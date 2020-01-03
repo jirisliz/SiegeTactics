@@ -10,6 +10,19 @@ class SoldierBasic extends Unit
     loadAnim();
   }
   
+  SoldierBasic(float x, float y, String aUp, 
+       String aDown, String aLeft, String aRight) 
+  {
+    super(new PVector(x, y), random(2,4), 0.4);
+    animFileWalkUp = aUp;
+    animFileWalkDown = aDown;
+    animFileWalkLeft = aLeft;
+    animFileWalkRight = aRight;
+    
+    loadAnim();
+    teamNum = 1;
+  }
+  
   SoldierBasic(float x, float y) 
   {
     super(new PVector(x, y), random(2,4), 0.4);

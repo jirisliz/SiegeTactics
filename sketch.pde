@@ -1,6 +1,7 @@
 boolean debug = false;
 
 ArrayList<SoldierBasic> soldiers;
+ArrayList<SoldierBasic> soldiers2;
 
 Path path;
 
@@ -17,10 +18,22 @@ void setup()
 
   soldiers = new ArrayList<SoldierBasic>();
 
-  for (int i = 0; i < 40; i++) 
+  for (int i = 0; i < 20; i++) 
   {
     soldiers.add(
-      new SoldierBasic(random(0, width), random(0, height)));
+      new SoldierBasic(random(0, width), 
+                       random(0, height)));
+  }
+
+  for (int i = 0; i < 20; i++) 
+  {
+    soldiers.add(
+      new SoldierBasic(random(0, width), 
+                       random(0, height), 
+                       "SoldierBasic2-walkUp.png", 
+                       "SoldierBasic2-walkDown.png", 
+                       "SoldierBasic2-walkLeft.png", 
+                       "SoldierBasic2-walkRight.png"));
   }
 }
 
@@ -43,6 +56,7 @@ void newPath() {
   // A path is a series of connected points
   // A more sophisticated path might be a curve
   path = new Path();
+  
   float offset = 150;
   //path.addPoint(offset,offset);
   path.addPoint(width-offset, offset);
@@ -57,7 +71,7 @@ void newPath() {
   path.addPoint(offset, offset);
   path.addPoint(width-offset, offset);
 
-
   //path.addPoint(width/2, offset);
   //path.addPoint(width/2, height/2);
+  
 }

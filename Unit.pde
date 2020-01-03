@@ -12,6 +12,7 @@ abstract class Unit extends Vehicle
 {
   States state = States.walk;
   Dirs dir = Dirs.up;
+  int teamNum = 0;
 
   LoadSprite animWalkUp;
   LoadSprite animWalkRight;
