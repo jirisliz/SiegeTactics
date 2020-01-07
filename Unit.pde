@@ -1,6 +1,6 @@
 public enum States
 {
-  walk, stand, attack;
+  walk, stand, attack, defend;
 }
 
 public enum Dirs

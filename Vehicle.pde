@@ -14,7 +14,7 @@ class Vehicle {
   float r;
   float maxforce;    // Maximum steering force
   float maxspeed;    // Maximum speed
-  
+
   PVector target;
   PVector primaryTarget;
 
@@ -37,17 +37,43 @@ class Vehicle {
     acceleration = new PVector(0, 0);
     velocity = new PVector(maxspeed, 0);
   }
-  
+
   void setTarget(PVector t) 
   {
     target = t;
   }
 
+  void applySeparation(ArrayList vehicles) 
+  {
+    // Separate from other boids force
+    PVector s = separate(vehicles);
+    s.mult(2);
+    applyForce(s);
+  }
+
+  void applyFollow(Path path) 
+  {
+    // Follow path force
+    PVector f = follow(path);
+    f.mult(3);
+    applyForce(f);
+  }
+
+  void applySeek() 
+  {
+    if (target != null) 
+    {
+      PVector seekForce = seek(target);
+      seekForce.mult(2);
+      applyForce(seekForce);
+    }
+  }
+
   // A function to deal with path following and separation
   void applyBehaviors(ArrayList vehicles, Path path, boolean seek) {
-    
-    if(path == null) seek = true;
-    
+
+    if (path == null) seek = true;
+
     // Separate from other boids force
     PVector s = separate(vehicles);
     s.mult(2);
@@ -56,15 +82,14 @@ class Vehicle {
     {
       PVector seekForce = seek(target);
       applyForce(seekForce);
-    } 
-    else
+    } else
     {
       // Follow path force
       PVector f = follow(path);
-    f.mult(3);
-    applyForce(f);
+      f.mult(3);
+      applyForce(f);
     }
-    
+
     // Accumulate in acceleration
     applyForce(s);
   }
@@ -73,7 +98,7 @@ class Vehicle {
     // We could add mass here if we want A = F / M
     acceleration.add(force);
   }
-  
+
   // Main "run" function
   public void run() {
     update();
@@ -260,5 +285,4 @@ class Vehicle {
     //if (position.y > height+r) position.y = -r;
   }
 }
-
 

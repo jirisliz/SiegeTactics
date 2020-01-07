@@ -15,33 +15,41 @@ void setup()
 
   smooth();
   fill(0);
+  
+  //frameRate(1);
 
   newPath();
   
   grid = new Grid(30,60);
 
   soldiers = new ArrayList<SoldierBasic>();
+  soldiers2 = new ArrayList<SoldierBasic>();
+  
+  int numOfAttackers = 10;
+  int numOfDefenders = 10;
 
-  for (int i = 0; i < 40; i++) 
+  for (int i = 0; i < numOfAttackers; i++) 
   {
     SoldierBasic s1 = new SoldierBasic(
-                       random(0, width), 
-                       random(0, height));
+      width*i/(2*numOfAttackers)+
+      width/2-width*(numOfAttackers/2)/(2*numOfAttackers), 
+                       height*4/5);
     s1.target = new PVector(width/2, height/4);
     soldiers.add(s1);
   }
 
-  for (int i = 0; i < 40; i++) 
+  for (int i = 0; i < numOfDefenders; i++) 
   {
     SoldierBasic s2 = new SoldierBasic(
-                       random(0, width), 
-                       random(0, height), 
+                       width*i/(2*numOfDefenders)+
+      width/2-width*(numOfDefenders/2)/(2*numOfDefenders), 
+                       height/5, 
                        "SoldierBasic2-walkUp.png", 
                        "SoldierBasic2-walkDown.png", 
                        "SoldierBasic2-walkLeft.png", 
                        "SoldierBasic2-walkRight.png");
     s2.target = new PVector(width/2, height*3/4);
-    soldiers.add(s2);
+    soldiers2.add(s2);
   }
 }
 
@@ -54,6 +62,14 @@ void draw()
   for (SoldierBasic s : soldiers) 
   {
     s.applyBehaviors(soldiers, path, false);
+    s.run();
+    s.update();
+    s.draw();
+  }
+  
+  for (SoldierBasic s : soldiers2) 
+  {
+    s.applyBehaviors(soldiers2, path, false);
     s.run();
     s.update();
     s.draw();
