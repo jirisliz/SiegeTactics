@@ -10,11 +10,15 @@ class Path {
   ArrayList<PVector> points;
   // A path has a radius, i.e how far is it ok for the boid to wander off
   float radius;
+  
+  color c;
 
-  Path() {
+  Path(int aR, color aC) {
     // Arbitrary radius of 20
-    radius = 60;
+    radius = aR;
     points = new ArrayList<PVector>();
+    
+    c = aC;
   }
 
   // Add a point to the path
@@ -26,7 +30,7 @@ class Path {
   // Draw the path
   void display() {
 
-    stroke(175);
+    stroke(c);
     strokeWeight(radius*2);
     noFill();
     for (int i = 0; i < points.size()-1; i += 2) 
@@ -48,28 +52,6 @@ class Path {
         line(p1.x, p1.y, p2.x, p2.y);
       }
     } 
-    /*
-    strokeJoin(ROUND);
-     
-     // Draw thick line for radius
-     stroke(175);
-     strokeWeight(radius*2);
-     noFill();
-     beginShape();
-     for (PVector v : points) {
-     vertex(v.x, v.y);
-     }
-     endShape(CLOSE);
-     // Draw thin line for center of path
-     stroke(0);
-     strokeWeight(1);
-     noFill();
-     beginShape();
-     for (PVector v : points) {
-     vertex(v.x, v.y);
-     }
-     endShape(CLOSE);
-     */
   }
 }
 

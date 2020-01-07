@@ -8,8 +8,9 @@ class LoadSprite
   LoadSprite(String path) 
   {
     sprImg = loadImage(path);
-    sprImg.resize(sprImg.width*scale,
-                  sprImg.height*scale);
+    
+    //sprImg.resize(sprImg.width*scale,
+    //              sprImg.height*scale);
     // we suppose frames in one row
     frames = sprImg.width/sprImg.height;
     currImg = createImage(sprImg.height, 
@@ -31,6 +32,9 @@ class LoadSprite
   
   void draw(float x, float y) 
   {
-    image(currImg, x-currImg.width/2, y-currImg.height/2);
+    noSmooth();
+    image(currImg, x-currImg.width*scale/2, y-currImg.height*scale/2, 
+          currImg.width*scale, currImg.height*scale);
+    smooth(4);
   }
 }

@@ -15,43 +15,57 @@ class Vehicle {
   float maxforce;    // Maximum steering force
   float maxspeed;    // Maximum speed
   
+  PVector target;
+  PVector primaryTarget;
+
   Vehicle() 
   {
     position = new PVector(width/2, height/2);
-    r = 15;
+    r = 3*8;
     maxspeed = 5;
     maxforce = 0.4;
     acceleration = new PVector(0, 0);
     velocity = new PVector(maxspeed, 0);
   }
 
-    // Constructor initialize all values
+  // Constructor initialize all values
   Vehicle( PVector l, float ms, float mf) {
-    position = l.get();
-    r = 12;
+    position = l.copy();
+    r = 16;
     maxspeed = ms;
     maxforce = mf;
     acceleration = new PVector(0, 0);
     velocity = new PVector(maxspeed, 0);
   }
+  
+  void setTarget(PVector t) 
+  {
+    target = t;
+  }
 
   // A function to deal with path following and separation
   void applyBehaviors(ArrayList vehicles, Path path, boolean seek) {
-    // Follow path force
-    PVector f = follow(path);
+    
+    if(path == null) seek = true;
+    
     // Separate from other boids force
     PVector s = separate(vehicles);
+    s.mult(2);
     // Seek force
-    if(seek)
+    if (seek)
     {
-      PVector seekForce = seek(new PVector(mouseX,mouseY));
+      PVector seekForce = seek(target);
       applyForce(seekForce);
-     } 
-    // Arbitrary weighting
+    } 
+    else
+    {
+      // Follow path force
+      PVector f = follow(path);
     f.mult(3);
-    s.mult(1);
+    applyForce(f);
+    }
+    
     // Accumulate in acceleration
-    if(!seek) applyForce(f);
     applyForce(s);
   }
 
@@ -59,22 +73,20 @@ class Vehicle {
     // We could add mass here if we want A = F / M
     acceleration.add(force);
   }
-
-
-
+  
   // Main "run" function
   public void run() {
     update();
     borders();
     //render();
   }
-  
+
   // This function implements Craig Reynolds' path following algorithm
   // http://www.red3d.com/cwr/steer/PathFollow.html
   PVector follow(Path p) {
 
     // Predict position 25 (arbitrary choice) frames ahead
-    PVector predict = velocity.get();
+    PVector predict = velocity.copy();
     predict.normalize();
     predict.mult(25);
     PVector predictpos = PVector.add(position, predict);
@@ -87,7 +99,7 @@ class Vehicle {
 
     // Loop through all points of the path
     //for (int i = 0; i < p.points.size(); i++) {
-    for(int i = 0 ; i < p.points.size()-1 ; i += 2) {
+    for (int i = 0; i < p.points.size()-1; i += 2) {
       // Look at a line segment
       PVector a = p.points.get(i);
       PVector b = p.points.get((i+1)%p.points.size()); // Note Path has to wraparound
@@ -99,8 +111,8 @@ class Vehicle {
       PVector dir = PVector.sub(b, a);
       // If it's not within the line segment, consider the normal to just be the end of the line segment (point b)
       //if (da + db > line.mag()+1) {
-      if (normalPoint.x < min(a.x,b.x) || normalPoint.x > max(a.x,b.x) || normalPoint.y < min(a.y,b.y) || normalPoint.y > max(a.y,b.y)) {
-        normalPoint = b.get();
+      if (normalPoint.x < min(a.x, b.x) || normalPoint.x > max(a.x, b.x) || normalPoint.y < min(a.y, b.y) || normalPoint.y > max(a.y, b.y)) {
+        normalPoint = b.copy();
         // If we're at the end we really want the next line segment for looking ahead
         a = p.points.get((i+1)%p.points.size());
         b = p.points.get((i+2)%p.points.size());  // Path wraps around
@@ -119,9 +131,8 @@ class Vehicle {
         // This is an oversimplification
         // Should be based on distance to path & velocity
         dir.mult(25);
-        target = normal.get();
+        target = normal.copy();
         target.add(dir);
-
       }
     }
 
@@ -147,8 +158,7 @@ class Vehicle {
     // Only if the distance is greater than the path's radius do we bother to steer
     if (worldRecord > p.radius) {
       return seek(target);
-    }
-    else {
+    } else {
       return new PVector(0, 0);
     }
   }
@@ -175,7 +185,7 @@ class Vehicle {
     PVector steer = new PVector(0, 0, 0);
     int count = 0;
     // For every boid in the system, check if it's too close
-    for (int i = 0 ; i < boids.size(); i++) {
+    for (int i = 0; i < boids.size(); i++) {
       Vehicle other = (Vehicle) boids.get(i);
       float d = PVector.dist(position, other.position);
       // If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
@@ -228,7 +238,7 @@ class Vehicle {
     PVector steer = PVector.sub(desired, velocity);
     steer.limit(maxforce);  // Limit to maximum steering force
 
-      return steer;
+    return steer;
   }
 
 
@@ -250,6 +260,5 @@ class Vehicle {
     //if (position.y > height+r) position.y = -r;
   }
 }
-
 
 
