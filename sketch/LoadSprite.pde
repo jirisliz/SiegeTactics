@@ -3,7 +3,7 @@ class LoadSprite
   PImage sprImg, currImg;
   int frames = 0;
   int currFrame = 0;
-  int scale = 3;
+  int scale = mScale;
   
   LoadSprite(String path) 
   {

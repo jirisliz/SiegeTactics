@@ -1,11 +1,14 @@
-boolean debug = false;
+// Debug data rendering
+boolean debug = true;
+
+// Global scale - mltiply num of pixels
+static int mScale = 3;
+
+Path path;
+Grid grid;
 
 ArrayList<SoldierBasic> soldiers;
 ArrayList<SoldierBasic> soldiers2;
-
-Path path;
-
-Grid grid;
 
 void setup() 
 {
@@ -16,11 +19,13 @@ void setup()
   smooth();
   fill(0);
   
-  //frameRate(1);
+  //frameRate(60);
 
   newPath();
   
-  grid = new Grid(30,60);
+  int rows = 80;
+  int cols = rows/8;
+  grid = new Grid(rows, cols, 4, 16);
 
   soldiers = new ArrayList<SoldierBasic>();
   soldiers2 = new ArrayList<SoldierBasic>();
@@ -55,7 +60,7 @@ void setup()
 
 void draw() 
 {
-  background(70, 70, 100);
+  background(255);
 
   if(path != null)path.display();
 
@@ -74,6 +79,8 @@ void draw()
     s.update();
     s.draw();
   }
+  
+  grid.draw();
 }
 
 void newPath() {
