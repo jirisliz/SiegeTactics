@@ -285,4 +285,3 @@ class Vehicle {
     //if (position.y > height+r) position.y = -r;
   }
 }
-

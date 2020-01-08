@@ -14,7 +14,7 @@ class LoadSprite
     // we suppose frames in one row
     frames = sprImg.width/sprImg.height;
     currImg = createImage(sprImg.height, 
-                          sprImg.height, RGB);
+                          sprImg.height, ARGB);
     update();
   }
   
