@@ -53,7 +53,11 @@ void setup()
                        "SoldierBasic2-walkUp.png", 
                        "SoldierBasic2-walkDown.png", 
                        "SoldierBasic2-walkLeft.png", 
-                       "SoldierBasic2-walkRight.png");
+                       "SoldierBasic2-walkRight.png", 
+                       "SoldierBasic2-attackUp.png", 
+                       "SoldierBasic2-attackDown.png", 
+                       "SoldierBasic2-attackLeft.png", 
+                       "SoldierBasic2-attackRight.png");
     s2.target = new PVector(width/2, height*3/4);
     s2.setDir(Dirs.up);
     s2.setState(States.attack);

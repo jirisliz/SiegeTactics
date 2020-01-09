@@ -31,7 +31,7 @@ class Vehicle {
   // Constructor initialize all values
   Vehicle( PVector l, float ms, float mf) {
     position = l.copy();
-    r = 16;
+    r = 3*8;
     maxspeed = ms;
     maxforce = mf;
     acceleration = new PVector(0, 0);

@@ -14,12 +14,17 @@ abstract class Unit extends Vehicle
   Dirs dir = Dirs.up;
   int teamNum = 0;
 
-  float viewRadius = 30;
+  float viewRadius = 40;
 
   LoadSprite animWalkUp;
   LoadSprite animWalkRight;
   LoadSprite animWalkDown;
   LoadSprite animWalkLeft;
+  
+  LoadSprite animAttackUp;
+  LoadSprite animAttackRight;
+  LoadSprite animAttackDown;
+  LoadSprite animAttackLeft;
 
   LoadSprite animCurr;
 
@@ -46,12 +51,10 @@ abstract class Unit extends Vehicle
     dir = d;
     updateCurrAnim();
   }
-
-  void updateCurrAnim() 
+  
+  void setWalkAnim() 
   {
-    if (state == States.walk) 
-    {
-      switch(dir) 
+    switch(dir) 
       {
       case up: 
         animCurr = animWalkUp; 
@@ -66,7 +69,34 @@ abstract class Unit extends Vehicle
         animCurr = animWalkRight; 
         break;
       }
+  }
+  
+  void setAttackAnim() 
+  {
+    switch(dir) 
+      {
+      case up: 
+        animCurr = animAttackUp; 
+        break;
+      case down: 
+        animCurr = animAttackDown; 
+        break;
+      case left: 
+        animCurr = animAttackLeft; 
+        break;
+      case right: 
+        animCurr = animAttackRight; 
+        break;
+      }
+  }
+
+  void updateCurrAnim() 
+  {
+    if (state == States.walk) 
+    {
+      setWalkAnim();
     }
+    
   }
 
   void update(ArrayList allies, 
@@ -87,7 +117,7 @@ abstract class Unit extends Vehicle
     if (fcount >= fmax) 
     {
       fcount = 0;
-      animCurr.update();
+      if(animCurr != null)animCurr.update();
     }
 
     // Handle states
@@ -103,13 +133,14 @@ abstract class Unit extends Vehicle
       
       if (position.dist(target) < viewRadius)
       {
-        
+       setAttackAnim(); 
       } else
       {
         super.update();
         applySeek();
         applySeparation(allies);
         applySeparation(enemies);
+        setWalkAnim();
       }
       break;
     }
@@ -117,6 +148,15 @@ abstract class Unit extends Vehicle
 
   void draw()
   {
-    animCurr.draw(position.x, position.y);
+    if(animCurr != null) 
+    {
+     animCurr.draw(position.x, position.y); 
+    }
+    else
+    {
+      fill(100);
+      noStroke();
+      ellipse(position.x, position.y, r, r);
+    }
   }
 }
