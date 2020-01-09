@@ -69,6 +69,14 @@ class Vehicle {
       PVector seekForce = seek(target);
       seekForce.mult(2);
       applyForce(seekForce);
+      
+      // Draw vector to target
+      if(debug)
+      {
+        stroke(10);
+        strokeWeight(1);
+        line(position.x, position.y, target.x, target.y);
+      }
     }
   }
 
@@ -78,7 +86,10 @@ class Vehicle {
     for (int i = 0; i < enemies.size(); i++) {
       Unit u = (Unit) enemies.get(i);
       float d = position.dist(u.position);
-      if (d < dist) target = u.position;
+      if (d < dist)
+      {
+        target = u.position;
+      }
     }
   }
 

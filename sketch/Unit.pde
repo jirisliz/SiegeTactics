@@ -97,7 +97,11 @@ abstract class Unit extends Vehicle
       break;
     case stand:
       break;
-      case attack:
+    case attack:
+      super.update();
+      applySeek();
+      applySeparation(allies);
+      applySeparation(enemies);
       break;
     }
   }

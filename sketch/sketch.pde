@@ -20,7 +20,6 @@ void setup()
   fill(0);
   
   //frameRate(60);
-
   newPath();
   
   int rows = 80;
@@ -41,6 +40,7 @@ void setup()
                        height*4/5);
     s1.target = new PVector(width/2, height/4);
     s1.setDir(Dirs.down);
+    s1.setState(States.attack);
     soldiers.add(s1);
   }
 
@@ -56,10 +56,19 @@ void setup()
                        "SoldierBasic2-walkRight.png");
     s2.target = new PVector(width/2, height*3/4);
     s2.setDir(Dirs.up);
+    s2.setState(States.attack);
     soldiers2.add(s2);
   }
   
-  
+  // Set attack targets
+  for(SoldierBasic s1 : soldiers)
+  {
+    s1.findNearestEnemy(soldiers2);
+  }
+  for(SoldierBasic s2 : soldiers2)
+  {
+    s2.findNearestEnemy(soldiers);
+  }
 }
 
 void draw() 
