@@ -40,6 +40,7 @@ void setup()
       width/2-width*(numOfAttackers/2)/(2*numOfAttackers), 
                        height*4/5);
     s1.target = new PVector(width/2, height/4);
+    s1.setDir(Dirs.down);
     soldiers.add(s1);
   }
 
@@ -54,8 +55,11 @@ void setup()
                        "SoldierBasic2-walkLeft.png", 
                        "SoldierBasic2-walkRight.png");
     s2.target = new PVector(width/2, height*3/4);
+    s2.setDir(Dirs.up);
     soldiers2.add(s2);
   }
+  
+  
 }
 
 void draw() 
@@ -66,21 +70,21 @@ void draw()
 
   for (SoldierBasic s : soldiers) 
   {
-    s.applyBehaviors(soldiers, path, false);
-    s.run();
-    s.update();
+    //s.applyBehaviors(soldiers, path, false);
+    //s.run();
+    s.update(soldiers, soldiers2, path);
     s.draw();
   }
   
   for (SoldierBasic s : soldiers2) 
   {
-    s.applyBehaviors(soldiers2, path, false);
-    s.run();
-    s.update();
+    //s.applyBehaviors(soldiers2, path, false);
+    //s.run();
+    s.update(soldiers2, soldiers, path);
     s.draw();
   }
   
-  grid.draw();
+  //grid.draw();
 }
 
 void newPath() {

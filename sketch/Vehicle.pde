@@ -22,7 +22,7 @@ class Vehicle {
   {
     position = new PVector(width/2, height/2);
     r = 3*8;
-    maxspeed = 5;
+    maxspeed = 2;
     maxforce = 0.4;
     acceleration = new PVector(0, 0);
     velocity = new PVector(maxspeed, 0);
@@ -53,10 +53,13 @@ class Vehicle {
 
   void applyFollow(Path path) 
   {
-    // Follow path force
-    PVector f = follow(path);
-    f.mult(3);
-    applyForce(f);
+    if (path != null) 
+    {
+      // Follow path force
+      PVector f = follow(path);
+      f.mult(3);
+      applyForce(f);
+    }
   }
 
   void applySeek() 
@@ -66,6 +69,16 @@ class Vehicle {
       PVector seekForce = seek(target);
       seekForce.mult(2);
       applyForce(seekForce);
+    }
+  }
+
+  void findNearestEnemy(ArrayList enemies) 
+  {
+    float dist = height * 2;
+    for (int i = 0; i < enemies.size(); i++) {
+      Unit u = (Unit) enemies.get(i);
+      float d = position.dist(u.position);
+      if (d < dist) target = u.position;
     }
   }
 

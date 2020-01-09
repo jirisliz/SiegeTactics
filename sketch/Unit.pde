@@ -20,13 +20,12 @@ abstract class Unit extends Vehicle
   LoadSprite animWalkLeft;
 
   LoadSprite animCurr;
-  
+
   int fcount = 0;
   int fmax = 10;
-  
+
   Unit() 
   {
-    
   }
 
   Unit(PVector l, float ms, float mf)
@@ -68,25 +67,39 @@ abstract class Unit extends Vehicle
     }
   }
 
-  void update()
+  void update(ArrayList allies, 
+    ArrayList enemies, Path path)
   {
-    super.update();
-    
+    //super.update();
+
+    // select direction quadrant 
     float a = velocity.heading();
-    
-    if(a >= PI/4 && a < PI-PI/4)dir = Dirs.down;
-    if(a >= PI-PI/4 || a < -PI+PI/4)dir = Dirs.left;
-    if(a >= -PI+PI/4 && a < -PI/4)dir = Dirs.up;
-    if(a >= -PI/4 && a < PI/4)dir = Dirs.right;
+    if (a >= PI/4 && a < PI-PI/4)dir = Dirs.down;
+    if (a >= PI-PI/4 || a < -PI+PI/4)dir = Dirs.left;
+    if (a >= -PI+PI/4 && a < -PI/4)dir = Dirs.up;
+    if (a >= -PI/4 && a < PI/4)dir = Dirs.right;
     updateCurrAnim();
-    
+
+    // Animation speed (frameRate divided) 
     fcount++;
-    if(fcount >= fmax) 
+    if (fcount >= fmax) 
     {
       fcount = 0;
       animCurr.update();
     }
-    
+
+    // Handle states
+    switch(state) 
+    {
+    case walk: 
+      super.update();
+      applyFollow(path);
+      break;
+    case stand:
+      break;
+      case attack:
+      break;
+    }
   }
 
   void draw()
