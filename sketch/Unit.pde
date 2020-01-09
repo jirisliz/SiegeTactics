@@ -14,6 +14,8 @@ abstract class Unit extends Vehicle
   Dirs dir = Dirs.up;
   int teamNum = 0;
 
+  float viewRadius = 30;
+
   LoadSprite animWalkUp;
   LoadSprite animWalkRight;
   LoadSprite animWalkDown;
@@ -98,10 +100,17 @@ abstract class Unit extends Vehicle
     case stand:
       break;
     case attack:
-      super.update();
-      applySeek();
-      applySeparation(allies);
-      applySeparation(enemies);
+      
+      if (position.dist(target) < viewRadius)
+      {
+        
+      } else
+      {
+        super.update();
+        applySeek();
+        applySeparation(allies);
+        applySeparation(enemies);
+      }
       break;
     }
   }
