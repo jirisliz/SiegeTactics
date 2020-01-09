@@ -60,15 +60,6 @@ void setup()
     soldiers2.add(s2);
   }
   
-  // Set attack targets
-  for(SoldierBasic s1 : soldiers)
-  {
-    s1.findNearestEnemy(soldiers2);
-  }
-  for(SoldierBasic s2 : soldiers2)
-  {
-    s2.findNearestEnemy(soldiers);
-  }
 }
 
 void draw() 
@@ -93,7 +84,22 @@ void draw()
     s.draw();
   }
   
+  setTargetEnemies();
+  
   //grid.draw();
+}
+
+void setTargetEnemies() 
+{
+  // Set attack targets
+  for(SoldierBasic s1 : soldiers)
+  {
+    s1.findNearestEnemy(soldiers2);
+  }
+  for(SoldierBasic s2 : soldiers2)
+  {
+    s2.findNearestEnemy(soldiers);
+  }
 }
 
 void newPath() {
