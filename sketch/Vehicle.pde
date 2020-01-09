@@ -88,6 +88,7 @@ class Vehicle {
       float d = position.dist(u.position);
       if (d < dist)
       {
+        dist = d;
         target = u.position;
       }
     }
