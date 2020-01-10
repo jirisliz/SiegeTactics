@@ -2,6 +2,7 @@ abstract class Object
 {
   PVector position;
   PVector orig; // Local origin
+  boolean active = true;
   
   void setOrig(PVector o)
   {

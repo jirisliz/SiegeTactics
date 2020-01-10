@@ -144,6 +144,7 @@ abstract class Unit extends Vehicle
     if (lives <= 0)
     {
       alive = false;
+      active = false; // due to compatibility with wall
       state = States.dead;
       animCurr = null;
     }
@@ -174,10 +175,8 @@ abstract class Unit extends Vehicle
   }
 
   void update(ArrayList allies, 
-    ArrayList enemies, Path path)
+    ArrayList enemies, Path path, ArrayList walls)
   {
-    //super.update();
-
     // select direction quadrant 
     float a = velocity.heading();
     if (a >= PI/4 && a < PI-PI/4)dir = Dirs.down;
@@ -206,8 +205,9 @@ abstract class Unit extends Vehicle
       {
         super.update();
         applyFollow(path);
-        applySeparation(allies);
-        applySeparation(enemies);
+        applySeparationCirc(allies);
+        applySeparationCirc(enemies);
+        applySeparationRect(walls);
       }
       break;
     case stand:
@@ -217,8 +217,9 @@ abstract class Unit extends Vehicle
       {
         super.update();
         applySeek();
-        applySeparation(allies);
-        applySeparation(enemies);
+        applySeparationCirc(allies);
+        applySeparationCirc(enemies);
+        applySeparationRect(walls);
         setWalkAnim();
       }
       break;
@@ -236,9 +237,9 @@ abstract class Unit extends Vehicle
       // Draw lives
       stroke(30, 200, 30);
       strokeWeight(3);
-      int l = (int) map(lives, 0, livesMax, 1, r);
-      line(position.x-l, position.y-r, 
-        position.x+l, position.y-r);
+      int l = (int) map(lives, 0, livesMax, 1, 3*r);
+      line(position.x-l, position.y-3*r, 
+        position.x+l, position.y-3*r);
     } else
     {
       fill(100);

@@ -1,5 +1,5 @@
 // Debug data rendering
-boolean debug = false;
+boolean debug = true;
 
 // Global scale - mltiply num of pixels
 static int mScale = 3;
@@ -12,7 +12,7 @@ Grid grid;
 ArrayList<SoldierBasic> soldiers;
 ArrayList<SoldierBasic> soldiers2;
 
-Wall wall;
+ArrayList<Wall> walls;
 
 void setup() 
 {
@@ -25,7 +25,7 @@ void setup()
   
   r = new Renderer();
   
-  wall = new Wall(new PVector(100,300), 200, 40);
+  newWalls();
   
   //frameRate(60);
   newPath();
@@ -84,21 +84,20 @@ void draw()
 
   for (SoldierBasic s : soldiers) 
   {
-    //s.applyBehaviors(soldiers, path, false);
-    //s.run();
-    s.update(soldiers, soldiers2, path);
+    s.update(soldiers, soldiers2, path, walls);
     r.add(s);
   }
   
   for (SoldierBasic s : soldiers2) 
   {
-    //s.applyBehaviors(soldiers2, path, false);
-    //s.run();
-    s.update(soldiers2, soldiers, path);
+    s.update(soldiers2, soldiers, path, walls);
     r.add(s);
   }
   
-  r.add(wall);
+  for(Wall wall : walls) 
+  {
+    r.add(wall);
+  }
   
   // Evaluate deads after all actions performed
   for (SoldierBasic s : soldiers) 
@@ -128,6 +127,14 @@ void setTargetEnemies()
   {
     s2.findNearestEnemy(soldiers);
   }
+}
+
+void newWalls() 
+{
+  walls = new ArrayList<Wall>();
+  walls.add(new Wall(new PVector(100,300), 150, 40));
+  walls.add(new Wall(new PVector(width/2-250,height/2), 500, 40));
+  walls.add(new Wall(new PVector(width-300,300), 150, 40));
 }
 
 void newPath() {

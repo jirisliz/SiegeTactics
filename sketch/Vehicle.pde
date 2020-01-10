@@ -21,7 +21,7 @@ class Vehicle extends Object {
   Vehicle() 
   {
     position = new PVector(width/2, height/2);
-    r = 3*8;
+    r = 8;
     maxspeed = 2;
     maxforce = 0.4;
     acceleration = new PVector(0, 0);
@@ -31,7 +31,7 @@ class Vehicle extends Object {
   // Constructor initialize all values
   Vehicle( PVector l, float ms, float mf) {
     position = l.copy();
-    r = 3*8;
+    r = 8;
     maxspeed = ms;
     maxforce = mf;
     acceleration = new PVector(0, 0);
@@ -43,13 +43,22 @@ class Vehicle extends Object {
     target = t;
   }
 
-  void applySeparation(ArrayList vehicles) 
+  void applySeparationCirc(ArrayList obj) 
   {
     // Separate from other boids force
-    PVector s = separate(vehicles);
+    PVector s = separateCirc(obj);
     s.mult(2);
     applyForce(s);
   }
+
+  void applySeparationRect(ArrayList obj) 
+  {
+    // Separate from other boids force
+    PVector s = separateRect(obj);
+    s.mult(4);
+    applyForce(s);
+  }
+
 
   void applyFollow(Path path) 
   {
@@ -69,40 +78,15 @@ class Vehicle extends Object {
       PVector seekForce = seek(target);
       seekForce.mult(2);
       applyForce(seekForce);
-      
+
       // Draw vector to target
-      if(debug)
+      if (debug)
       {
         stroke(10);
         strokeWeight(1);
         line(position.x, position.y, target.x, target.y);
       }
     }
-  }
-
-  // A function to deal with path following and separation
-  void applyBehaviors(ArrayList vehicles, Path path, boolean seek) {
-
-    if (path == null) seek = true;
-
-    // Separate from other boids force
-    PVector s = separate(vehicles);
-    s.mult(2);
-    // Seek force
-    if (seek)
-    {
-      PVector seekForce = seek(target);
-      applyForce(seekForce);
-    } else
-    {
-      // Follow path force
-      PVector f = follow(path);
-      f.mult(3);
-      applyForce(f);
-    }
-
-    // Accumulate in acceleration
-    applyForce(s);
   }
 
   void applyForce(PVector force) {
@@ -216,14 +200,14 @@ class Vehicle extends Object {
 
   // Separation
   // Method checks for nearby boids and steers away
-  PVector separate (ArrayList boids) {
-    float desiredseparation = r*2;
+  PVector separateCirc(ArrayList boids) {
+    float desiredseparation = r*2*2;
     PVector steer = new PVector(0, 0, 0);
     int count = 0;
     // For every boid in the system, check if it's too close
     for (int i = 0; i < boids.size(); i++) {
-      Unit other = (Unit) boids.get(i);
-      if(other.lives <= 0)continue;
+      Object other = (Object) boids.get(i);
+      if (!other.active)continue;
       float d = PVector.dist(position, other.position);
       // If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
       if ((d > 0) && (d < desiredseparation)) {
@@ -235,6 +219,35 @@ class Vehicle extends Object {
         count++;            // Keep track of how many
       }
     }
+    return finSepar(steer, count);
+  }
+  
+  PVector separateRect(ArrayList boids) {
+    float desiredseparation = r*2;
+    PVector steer = new PVector(0, 0, 0);
+    int count = 0;
+    // For every boid in the system, check if it's too close
+    for (int i = 0; i < boids.size(); i++) {
+      Wall other = (Wall) boids.get(i);
+      if (!other.active)continue;
+      PVector posWall = new PVector(position.x, 
+                         other.position.y + 
+                         other.h/2);
+      if (other.intersects(this)) {
+        // Calculate vector pointing away from neighbor
+        PVector diff = PVector.sub(position, posWall);
+        diff.normalize();
+        diff.div(r*2);        // Weight by distance
+        steer.add(diff);
+        count++;            // Keep track of how many
+      }
+    }
+    return finSepar(steer, count);
+  }
+
+
+  PVector finSepar(PVector steer, int count) 
+  {
     // Average -- divide by how many
     if (count > 0) {
       steer.div((float)count);
@@ -288,10 +301,9 @@ class Vehicle extends Object {
     ellipse(0, 0, r, r);
     popMatrix();
   }
-  
+
   void draw() 
   {
-    
   }
 
   // Wraparound
