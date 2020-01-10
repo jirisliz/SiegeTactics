@@ -80,20 +80,6 @@ class Vehicle {
     }
   }
 
-  void findNearestEnemy(ArrayList enemies) 
-  {
-    float dist = height * 2;
-    for (int i = 0; i < enemies.size(); i++) {
-      Unit u = (Unit) enemies.get(i);
-      float d = position.dist(u.position);
-      if (d < dist)
-      {
-        dist = d;
-        target = u.position;
-      }
-    }
-  }
-
   // A function to deal with path following and separation
   void applyBehaviors(ArrayList vehicles, Path path, boolean seek) {
 
@@ -236,7 +222,8 @@ class Vehicle {
     int count = 0;
     // For every boid in the system, check if it's too close
     for (int i = 0; i < boids.size(); i++) {
-      Vehicle other = (Vehicle) boids.get(i);
+      Unit other = (Unit) boids.get(i);
+      if(other.lives <= 0)continue;
       float d = PVector.dist(position, other.position);
       // If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
       if ((d > 0) && (d < desiredseparation)) {

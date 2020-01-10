@@ -29,7 +29,7 @@ void setup()
   soldiers = new ArrayList<SoldierBasic>();
   soldiers2 = new ArrayList<SoldierBasic>();
   
-  int numOfAttackers = 10;
+  int numOfAttackers = 30;
   int numOfDefenders = 10;
 
   for (int i = 0; i < numOfAttackers; i++) 
@@ -38,7 +38,7 @@ void setup()
       width*i/(2*numOfAttackers)+
       width/2-width*(numOfAttackers/2)/(2*numOfAttackers), 
                        height*4/5);
-    s1.target = new PVector(width/2, height/4);
+    s1.primaryTarget = new PVector(width/2, height/4);
     s1.setDir(Dirs.down);
     s1.setState(States.attack);
     soldiers.add(s1);
@@ -58,7 +58,7 @@ void setup()
                        "SoldierBasic2-attackDown.png", 
                        "SoldierBasic2-attackLeft.png", 
                        "SoldierBasic2-attackRight.png");
-    s2.target = new PVector(width/2, height*3/4);
+    s2.primaryTarget = new PVector(width/2, height*3/4);
     s2.setDir(Dirs.up);
     s2.setState(States.attack);
     soldiers2.add(s2);
