@@ -204,6 +204,8 @@ abstract class Unit extends Vehicle
     case walk: 
       super.update();
       applyFollow(path);
+      applySeparation(allies);
+      applySeparation(enemies);
       break;
     case stand:
       break;

@@ -68,7 +68,7 @@ void setup()
                        "SoldierBasic2-attackRight.png");
     s2.primaryTarget = new PVector(width/2, height*3/4);
     s2.setDir(Dirs.down);
-    s2.setState(States.walk);
+    s2.setState(States.attack);
     soldiers2.add(s2);
   }
   
