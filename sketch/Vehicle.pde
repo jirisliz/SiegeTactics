@@ -288,6 +288,11 @@ class Vehicle extends Object {
     ellipse(0, 0, r, r);
     popMatrix();
   }
+  
+  void draw() 
+  {
+    
+  }
 
   // Wraparound
   void borders() {

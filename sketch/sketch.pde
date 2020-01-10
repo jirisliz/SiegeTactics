@@ -4,11 +4,15 @@ boolean debug = false;
 // Global scale - mltiply num of pixels
 static int mScale = 3;
 
+Renderer r;
+
 Path path;
 Grid grid;
 
 ArrayList<SoldierBasic> soldiers;
 ArrayList<SoldierBasic> soldiers2;
+
+Wall wall;
 
 void setup() 
 {
@@ -18,6 +22,10 @@ void setup()
 
   smooth();
   fill(0);
+  
+  r = new Renderer();
+  
+  wall = new Wall(new PVector(100,300), 200, 40);
   
   //frameRate(60);
   newPath();
@@ -29,8 +37,8 @@ void setup()
   soldiers = new ArrayList<SoldierBasic>();
   soldiers2 = new ArrayList<SoldierBasic>();
   
-  int numOfAttackers = 10;
-  int numOfDefenders = 10;
+  int numOfAttackers = 30;
+  int numOfDefenders = 30;
 
   for (int i = 0; i < numOfAttackers; i++) 
   {
@@ -60,7 +68,7 @@ void setup()
                        "SoldierBasic2-attackRight.png");
     s2.primaryTarget = new PVector(width/2, height*3/4);
     s2.setDir(Dirs.down);
-    s2.setState(States.attack);
+    s2.setState(States.walk);
     soldiers2.add(s2);
   }
   
@@ -71,13 +79,16 @@ void draw()
   background(255);
 
   if(path != null)path.display();
+  
+  r.clear();
 
   for (SoldierBasic s : soldiers) 
   {
     //s.applyBehaviors(soldiers, path, false);
     //s.run();
     s.update(soldiers, soldiers2, path);
-    s.draw();
+    r.add(s);
+    //s.draw();
   }
   
   for (SoldierBasic s : soldiers2) 
@@ -85,8 +96,11 @@ void draw()
     //s.applyBehaviors(soldiers2, path, false);
     //s.run();
     s.update(soldiers2, soldiers, path);
-    s.draw();
+    r.add(s);
+    //s.draw();
   }
+  
+  r.add(wall);
   
   // Evaluate deads after all actions performed
   for (SoldierBasic s : soldiers) 
@@ -99,6 +113,8 @@ void draw()
   }
   
   setTargetEnemies();
+  
+  r.draw();
   
   //grid.draw();
 }
