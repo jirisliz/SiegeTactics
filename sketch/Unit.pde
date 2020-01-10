@@ -33,7 +33,7 @@ abstract class Unit extends Vehicle
   int livesMax = 10;
   int lives = livesMax;
   boolean alive = true;
-  
+
   int teamNum = 0;
 
   float viewRadius = 40;
@@ -41,13 +41,13 @@ abstract class Unit extends Vehicle
 
   Unit() 
   {
-    orig = new PVector(0,0);
+    orig = new PVector(0, 0);
   }
 
   Unit(PVector l, float ms, float mf)
   {
     super(l, ms, mf);
-    orig = new PVector(0,0);
+    orig = new PVector(0, 0);
   }
 
   void setState(States st) 
@@ -123,7 +123,7 @@ abstract class Unit extends Vehicle
         enemyAttacking = u;
       }
     }
-    if(!anyEnemyFound && alive) 
+    if (!anyEnemyFound && alive) 
     {
       state = States.walk;
       target = primaryTarget;
@@ -138,39 +138,39 @@ abstract class Unit extends Vehicle
       lives = 0;
     }
   }
-  
+
   void stillAlive() 
   {
-    if(lives <= 0)
+    if (lives <= 0)
     {
       alive = false;
       state = States.dead;
       animCurr = null;
     }
   }
-    
-  
+
+
   boolean attackIfEnemyNear() 
   {
     float dist = width*height;
-      if(target != null) 
+    if (target != null) 
+    {
+      dist = position.dist(target);
+    }
+    if (dist < viewRadius)
+    {
+      setAttackAnim();
+      if (animFullCycle) 
       {
-        dist = position.dist(target);
-      }
-      if (dist < viewRadius)
-      {
-        setAttackAnim();
-        if (animFullCycle) 
+        animFullCycle = false;
+        if (enemyAttacking != null) 
         {
-          animFullCycle = false;
-          if (enemyAttacking != null) 
-          {
-            enemyAttacking.attack(1);
-          }
+          enemyAttacking.attack(1);
         }
-        return true;
       }
-      return false;
+      return true;
+    }
+    return false;
   }
 
   void update(ArrayList allies, 
@@ -194,7 +194,7 @@ abstract class Unit extends Vehicle
       if (animCurr != null)
       {
         animCurr.update();
-        if(animCurr.currFrame == 0)animFullCycle = true;
+        if (animCurr.currFrame == 0)animFullCycle = true;
       }
     }
 
@@ -202,15 +202,18 @@ abstract class Unit extends Vehicle
     switch(state) 
     {
     case walk: 
-      super.update();
-      applyFollow(path);
-      applySeparation(allies);
-      applySeparation(enemies);
+      if (!attackIfEnemyNear() && alive) 
+      {
+        super.update();
+        applyFollow(path);
+        applySeparation(allies);
+        applySeparation(enemies);
+      }
       break;
     case stand:
       break;
     case attack:
-      if(!attackIfEnemyNear() && alive) 
+      if (!attackIfEnemyNear() && alive) 
       {
         super.update();
         applySeek();
@@ -219,7 +222,7 @@ abstract class Unit extends Vehicle
         setWalkAnim();
       }
       break;
-      case defend:
+    case defend:
       attackIfEnemyNear();
       break;
     }
