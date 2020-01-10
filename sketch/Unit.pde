@@ -32,6 +32,8 @@ abstract class Unit extends Vehicle
   Dirs dir = Dirs.up;
   int livesMax = 10;
   int lives = livesMax;
+  boolean alive = true;
+  
   int teamNum = 0;
 
   float viewRadius = 40;
@@ -111,7 +113,7 @@ abstract class Unit extends Vehicle
     for (int i = 0; i < enemies.size(); i++) {
       Unit u = (Unit) enemies.get(i);
       float d = position.dist(u.position);
-      if (d < dist && u.lives > 0)
+      if (d < dist && u.alive)
       {
         anyEnemyFound = true;
         dist = d;
@@ -119,7 +121,7 @@ abstract class Unit extends Vehicle
         enemyAttacking = u;
       }
     }
-    if(!anyEnemyFound) 
+    if(!anyEnemyFound && alive) 
     {
       state = States.walk;
       target = primaryTarget;
@@ -132,9 +134,41 @@ abstract class Unit extends Vehicle
     if (lives <= 0)
     {
       lives = 0;
+    }
+  }
+  
+  void stillAlive() 
+  {
+    if(lives <= 0)
+    {
+      alive = false;
       state = States.dead;
       animCurr = null;
     }
+  }
+    
+  
+  boolean attackIfEnemyNear() 
+  {
+    float dist = width*height;
+      if(target != null) 
+      {
+        dist = position.dist(target);
+      }
+      if (dist < viewRadius)
+      {
+        setAttackAnim();
+        if (animFullCycle) 
+        {
+          animFullCycle = false;
+          if (enemyAttacking != null) 
+          {
+            enemyAttacking.attack(1);
+          }
+        }
+        return true;
+      }
+      return false;
   }
 
   void update(ArrayList allies, 
@@ -172,23 +206,7 @@ abstract class Unit extends Vehicle
     case stand:
       break;
     case attack:
-      float dist = width*height;
-      if(target != null) 
-      {
-        dist = position.dist(target);
-      }
-      if (dist < viewRadius)
-      {
-        setAttackAnim();
-        if (animFullCycle) 
-        {
-          animFullCycle = false;
-          if (enemyAttacking != null) 
-          {
-            enemyAttacking.attack(1);
-          }
-        }
-      } else
+      if(!attackIfEnemyNear() && alive) 
       {
         super.update();
         applySeek();
@@ -196,6 +214,9 @@ abstract class Unit extends Vehicle
         applySeparation(enemies);
         setWalkAnim();
       }
+      break;
+      case defend:
+      attackIfEnemyNear();
       break;
     }
   }

@@ -21,7 +21,7 @@ class SoldierBasic extends Unit
        String aAUp, 
        String aADown, String aALeft, String aARight) 
   {
-    super(new PVector(x, y), random(1,2), 0.4);
+    super(new PVector(x, y), random(2,3), 0.4);
     animFileWalkUp = aUp;
     animFileWalkDown = aDown;
     animFileWalkLeft = aLeft;
@@ -38,7 +38,7 @@ class SoldierBasic extends Unit
   
   SoldierBasic(float x, float y) 
   {
-    super(new PVector(x, y), random(1,2), 0.4);
+    super(new PVector(x, y), random(2,3), 0.4);
     loadAnim();
   }
   

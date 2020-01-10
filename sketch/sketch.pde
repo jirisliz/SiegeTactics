@@ -1,5 +1,5 @@
 // Debug data rendering
-boolean debug = true;
+boolean debug = false;
 
 // Global scale - mltiply num of pixels
 static int mScale = 3;
@@ -29,7 +29,7 @@ void setup()
   soldiers = new ArrayList<SoldierBasic>();
   soldiers2 = new ArrayList<SoldierBasic>();
   
-  int numOfAttackers = 30;
+  int numOfAttackers = 10;
   int numOfDefenders = 10;
 
   for (int i = 0; i < numOfAttackers; i++) 
@@ -59,7 +59,7 @@ void setup()
                        "SoldierBasic2-attackLeft.png", 
                        "SoldierBasic2-attackRight.png");
     s2.primaryTarget = new PVector(width/2, height*3/4);
-    s2.setDir(Dirs.up);
+    s2.setDir(Dirs.down);
     s2.setState(States.attack);
     soldiers2.add(s2);
   }
@@ -86,6 +86,16 @@ void draw()
     //s.run();
     s.update(soldiers2, soldiers, path);
     s.draw();
+  }
+  
+  // Evaluate deads after all actions performed
+  for (SoldierBasic s : soldiers) 
+  {
+    s.stillAlive();
+  }
+  for (SoldierBasic s : soldiers2) 
+  {
+    s.stillAlive();
   }
   
   setTargetEnemies();
