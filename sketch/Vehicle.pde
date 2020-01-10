@@ -5,10 +5,10 @@
 // Path Following
 // Vehicle class
 
-class Vehicle {
+class Vehicle extends Object {
 
   // All the usual stuff
-  PVector position;
+  //PVector position; // in Object
   PVector velocity;
   PVector acceleration;
   float r;

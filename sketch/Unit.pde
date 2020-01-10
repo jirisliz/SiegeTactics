@@ -41,11 +41,13 @@ abstract class Unit extends Vehicle
 
   Unit() 
   {
+    orig = new PVector(0,0);
   }
 
   Unit(PVector l, float ms, float mf)
   {
     super(l, ms, mf);
+    orig = new PVector(0,0);
   }
 
   void setState(States st) 

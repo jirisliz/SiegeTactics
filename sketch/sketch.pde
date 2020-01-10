@@ -40,7 +40,7 @@ void setup()
                        height*4/5);
     s1.primaryTarget = new PVector(width/2, height/4);
     s1.setDir(Dirs.down);
-    s1.setState(States.attack);
+    s1.setState(States.walk);
     soldiers.add(s1);
   }
 
