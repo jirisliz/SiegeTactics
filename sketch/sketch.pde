@@ -38,7 +38,7 @@ void setup()
   soldiers2 = new ArrayList<SoldierBasic>();
   
   int numOfAttackers = 20;
-  int numOfDefenders = 30;
+  int numOfDefenders = 20;
 
   for (int i = 0; i < numOfAttackers; i++) 
   {
@@ -132,16 +132,20 @@ void setTargetEnemies()
 void newWalls() 
 {
   walls = new ArrayList<Wall>();
-  walls.add(new Wall(new PVector(100,300), 150, 40));
-  walls.add(new Wall(new PVector(width/2-250,height/2), 500, 40));
-  walls.add(new Wall(new PVector(width-300,300), 150, 40));
+  walls.add(new Wall(new PVector(0,500), width/3, 40));
+  //walls.add(new Wall(new PVector(width/2-250,height/2), 500, 40));
+  walls.add(new Wall(new PVector(width*2/3,500), width/3, 40));
 }
 
 void newPath() {
   // A path is a series of connected points
   // A more sophisticated path might be a curve
-  path = new Path(50, color(175));
+  path = new Path(150, color(175));
   
+  path.addPoint(width/2, 380);
+  path.addPoint(width/2, 520);
+  
+  /*
   float offset = 150;
   //path.addPoint(offset,offset);
   path.addPoint(width-offset, offset);
@@ -158,5 +162,6 @@ void newPath() {
 
   //path.addPoint(width/2, offset);
   //path.addPoint(width/2, height/2);
+  */
   
 }

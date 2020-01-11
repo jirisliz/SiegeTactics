@@ -216,6 +216,7 @@ abstract class Unit extends Vehicle
       if (!attackIfEnemyNear() && alive) 
       {
         super.update();
+        applyFollow(path);
         applySeek();
         applySeparationCirc(allies);
         applySeparationCirc(enemies);
