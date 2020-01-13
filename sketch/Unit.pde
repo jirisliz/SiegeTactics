@@ -36,7 +36,8 @@ abstract class Unit extends Vehicle
 
   int teamNum = 0;
 
-  float viewRadius = 40;
+  float viewRadius = 200;
+  float attackRadius = 40;
   Unit enemyAttacking;
 
   Unit() 
@@ -158,7 +159,7 @@ abstract class Unit extends Vehicle
     {
       dist = position.dist(target);
     }
-    if (dist < viewRadius)
+    if (dist < attackRadius)
     {
       setAttackAnim();
       if (animFullCycle) 
@@ -226,6 +227,18 @@ abstract class Unit extends Vehicle
       break;
     case defend:
       attackIfEnemyNear();
+      if (target != null) 
+    {
+      float dist = position.dist(target);
+      if(dist < viewRadius) 
+      {
+        super.update();
+        applySeek();
+        applySeparationCirc(allies);
+        applySeparationCirc(enemies);
+        applySeparationRect(walls);
+      }
+    }
       break;
     }
   }

@@ -23,7 +23,7 @@ class Vehicle extends Object {
     position = new PVector(width/2, height/2);
     r = 8;
     maxspeed = 2;
-    maxforce = 0.4;
+    maxforce = 0.1;
     acceleration = new PVector(0, 0);
     velocity = new PVector(maxspeed, 0);
   }
@@ -47,7 +47,7 @@ class Vehicle extends Object {
   {
     // Separate from other boids force
     PVector s = separateCirc(obj);
-    s.mult(2);
+    s.mult(1);
     applyForce(s);
   }
 
