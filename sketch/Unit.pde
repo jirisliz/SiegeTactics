@@ -5,21 +5,25 @@ public enum States
 
 public enum Dirs
 {
-  up, right, down, left;
+  LU, RU, RD, LD;
+  //up, right, down, left;
 }
 
 abstract class Unit extends Vehicle
 {
-  // Animation vars
-  LoadSprite animWalkUp;
-  LoadSprite animWalkRight;
-  LoadSprite animWalkDown;
-  LoadSprite animWalkLeft;
+  // Standard unit animations:
+  LoadSprite anim_iddleRU, anim_iddleLU, 
+    anim_iddleRD, anim_iddleLD;
 
-  LoadSprite animAttackUp;
-  LoadSprite animAttackRight;
-  LoadSprite animAttackDown;
-  LoadSprite animAttackLeft;
+  LoadSprite anim_attackRU, anim_attackLU, 
+    anim_attackRD, anim_attackLD;
+
+  LoadSprite anim_attack2RU, anim_attack2LU, 
+    anim_attack2RD, anim_attack2LD;
+
+  LoadSprite anim_runRU, anim_runLU, 
+    anim_runRD, anim_runLD;
+
 
   LoadSprite animCurr;
 
@@ -28,8 +32,9 @@ abstract class Unit extends Vehicle
   boolean animFullCycle = false;
 
   // Unit vars
+  String unitType;
   States state = States.walk;
-  Dirs dir = Dirs.up;
+  Dirs dir = Dirs.RU;
   int livesMax = 10;
   int lives = livesMax;
   boolean alive = true;
@@ -45,10 +50,37 @@ abstract class Unit extends Vehicle
     orig = new PVector(0, 0);
   }
 
-  Unit(PVector l, float ms, float mf)
+  Unit(String aName, PVector l, float ms, float mf)
   {
     super(l, ms, mf);
     orig = new PVector(0, 0);
+    unitType = aName;
+    loadStdAnims(aName);
+  }
+
+  void loadStdAnims(String unitName) 
+  {
+    anim_iddleRU = new LoadSprite(unitName+"-iddleRU.png");
+    anim_iddleLU = new LoadSprite(unitName+"-iddleLU.png");
+    anim_iddleRD = new LoadSprite(unitName+"-iddleRD.png");
+    anim_iddleLD = new LoadSprite(unitName+"-iddleLD.png");
+
+    anim_attackRU = new LoadSprite(unitName+"-attackRU.png");
+    anim_attackLU = new LoadSprite(unitName+"-attackLU.png");
+    anim_attackRD = new LoadSprite(unitName+"-attackRD.png");
+    anim_attackLD = new LoadSprite(unitName+"-attackLD.png");
+
+    anim_attack2RU = new LoadSprite(unitName+"-attack2RU.png");
+    anim_attack2LU = new LoadSprite(unitName+"-attack2LU.png");
+    anim_attack2RD = new LoadSprite(unitName+"-attack2RD.png");
+    anim_attack2LD = new LoadSprite(unitName+"-attack2LD.png");
+
+    anim_runRU = new LoadSprite(unitName+"-runRU.png");
+    anim_runLU = new LoadSprite(unitName+"-runLU.png");
+    anim_runRD = new LoadSprite(unitName+"-runRD.png");
+    anim_runLD = new LoadSprite(unitName+"-runLD.png");
+
+    updateCurrAnim();
   }
 
   void setState(States st) 
@@ -63,21 +95,40 @@ abstract class Unit extends Vehicle
     updateCurrAnim();
   }
 
+  void setIddleAnim() 
+  {
+    switch(dir) 
+    {
+    case RU: 
+      animCurr = anim_iddleRU; 
+      break;
+    case RD: 
+      animCurr = anim_iddleRD; 
+      break;
+    case LD: 
+      animCurr = anim_iddleLD; 
+      break;
+    case LU: 
+      animCurr = anim_iddleLU; 
+      break;
+    }
+  }
+
   void setWalkAnim() 
   {
     switch(dir) 
     {
-    case up: 
-      animCurr = animWalkUp; 
+    case RU: 
+      animCurr = anim_runRU; 
       break;
-    case down: 
-      animCurr = animWalkDown; 
+    case RD: 
+      animCurr = anim_runRD; 
       break;
-    case left: 
-      animCurr = animWalkLeft; 
+    case LD: 
+      animCurr = anim_runLD; 
       break;
-    case right: 
-      animCurr = animWalkRight; 
+    case LU: 
+      animCurr = anim_runLU; 
       break;
     }
   }
@@ -86,17 +137,17 @@ abstract class Unit extends Vehicle
   {
     switch(dir) 
     {
-    case up: 
-      animCurr = animAttackUp; 
+    case RU: 
+      animCurr = anim_attack2RU; 
       break;
-    case down: 
-      animCurr = animAttackDown; 
+    case RD: 
+      animCurr = anim_attack2RD; 
       break;
-    case left: 
-      animCurr = animAttackLeft; 
+    case LD: 
+      animCurr = anim_attack2LD; 
       break;
-    case right: 
-      animCurr = animAttackRight; 
+    case LU: 
+      animCurr = anim_attack2LU; 
       break;
     }
   }
@@ -161,6 +212,7 @@ abstract class Unit extends Vehicle
     }
     if (dist < attackRadius)
     {
+      selectDirQuad();
       setAttackAnim();
       if (animFullCycle) 
       {
@@ -175,17 +227,20 @@ abstract class Unit extends Vehicle
     return false;
   }
 
-  void update(ArrayList allies, 
-    ArrayList enemies, Path path, ArrayList walls)
+  void selectDirQuad() 
   {
     // select direction quadrant 
     float a = velocity.heading();
-    if (a >= PI/4 && a < PI-PI/4)dir = Dirs.down;
-    if (a >= PI-PI/4 || a < -PI+PI/4)dir = Dirs.left;
-    if (a >= -PI+PI/4 && a < -PI/4)dir = Dirs.up;
-    if (a >= -PI/4 && a < PI/4)dir = Dirs.right;
+    if (a >= 0 && a < PI/2)dir = Dirs.RD;
+    if (a >= PI/2 && a < PI)dir = Dirs.LD;
+    if (a >= -PI/2 && a < 0)dir = Dirs.RU;
+    if (a >= -PI && a < -PI/2)dir = Dirs.LU;
     updateCurrAnim();
+  }
 
+  void update(ArrayList allies, 
+    ArrayList enemies, Path path, ArrayList walls)
+  {
     // Animation speed (frameRate divided) 
     fcount++;
     if (fcount >= fmax) 
@@ -209,9 +264,11 @@ abstract class Unit extends Vehicle
         applySeparationCirc(allies);
         applySeparationCirc(enemies);
         applySeparationRect(walls);
+        selectDirQuad();
       }
       break;
     case stand:
+      setIddleAnim();
       break;
     case attack:
       if (!attackIfEnemyNear() && alive) 
@@ -222,23 +279,26 @@ abstract class Unit extends Vehicle
         applySeparationCirc(allies);
         applySeparationCirc(enemies);
         applySeparationRect(walls);
+        selectDirQuad();
         setWalkAnim();
       }
       break;
     case defend:
+      setIddleAnim();
       attackIfEnemyNear();
       if (target != null) 
-    {
-      float dist = position.dist(target);
-      if(dist < viewRadius) 
       {
-        super.update();
-        applySeek();
-        applySeparationCirc(allies);
-        applySeparationCirc(enemies);
-        applySeparationRect(walls);
+        float dist = position.dist(target);
+        if (dist < viewRadius) 
+        {
+          super.update();
+          applySeek();
+          applySeparationCirc(allies);
+          applySeparationCirc(enemies);
+          applySeparationRect(walls);
+          selectDirQuad();
+        }
       }
-    }
       break;
     }
   }
