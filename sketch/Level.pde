@@ -1,4 +1,4 @@
-abstract class Test
+abstract class Level
 {
  
   abstract void update();

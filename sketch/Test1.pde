@@ -1,5 +1,5 @@
 // Soldiers walking path
-class Test1 extends Test
+class Test1 extends Level
 {
   Renderer r;
 

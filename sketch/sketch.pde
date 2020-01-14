@@ -4,7 +4,7 @@ boolean debug = false;
 // Global scale - mltiply num of pixels
 static int mScale = 3;
 
-Test test;
+Level level;
 
 void setup() 
 {
@@ -15,11 +15,11 @@ void setup()
   smooth();
   fill(0);
   
-  test = new Test2();
+  level = new Test2();
 }
 
 void draw() 
 {
-  test.update();
-  test.draw();
+  level.update();
+  level.draw();
 }
