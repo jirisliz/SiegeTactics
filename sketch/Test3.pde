@@ -15,7 +15,7 @@ class Test3 extends Level
     soldiers2 = new ArrayList<SoldierBasic>();
 
     int numOfAttackers = 5;
-    int numOfDefenders = 2;
+    int numOfDefenders = 5;
 
     for (int i = 0; i < numOfAttackers; i++) 
     {
@@ -41,6 +41,7 @@ class Test3 extends Level
       s2.target = s2.primaryTarget;
       s2.setDir(Dirs.LD);
       s2.setState(States.seek);
+      s2.applySeek();
       soldiers2.add(s2);
     }
   }
@@ -73,6 +74,11 @@ class Test3 extends Level
 
     //setTargetEnemies();
   }
+  
+  void mouseClicked() 
+  {
+    setTargetMouse();
+  }
 
   void draw() 
   {
@@ -80,6 +86,24 @@ class Test3 extends Level
     
     update();
     r.draw();
+  }
+  
+  void mouseClickedEvent() 
+  {
+    setTargetMouse();
+  }
+  
+  void setTargetMouse() 
+  {
+    // Set targets as last mouse click
+    for (SoldierBasic s1 : soldiers)
+    {
+      s1.setTarget(new PVector(mouseX, mouseY));
+    }
+    for (SoldierBasic s2 : soldiers2)
+    {
+      s2.setTarget(new PVector(mouseX, mouseY)) ;
+    }
   }
 
   void setTargetEnemies() 

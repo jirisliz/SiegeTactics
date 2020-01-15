@@ -14,6 +14,7 @@ class Vehicle extends Object {
   float r;
   float maxforce;    // Maximum steering force
   float maxspeed;    // Maximum speed
+  float mass = 1.8;
 
   PVector target;
   PVector primaryTarget;
@@ -25,7 +26,7 @@ class Vehicle extends Object {
     maxspeed = 2;
     maxforce = 0.1;
     acceleration = new PVector(0, 0);
-    velocity = new PVector(maxspeed, 0);
+    velocity = new PVector(0, 0);
   }
 
   // Constructor initialize all values
@@ -35,7 +36,7 @@ class Vehicle extends Object {
     maxspeed = ms;
     maxforce = mf;
     acceleration = new PVector(0, 0);
-    velocity = new PVector(maxspeed, 0);
+    velocity = new PVector(0, 0);
   }
 
   void setTarget(PVector t) 
@@ -48,7 +49,7 @@ class Vehicle extends Object {
     if (obj == null) return;
     // Separate from other boids force
     PVector s = separateCirc(obj);
-    s.mult(1);
+    s.mult(2);
     applyForce(s);
   }
 
@@ -77,7 +78,7 @@ class Vehicle extends Object {
     if (target == null) return;
 
     PVector seekForce = seek(target);
-    seekForce.mult(2);
+    seekForce.mult(1);
     applyForce(seekForce);
 
     // Draw vector to target
@@ -92,6 +93,7 @@ class Vehicle extends Object {
   void applyForce(PVector force) {
     // We could add mass here if we want A = F / M
     acceleration.add(force);
+    acceleration.div(mass);
   }
 
   // Main "run" function

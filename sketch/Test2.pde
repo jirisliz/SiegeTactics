@@ -33,7 +33,7 @@ class Test2 extends Level
         height*4/5);
       s1.primaryTarget = new PVector(width/2, height/4);
       s1.setDir(Dirs.LD);
-      s1.setState(States.walk);
+      s1.setState(States.attack);
       soldiers.add(s1);
     }
 

@@ -94,6 +94,12 @@ abstract class Unit extends Vehicle
     dir = d;
     updateCurrAnim();
   }
+  
+  void setTarget(PVector t) 
+  {
+    target = t;
+    state = States.seek;
+  }
 
   void setIddleAnim() 
   {
@@ -154,7 +160,7 @@ abstract class Unit extends Vehicle
 
   void updateCurrAnim() 
   {
-    if (state == States.walk) 
+    if (state == States.walk || state == States.seek) 
     {
       setWalkAnim();
     } else if (state == States.attack) 
@@ -209,7 +215,7 @@ abstract class Unit extends Vehicle
   }
 
 
-  boolean attackIfEnemyNear() 
+  boolean actionIfTargetNear(States st) 
   {
     float dist = width*height;
     if (target != null) 
@@ -219,7 +225,8 @@ abstract class Unit extends Vehicle
     if (dist < attackRadius)
     {
       selectDirQuad();
-      setAttackAnim();
+      setState(st);
+      
       if (animFullCycle) 
       {
         animFullCycle = false;
@@ -273,7 +280,7 @@ abstract class Unit extends Vehicle
     switch(state) 
     {
     case walk: 
-      if (!attackIfEnemyNear() && alive) 
+      if (!actionIfTargetNear(States.attack) && alive) 
       {
         super.update();
         applyFollow(path);
@@ -285,7 +292,7 @@ abstract class Unit extends Vehicle
       break;
     case seek: 
     
-      if (!attackIfEnemyNear() && alive) 
+      if (!actionIfTargetNear(States.stand) && alive) 
       {
         super.update();
         applySeek();
@@ -301,7 +308,7 @@ abstract class Unit extends Vehicle
       setIddleAnim();
       break;
     case attack:
-      if (!attackIfEnemyNear() && alive) 
+      if (!actionIfTargetNear(States.attack) && alive) 
       {
         super.update();
         applyFollow(path);
@@ -315,7 +322,7 @@ abstract class Unit extends Vehicle
       break;
     case defend:
       setIddleAnim();
-      attackIfEnemyNear();
+      actionIfTargetNear(States.attack);
       if (target != null) 
       {
         float dist = position.dist(target);

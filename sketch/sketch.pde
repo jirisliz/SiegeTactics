@@ -12,7 +12,7 @@ void setup()
   //size( displayWidth , displayHeight , P2D);
   fullScreen();
   
-  //frameRate(40);
+  //frameRate(20);
 
   smooth();
   fill(0);
@@ -23,4 +23,9 @@ void setup()
 void draw() 
 {
   level.draw();
+}
+
+void mousePressed() 
+{
+  level.mouseClickedEvent();
 }
