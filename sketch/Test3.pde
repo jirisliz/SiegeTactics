@@ -14,8 +14,8 @@ class Test3 extends Level
     soldiers = new ArrayList<SoldierBasic>();
     soldiers2 = new ArrayList<SoldierBasic>();
 
-    int numOfAttackers = 5;
-    int numOfDefenders = 5;
+    int numOfAttackers = 12;
+    int numOfDefenders = 12;
 
     for (int i = 0; i < numOfAttackers; i++) 
     {
@@ -96,14 +96,40 @@ class Test3 extends Level
   void setTargetMouse() 
   {
     // Set targets as last mouse click
+    // create little formation 4x3
+    int x = 0;
+    int y = 0;
+    int xN = 4;
+    int yN = 3;
+    int r = 60;
     for (SoldierBasic s1 : soldiers)
     {
-      s1.setTarget(new PVector(mouseX, mouseY));
+      s1.setTarget(new PVector(
+       mouseX-xN*r+x*r, mouseY+yN*r+y*r));
+      x++;
+      if(x >= xN) 
+      {
+        x = 0;
+        y++;
+      }
     }
+    
+    x = 0;
+    y = 0;
+    xN = 4;
+    yN = 3;
     for (SoldierBasic s2 : soldiers2)
     {
-      s2.setTarget(new PVector(mouseX, mouseY)) ;
+      s2.setTarget(new PVector(
+      mouseX-xN*r+x*r, mouseY-yN*r+y*r));
+      x++;
+      if(x >= xN) 
+      {
+        x = 0;
+        y++;
+      }
     }
+    
   }
 
   void setTargetEnemies() 

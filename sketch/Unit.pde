@@ -305,6 +305,8 @@ abstract class Unit extends Vehicle
       
       break;
     case stand:
+      velocity.x = 0;
+      velocity.y = 0;
       setIddleAnim();
       break;
     case attack:
