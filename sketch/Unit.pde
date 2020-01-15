@@ -1,6 +1,6 @@
 public enum States
 {
-  walk, stand, attack, defend, dead;
+  walk, seek, stand, attack, defend, dead;
 }
 
 public enum Dirs
@@ -157,6 +157,12 @@ abstract class Unit extends Vehicle
     if (state == States.walk) 
     {
       setWalkAnim();
+    } else if (state == States.attack) 
+    {
+      setAttackAnim();
+    } else if (state == States.stand) 
+    {
+      setIddleAnim();
     }
   }
 
@@ -236,6 +242,16 @@ abstract class Unit extends Vehicle
     if (a >= -PI/2 && a < 0)dir = Dirs.RU;
     if (a >= -PI && a < -PI/2)dir = Dirs.LU;
     updateCurrAnim();
+    
+    /*
+    if (debug) 
+    {
+      textSize(30);
+      fill(5);
+      textAlign(CENTER);
+      text(a*180/PI, position.x, position.y - 20);
+    }
+    */
   }
 
   void update(ArrayList allies, 
@@ -266,6 +282,20 @@ abstract class Unit extends Vehicle
         applySeparationRect(walls);
         selectDirQuad();
       }
+      break;
+    case seek: 
+    
+      if (!attackIfEnemyNear() && alive) 
+      {
+        super.update();
+        applySeek();
+        applySeparationCirc(allies);
+        applySeparationCirc(enemies);
+        applySeparationRect(walls);
+        
+        selectDirQuad();
+      }
+      
       break;
     case stand:
       setIddleAnim();

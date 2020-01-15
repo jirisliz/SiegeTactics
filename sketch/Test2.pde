@@ -1,4 +1,4 @@
-// Soldiers walking path
+// Soldiers attacks defenders in gate
 class Test2 extends Level
 {
   Renderer r;
@@ -22,8 +22,8 @@ class Test2 extends Level
     soldiers = new ArrayList<SoldierBasic>();
     soldiers2 = new ArrayList<SoldierBasic>();
 
-    int numOfAttackers = 20;
-    int numOfDefenders = 20;
+    int numOfAttackers = 10;
+    int numOfDefenders = 10;
 
     for (int i = 0; i < numOfAttackers; i++) 
     {
@@ -90,7 +90,7 @@ class Test2 extends Level
     background(255);
     if (path != null)path.display();
     if (path2 != null)path2.display();
-
+    update();
     r.draw();
   }
 

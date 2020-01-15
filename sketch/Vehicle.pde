@@ -45,6 +45,7 @@ class Vehicle extends Object {
 
   void applySeparationCirc(ArrayList obj) 
   {
+    if (obj == null) return;
     // Separate from other boids force
     PVector s = separateCirc(obj);
     s.mult(1);
@@ -53,6 +54,7 @@ class Vehicle extends Object {
 
   void applySeparationRect(ArrayList obj) 
   {
+    if (obj == null) return;
     // Separate from other boids force
     PVector s = separateRect(obj);
     s.mult(4);
@@ -62,30 +64,28 @@ class Vehicle extends Object {
 
   void applyFollow(Path path) 
   {
-    if (path != null) 
-    {
-      // Follow path force
-      PVector f = follow(path);
-      f.mult(3);
-      applyForce(f);
-    }
+    if (path == null) return;
+
+    // Follow path force
+    PVector f = follow(path);
+    f.mult(2);
+    applyForce(f);
   }
 
   void applySeek() 
   {
-    if (target != null) 
-    {
-      PVector seekForce = seek(target);
-      seekForce.mult(2);
-      applyForce(seekForce);
+    if (target == null) return;
 
-      // Draw vector to target
-      if (debug)
-      {
-        stroke(10);
-        strokeWeight(1);
-        line(position.x, position.y, target.x, target.y);
-      }
+    PVector seekForce = seek(target);
+    seekForce.mult(2);
+    applyForce(seekForce);
+
+    // Draw vector to target
+    if (debug)
+    {
+      stroke(10);
+      strokeWeight(1);
+      line(position.x, position.y, target.x, target.y);
     }
   }
 
@@ -221,7 +221,7 @@ class Vehicle extends Object {
     }
     return finSepar(steer, count);
   }
-  
+
   PVector separateRect(ArrayList boids) {
     float desiredseparation = r*2;
     PVector steer = new PVector(0, 0, 0);
@@ -231,8 +231,8 @@ class Vehicle extends Object {
       Wall other = (Wall) boids.get(i);
       if (!other.active)continue;
       PVector posWall = new PVector(position.x, 
-                         other.position.y + 
-                         other.h/2);
+        other.position.y + 
+        other.h/2);
       if (other.intersects(this)) {
         // Calculate vector pointing away from neighbor
         PVector diff = PVector.sub(position, posWall);
