@@ -203,7 +203,7 @@ class Vehicle extends Object {
   // Separation
   // Method checks for nearby boids and steers away
   PVector separateCirc(ArrayList boids) {
-    float desiredseparation = r*2*2;
+    float desiredseparation = r*2;
     PVector steer = new PVector(0, 0, 0);
     int count = 0;
     // For every boid in the system, check if it's too close

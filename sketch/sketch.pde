@@ -1,8 +1,8 @@
 // Debug data rendering
-static boolean debug = true;
+static boolean debug = false;
 
 // Global scale - mltiply num of pixels
-static int mScale = 4;
+static int mScale = 3;
 
 Level level;
 

@@ -15,7 +15,7 @@ class Test3 extends Level
     soldiers2 = new ArrayList<SoldierBasic>();
 
     int numOfAttackers = 12;
-    int numOfDefenders = 12;
+    int numOfDefenders = 9;
 
     for (int i = 0; i < numOfAttackers; i++) 
     {
@@ -116,7 +116,7 @@ class Test3 extends Level
     
     x = 0;
     y = 0;
-    xN = 4;
+    xN = 3;
     yN = 3;
     for (SoldierBasic s2 : soldiers2)
     {
