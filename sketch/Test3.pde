@@ -11,7 +11,7 @@ class Test3 extends Level
 
   Test3() 
   {
-    grass = new LoadTile("grass1.png",2,2); 
+    grass = new LoadTile("grass1.png",3,3); 
 
     r = new Renderer();
     
@@ -110,8 +110,8 @@ class Test3 extends Level
       for(int j = 0 ; j <= hs ; j++) 
       {
         backgr.copy(
-         grass.getTile((int) random(0,1.4),
-                       (int) random(0,1.4)), 
+         grass.getTile((int) random(0,2.4),
+                       (int) random(0,2.4)), 
                        0,0,side,side,
                        i*side,j*side,side,side);
           
