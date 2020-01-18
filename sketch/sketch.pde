@@ -2,7 +2,7 @@
 static boolean debug = false;
 
 // Global scale - mltiply num of pixels
-static int mScale = 3;
+static int mScale = 4;
 
 Level level;
 
@@ -14,7 +14,7 @@ void setup()
   
   //frameRate(20);
 
-  smooth();
+  noSmooth();
   fill(0);
   
   level = new Test3();

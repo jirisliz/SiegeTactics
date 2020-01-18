@@ -6,10 +6,16 @@ class Test3 extends Level
   ArrayList<SoldierBasic> soldiers;
   ArrayList<SoldierBasic> soldiers2;
 
+  LoadTile grass;
+  PImage backgr;
+
   Test3() 
   {
+    grass = new LoadTile("grass1.png",2,2); 
 
     r = new Renderer();
+    
+    createBackgr();
 
     soldiers = new ArrayList<SoldierBasic>();
     soldiers2 = new ArrayList<SoldierBasic>();
@@ -84,8 +90,33 @@ class Test3 extends Level
   {
     background(255);
     
+    image(backgr, 0, 0, 
+          backgr.width*mScale, backgr.height*mScale);
+    
     update();
     r.draw();
+  }
+  
+  void createBackgr() 
+  {
+    // draw grass with tiles
+    int side = grass.getTileSide();
+    int rs = width/(side*mScale)+1;
+    int hs = height/(side*mScale)+1;
+    backgr = createImage(rs*side, hs*side, ARGB);
+    
+    for(int i = 0 ; i <= rs ; i++) 
+    {
+      for(int j = 0 ; j <= hs ; j++) 
+      {
+        backgr.copy(
+         grass.getTile((int) random(0,1.4),
+                       (int) random(0,1.4)), 
+                       0,0,side,side,
+                       i*side,j*side,side,side);
+          
+      }
+    }
   }
   
   void mouseClickedEvent() 
