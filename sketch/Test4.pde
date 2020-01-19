@@ -1,14 +1,21 @@
 // No walls and paths, just two groups going to target pos
-class Test3 extends Level
+class Test4 extends Level
 {
   Renderer r;
 
   ArrayList<SoldierBasic> soldiers;
   ArrayList<SoldierBasic> soldiers2;
 
-  Test3() 
+  LoadTile grass;
+  PImage backgr;
+
+  Test4() 
   {
+    grass = new LoadTile("grass1.png",3,3); 
+
     r = new Renderer();
+    
+    createBackgr();
 
     soldiers = new ArrayList<SoldierBasic>();
     soldiers2 = new ArrayList<SoldierBasic>();
@@ -83,8 +90,33 @@ class Test3 extends Level
   {
     background(255);
     
+    image(backgr, 0, 0, 
+          backgr.width*mScale, backgr.height*mScale);
+    
     update();
     r.draw();
+  }
+  
+  void createBackgr() 
+  {
+    // draw grass with tiles
+    int side = grass.getTileSide();
+    int rs = width/(side*mScale)+1;
+    int hs = height/(side*mScale)+1;
+    backgr = createImage(rs*side, hs*side, ARGB);
+    
+    for(int i = 0 ; i <= rs ; i++) 
+    {
+      for(int j = 0 ; j <= hs ; j++) 
+      {
+        backgr.copy(
+         grass.getTile((int) random(0,2.4),
+                       (int) random(0,2.4)), 
+                       0,0,side,side,
+                       i*side,j*side,side,side);
+          
+      }
+    }
   }
   
   void mouseClickedEvent() 
