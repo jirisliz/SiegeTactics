@@ -7,12 +7,9 @@ KetaiGesture gesture;
 static boolean debug = true;
 
 // Global scale - mltiply num of pixels
-static int mScale = 1;
-float zoom = 1;
-int mScaleMin = 1;
-int mScaleMax = 13;
-int oldScale = 30;
-PVector old;
+static float mScale = 1;
+float mScaleMin = 1;
+float mScaleMax = 13;
 
 Level level;
 
@@ -44,7 +41,6 @@ void mousePressed()
 
 void mouseDragged() 
 {
- 
 }
 
 void mouseReleased() 
@@ -54,17 +50,16 @@ void mouseReleased()
 void onPinch(float x, float y, float d)
 {
 
-  zoom = constrain(zoom + d/100, (float) mScaleMin, (float) mScaleMax);
-  mScale = constrain((int) zoom, mScaleMin, mScaleMax);
-  
-    if (debug) 
-    {
-      textSize(30);
-      fill(5);
-      textAlign(CENTER);
-      text("scale="+mScale+" zoom="+zoom , width/2, 200);
-    }
-  
+  mScale = constrain(mScale + d/100, mScaleMin, mScaleMax);
+
+  if (debug) 
+  {
+    textSize(30);
+    fill(5);
+    textAlign(CENTER);
+    text("scale="+mScale+" x="+x+",y="+y, 
+      width/2, 200);
+  }
 }
 
 public boolean surfaceTouchEvent(MotionEvent event) {

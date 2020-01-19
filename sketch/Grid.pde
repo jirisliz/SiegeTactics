@@ -1,9 +1,9 @@
 class Grid
 {
-  int rows, cols;
-  int rowSz, colSz; // in pixels
+  float rows, cols;
+  float rowSz, colSz; // in pixels
   
-  int xOffset, yOffset;
+  float xOffset, yOffset;
   
   // Array of blocks (walls, buildings,...) 
   boolean[][] blocks;
@@ -20,7 +20,7 @@ class Grid
     //xOffset = 0;
     //yOffset = 0;
     
-    blocks = new boolean[cols][rows];
+    blocks = new boolean[(int)cols][(int)rows];
     blocks[2][2] = true;
     blocks[3][4] = true;
   }
@@ -33,8 +33,8 @@ class Grid
      {
        if(blocks[j][i])
        {
-        int x1 = xOffset + j*colSz;
-        int y1 = yOffset + i*rowSz;
+        float x1 = xOffset + j*colSz;
+        float y1 = yOffset + i*rowSz;
         fill(128);
         noStroke();
         rect(x1, y1, colSz, rowSz);
@@ -46,10 +46,10 @@ class Grid
     {
       for(int i = 0 ; i <= rows ; i++)
       {
-        int x1 = xOffset;
-        int y1 = yOffset + i*rowSz;
-        int x2 = xOffset + cols*colSz;
-        int y2 = yOffset + i*rowSz;
+        float x1 = xOffset;
+        float y1 = yOffset + i*rowSz;
+        float x2 = xOffset + cols*colSz;
+        float y2 = yOffset + i*rowSz;
         stroke(1);
         strokeWeight(1);
         line(x1, y1, x2, y2);
@@ -57,10 +57,10 @@ class Grid
       
       for(int j = 0 ; j <= cols ; j++)
       {
-        int x1 = xOffset + j*colSz;
-        int y1 = yOffset;
-        int x2 = xOffset + j*colSz;
-        int y2 = yOffset + rows*rowSz;
+        float x1 = xOffset + j*colSz;
+        float y1 = yOffset;
+        float x2 = xOffset + j*colSz;
+        float y2 = yOffset + rows*rowSz;
         stroke(1);
         strokeWeight(1);
         line(x1, y1, x2, y2);

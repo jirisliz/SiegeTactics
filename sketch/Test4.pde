@@ -101,8 +101,8 @@ class Test4 extends Level
   {
     // draw grass with tiles
     int side = grass.getTileSide();
-    int rs = width/(side*mScale)+1;
-    int hs = height/(side*mScale)+1;
+    int rs = (int) (width/(side*mScale)+1) ;
+    int hs = (int) (height/(side*mScale)+1) ;
     backgr = createImage(rs*side, hs*side, ARGB);
     
     for(int i = 0 ; i <= rs ; i++) 
