@@ -12,8 +12,6 @@ class LoadSprite
     {
       sprImg = loadImage(path);
 
-      //sprImg.resize(sprImg.width*scale,
-      //              sprImg.height*scale);
       // we suppose frames in one row
       frames = sprImg.width/sprImg.height;
       currImg = createImage(sprImg.height, 
@@ -46,13 +44,13 @@ class LoadSprite
       fill(100);
       stroke(0);
       strokeWeight(2);
-      rect(x-16*mScale/2, y-16*mScale/2, 
-      16*mScale, 16*mScale);
+      rect(x-16/2, y-16/2, 
+      16, 16);
     }
     else
    {
-     image(currImg, x-currImg.width*mScale/2, y-currImg.height*mScale/2, 
-      currImg.width*mScale, currImg.height*mScale);
+     image(currImg, x-currImg.width/2, y-currImg.height/2, 
+      currImg.width, currImg.height);
    }
     
   }

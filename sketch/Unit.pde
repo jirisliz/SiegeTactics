@@ -26,9 +26,11 @@ abstract class Unit extends Vehicle
 
 
   LoadSprite animCurr;
-
+  
+  // Animations speed
   int fcount = 0;
-  int fmax = 10;
+  int fmax = 3;
+  // Used for attacking
   boolean animFullCycle = false;
 
   // Unit vars
@@ -42,7 +44,7 @@ abstract class Unit extends Vehicle
   int teamNum = 0;
 
   float viewRadius = 200;
-  float attackRadius = 40;
+  float attackRadius = 20;
   Unit enemyAttacking;
 
   Unit() 
@@ -350,9 +352,9 @@ abstract class Unit extends Vehicle
       // Draw lives
       stroke(30, 200, 30);
       strokeWeight(3);
-      int l = (int) map(lives, 0, livesMax, 1, 3*r);
-      line(position.x-l, position.y-3*r, 
-        position.x+l, position.y-3*r);
+      int l = (int) map(lives, 0, livesMax, 1, r);
+      line(position.x-l, position.y-r, 
+        position.x+l, position.y-r);
     } else
     {
       fill(100);

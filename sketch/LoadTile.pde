@@ -2,7 +2,7 @@ class LoadTile
 {
   PImage tileImg; 
   int xNum, yNum;
-  float scale = mScale;
+  float scale = 1;
   
   LoadTile(String path, int axNum, int ayNum) 
   {

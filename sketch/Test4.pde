@@ -20,8 +20,8 @@ class Test4 extends Level
     soldiers = new ArrayList<SoldierBasic>();
     soldiers2 = new ArrayList<SoldierBasic>();
 
-    int numOfAttackers = 12;
-    int numOfDefenders = 9;
+    int numOfAttackers = 50;
+    int numOfDefenders = 50;
 
     for (int i = 0; i < numOfAttackers; i++) 
     {
@@ -91,7 +91,7 @@ class Test4 extends Level
     background(255);
     
     image(backgr, 0, 0, 
-          backgr.width*mScale, backgr.height*mScale);
+          backgr.width, backgr.height);
     
     update();
     r.draw();
@@ -101,8 +101,8 @@ class Test4 extends Level
   {
     // draw grass with tiles
     int side = grass.getTileSide();
-    int rs = (int) (width/(side*mScale)+1) ;
-    int hs = (int) (height/(side*mScale)+1) ;
+    int rs = (int) (width/(side)+1) ;
+    int hs = (int) (height/(side)+1) ;
     backgr = createImage(rs*side, hs*side, ARGB);
     
     for(int i = 0 ; i <= rs ; i++) 

@@ -12,8 +12,8 @@ class Grid
   {
     rows = aRows;
     cols = aCols;
-    rowSz = aRowSz*mScale;
-    colSz = aColSz*mScale;
+    rowSz = aRowSz;
+    colSz = aColSz;
     
     xOffset = width/2 - cols*colSz/2;
     yOffset = height/2 - rows*rowSz/2;
