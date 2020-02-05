@@ -32,37 +32,31 @@ void setup()
   noSmooth();
   fill(0);
 
-  level = new Test4();
+  level = new Test2();
 
   mTransX = 0;
   mTransY = 0;
+  
 }
 
 void draw() 
 {
+  // move origin to screen center
+  pushMatrix();
+  translate(width/2, height/2);
 
+  // do game scale and transtation
   pushMatrix();
   scale(mScale);
   translate(mTransX, mTransY);
+  
   level.draw();
+  
+  line(-20,0,20,0);
+  line(0,-20,0,20);
+  
   popMatrix();
-
-  if (debug) 
-  {
-    textSize(30);
-    fill(5);
-    textAlign(CENTER);
-    text("transX="+mTransX +" transY="+mTransY, 
-      width/2, 300);
-    text("transXOld="+mTransXOld +" transYOld="+mTransYOld, 
-      width/2, 350);
-    text("touches=" + touches.length, width/2, 400);
-    text("mTrStart=" + mTrStart + 
-      " mTransl="+mTransl +
-      " mScaling="+mScaling+",mScale"+mScale, 
-      width/2, 450);
-  }
-
+  popMatrix();
 
   checkTouch();
 }
@@ -127,14 +121,6 @@ void mouseDragged()
       {
         mScaling = true;
       }
-      if (debug)
-      {
-        text("a1=" + a1 + ",a2=" + a2, width/2, 500);
-        text("f1=" + f1 + ",f2=" + f2, width/2, 550);
-        text("mF1Old=" + mF1Old + ",mF2Old=" + mF2Old, width/2, 600);
-        text("mF1Old-f1=" + sub1 +
-          ",mF2Old-f2=" + sub2, width/2, 650);
-      }
     }
 
     if (mTransl) 
@@ -148,7 +134,7 @@ void mouseDragged()
     if (mScaling) 
     {
       float scl = (PVector.dist(f1, f2)-mDistOld) / (height/2);
-      mScale = constrain(mScaleOld + scl, mScaleMin, mScaleMax);
+      mScale = constrain(mScaleOld + scl*2, mScaleMin, mScaleMax);
     }
   }
 }
