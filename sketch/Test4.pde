@@ -20,16 +20,16 @@ class Test4 extends Level
     soldiers = new ArrayList<SoldierBasic>();
     soldiers2 = new ArrayList<SoldierBasic>();
 
-    int numOfAttackers = 50;
-    int numOfDefenders = 50;
+    int numOfAttackers = 20;
+    int numOfDefenders = 15;
 
     for (int i = 0; i < numOfAttackers; i++) 
     {
       SoldierBasic s1 = new SoldierBasic(
-        width*i/(2*numOfAttackers)+
-        width/2-width*(numOfAttackers/2)/(2*numOfAttackers), 
-        height*4/5);
-      s1.primaryTarget = new PVector(width/2, height/4);
+        mWidth*i/(2*numOfAttackers)+
+        mWidth/2-mWidth*(numOfAttackers/2)/(2*numOfAttackers), 
+        mHeight*4/5);
+      s1.primaryTarget = new PVector(mWidth/2, mHeight/4);
       s1.target = s1.primaryTarget;
       s1.setDir(Dirs.LD);
       s1.setState(States.seek);
@@ -39,11 +39,11 @@ class Test4 extends Level
     for (int i = 0; i < numOfDefenders; i++) 
     {
       SoldierBasic s2 = new SoldierBasic(
-        width*i/(3*numOfDefenders)+
-        width/2-width*(numOfDefenders/2)/(3*numOfDefenders), 
-        height/5, 
+        mWidth*i/(3*numOfDefenders)+
+        mWidth/2-mWidth*(numOfDefenders/2)/(3*numOfDefenders), 
+        mHeight/5, 
         "BasicSpearman2");
-      s2.primaryTarget = new PVector(width/2, height*3/4);
+      s2.primaryTarget = new PVector(mWidth/2, mHeight*3/4);
       s2.target = s2.primaryTarget;
       s2.setDir(Dirs.LD);
       s2.setState(States.seek);
@@ -88,10 +88,17 @@ class Test4 extends Level
 
   void draw() 
   {
-    background(255);
+    background(0);
     
     image(backgr, 0, 0, 
           backgr.width, backgr.height);
+          
+    if(debug) 
+    {
+      PVector target = screen2World(new PVector(mouseX, mouseY));
+      fill(120);
+      ellipse(target.x, target.y, 20, 20);
+    }
     
     update();
     r.draw();
@@ -101,8 +108,8 @@ class Test4 extends Level
   {
     // draw grass with tiles
     int side = grass.getTileSide();
-    int rs = (int) (width/(side)+1) ;
-    int hs = (int) (height/(side)+1) ;
+    int rs = (int) (mWidth/(side)+1) ;
+    int hs = (int) (mHeight/(side)+1) ;
     backgr = createImage(rs*side, hs*side, ARGB);
     
     for(int i = 0 ; i <= rs ; i++) 
@@ -126,17 +133,19 @@ class Test4 extends Level
   
   void setTargetMouse() 
   {
+    PVector target = screen2World(new PVector(mouseX, mouseY));
+    
     // Set targets as last mouse click
     // create little formation 4x3
     int x = 0;
     int y = 0;
     int xN = 4;
     int yN = 3;
-    int r = 60;
+    int r = 20;
     for (SoldierBasic s1 : soldiers)
     {
       s1.setTarget(new PVector(
-       mouseX-xN*r+x*r, mouseY+yN*r+y*r));
+       target.x-xN*r+x*r, target.y+yN*r+y*r));
       x++;
       if(x >= xN) 
       {
@@ -152,7 +161,7 @@ class Test4 extends Level
     for (SoldierBasic s2 : soldiers2)
     {
       s2.setTarget(new PVector(
-      mouseX-xN*r+x*r, mouseY-yN*r+y*r));
+      target.x-xN*r+x*r, target.y-yN*r+y*r));
       x++;
       if(x >= xN) 
       {

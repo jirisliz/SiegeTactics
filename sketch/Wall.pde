@@ -34,10 +34,12 @@ class Wall extends Object
 
   void draw() 
   {
-    stroke(200);
+    noStroke();
     strokeWeight(1);
+    fill(170);
+    rect(position.x, position.y, w, h/3);
     fill(120);
-    rect(position.x, position.y, w, h);
+    rect(position.x, position.y + h/3, w, h*2/3);
 
     if (debug) 
     {

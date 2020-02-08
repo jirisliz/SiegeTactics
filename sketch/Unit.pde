@@ -26,10 +26,7 @@ abstract class Unit extends Vehicle
 
 
   LoadSprite animCurr;
-  
-  // Animations speed
-  int fcount = 0;
-  int fmax = 3;
+
   // Used for attacking
   boolean animFullCycle = false;
 
@@ -62,25 +59,25 @@ abstract class Unit extends Vehicle
 
   void loadStdAnims(String unitName) 
   {
-    anim_iddleRU = new LoadSprite(unitName+"-iddleRU.png");
-    anim_iddleLU = new LoadSprite(unitName+"-iddleLU.png");
-    anim_iddleRD = new LoadSprite(unitName+"-iddleRD.png");
-    anim_iddleLD = new LoadSprite(unitName+"-iddleLD.png");
+    anim_iddleRU = new LoadSprite(unitName+"-iddleRU.png", 8);
+    anim_iddleLU = new LoadSprite(unitName+"-iddleLU.png", 8);
+    anim_iddleRD = new LoadSprite(unitName+"-iddleRD.png", 8);
+    anim_iddleLD = new LoadSprite(unitName+"-iddleLD.png", 8);    
 
-    anim_attackRU = new LoadSprite(unitName+"-attackRU.png");
-    anim_attackLU = new LoadSprite(unitName+"-attackLU.png");
-    anim_attackRD = new LoadSprite(unitName+"-attackRD.png");
-    anim_attackLD = new LoadSprite(unitName+"-attackLD.png");
+    anim_attackRU = new LoadSprite(unitName+"-attackRU.png", 5);
+    anim_attackLU = new LoadSprite(unitName+"-attackLU.png", 5);
+    anim_attackRD = new LoadSprite(unitName+"-attackRD.png", 5);
+    anim_attackLD = new LoadSprite(unitName+"-attackLD.png", 5);
 
-    anim_attack2RU = new LoadSprite(unitName+"-attack2RU.png");
-    anim_attack2LU = new LoadSprite(unitName+"-attack2LU.png");
-    anim_attack2RD = new LoadSprite(unitName+"-attack2RD.png");
-    anim_attack2LD = new LoadSprite(unitName+"-attack2LD.png");
+    anim_attack2RU = new LoadSprite(unitName+"-attack2RU.png", 5);
+    anim_attack2LU = new LoadSprite(unitName+"-attack2LU.png", 5);
+    anim_attack2RD = new LoadSprite(unitName+"-attack2RD.png", 5);
+    anim_attack2LD = new LoadSprite(unitName+"-attack2LD.png", 5);
 
-    anim_runRU = new LoadSprite(unitName+"-runRU.png");
-    anim_runLU = new LoadSprite(unitName+"-runLU.png");
-    anim_runRD = new LoadSprite(unitName+"-runRD.png");
-    anim_runLD = new LoadSprite(unitName+"-runLD.png");
+    anim_runRU = new LoadSprite(unitName+"-runRU.png", 4);
+    anim_runLU = new LoadSprite(unitName+"-runLU.png", 4);
+    anim_runRD = new LoadSprite(unitName+"-runRD.png", 4);
+    anim_runLD = new LoadSprite(unitName+"-runLD.png", 4);
 
     updateCurrAnim();
   }
@@ -96,7 +93,7 @@ abstract class Unit extends Vehicle
     dir = d;
     updateCurrAnim();
   }
-  
+
   void setTarget(PVector t) 
   {
     target = t;
@@ -228,7 +225,7 @@ abstract class Unit extends Vehicle
     {
       selectDirQuad();
       setState(st);
-      
+
       if (animFullCycle) 
       {
         animFullCycle = false;
@@ -251,32 +248,18 @@ abstract class Unit extends Vehicle
     if (a >= -PI/2 && a < 0)dir = Dirs.RU;
     if (a >= -PI && a < -PI/2)dir = Dirs.LU;
     updateCurrAnim();
-    
-    /*
-    if (debug) 
-    {
-      textSize(30);
-      fill(5);
-      textAlign(CENTER);
-      text(a*180/PI, position.x, position.y - 20);
-    }
-    */
   }
 
   void update(ArrayList allies, 
     ArrayList enemies, Path path, ArrayList walls)
   {
-    // Animation speed (frameRate divided) 
-    fcount++;
-    if (fcount >= fmax) 
+
+    if (animCurr != null)
     {
-      fcount = 0;
-      if (animCurr != null)
-      {
-        animCurr.update();
-        if (animCurr.currFrame == 0)animFullCycle = true;
-      }
+      animCurr.update();
+      if (animCurr.currFrame == 0)animFullCycle = true;
     }
+
 
     // Handle states
     switch(state) 
@@ -293,7 +276,7 @@ abstract class Unit extends Vehicle
       }
       break;
     case seek: 
-    
+
       if (!actionIfTargetNear(States.stand) && alive) 
       {
         super.update();
@@ -301,10 +284,10 @@ abstract class Unit extends Vehicle
         applySeparationCirc(allies);
         applySeparationCirc(enemies);
         applySeparationRect(walls);
-        
+
         selectDirQuad();
       }
-      
+
       break;
     case stand:
       velocity.x = 0;

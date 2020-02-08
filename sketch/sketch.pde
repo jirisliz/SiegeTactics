@@ -1,7 +1,7 @@
 // Debug data rendering
 static boolean debug = false;
 
-// Global scale - mltiply num of pixels
+// Global scale and translate
 boolean mScaling = false;
 static float mScale = 1;
 float mScaleOld = 1;
@@ -32,11 +32,23 @@ void setup()
   noSmooth();
   fill(0);
 
-  level = new Test2();
-
-  mTransX = 0;
-  mTransY = 0;
+  level = new Test4();
   
+  // Set min zoom
+  float mScaleMin1 = (float) displayWidth / (float) mWidth;
+  float mScaleMin2 = (float) displayHeight / (float) mHeight;
+  if(mScaleMin1 >= mScaleMin2) 
+  {
+    mScaleMin = mScaleMin1;
+  }
+  else
+  {
+    mScaleMin = mScaleMin2;
+  }
+  mScale = mScaleMin;
+
+  mTransX = -mWidth/2;
+  mTransY = -mHeight/2;
 }
 
 void draw() 
@@ -49,12 +61,9 @@ void draw()
   pushMatrix();
   scale(mScale);
   translate(mTransX, mTransY);
-  
+
   level.draw();
-  
-  line(-20,0,20,0);
-  line(0,-20,0,20);
-  
+
   popMatrix();
   popMatrix();
 
@@ -71,12 +80,25 @@ void checkTouch()
   }
 }
 
+PVector world2Screen(PVector w) 
+{
+  float sX = ((w.x- mTransX) * mScale);
+  float sY = ((w.y - mTransY) * mScale);
+  
+  return new PVector(sX, sY);
+}
+
+PVector screen2World(PVector s) 
+{
+  float wX = ((s.x-width/2) / mScale) - mTransX;
+  float wY = ((s.y-height/2)/ mScale) - mTransY;
+  
+  return new PVector(wX, wY);
+}
+
 void mousePressed() 
 {
-  if (touches.length == 0) 
-  {
-    level.mouseClickedEvent();
-  }
+  
 }
 
 void mouseDragged() 
@@ -141,5 +163,9 @@ void mouseDragged()
 
 void mouseReleased() 
 {
+  if (touches.length == 1 && !mTrStart) 
+  {
+    level.mouseClickedEvent();
+  }
   mTrStart = false;
 }
