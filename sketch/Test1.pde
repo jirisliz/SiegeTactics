@@ -28,10 +28,10 @@ class Test1 extends Level
     for (int i = 0; i < numOfAttackers; i++) 
     {
       SoldierBasic s1 = new SoldierBasic(
-        mWidth*i/(2*numOfAttackers)+
-        mWidth/2-mWidth*(numOfAttackers/2)/(2*numOfAttackers), 
-        mHeight*4/5);
-      s1.primaryTarget = new PVector(mWidth/2, mHeight/4);
+        scr.mWidth*i/(2*numOfAttackers)+
+        scr.mWidth/2-scr.mWidth*(numOfAttackers/2)/(2*numOfAttackers), 
+        scr.mHeight*4/5);
+      s1.primaryTarget = new PVector(scr.mWidth/2, scr.mHeight/4);
       s1.setDir(Dirs.LD);
       s1.setState(States.walk);
       soldiers.add(s1);
@@ -40,11 +40,11 @@ class Test1 extends Level
     for (int i = 0; i < numOfDefenders; i++) 
     {
       SoldierBasic s2 = new SoldierBasic(
-        mWidth*i/(3*numOfDefenders)+
-        mWidth/2-mWidth*(numOfDefenders/2)/(3*numOfDefenders), 
-        mHeight/5, 
+        scr.mWidth*i/(3*numOfDefenders)+
+        scr.mWidth/2-scr.mWidth*(numOfDefenders/2)/(3*numOfDefenders), 
+        scr.mHeight/5, 
         "BasicSpearman2");
-      s2.primaryTarget = new PVector(mWidth/2, mHeight*3/4);
+      s2.primaryTarget = new PVector(scr.mWidth/2, scr.mHeight*3/4);
       s2.setDir(Dirs.LD);
       s2.setState(States.walk);
       soldiers2.add(s2);
@@ -110,8 +110,8 @@ class Test1 extends Level
   void newWalls() 
   {
     walls = new ArrayList<Wall>();
-    walls.add(new Wall(new PVector(20, mHeight/3), 50, 40));
-    walls.add(new Wall(new PVector(mWidth-27, mHeight/3), 50, 40));
+    walls.add(new Wall(new PVector(20, scr.mHeight/3), 50, 40));
+    walls.add(new Wall(new PVector(scr.mWidth-27, scr.mHeight/3), 50, 40));
   }
 
   void newPath() {
@@ -121,16 +121,16 @@ class Test1 extends Level
 
     float offset = 20;
     //path.addPoint(offset,offset);
-    path.addPoint(mWidth-offset, offset);
-    path.addPoint(mWidth-offset, mHeight-offset);
+    path.addPoint(scr.mWidth-offset, offset);
+    path.addPoint(scr.mWidth-offset, scr.mHeight-offset);
 
-    path.addPoint(mWidth-offset, mHeight-offset);
-    path.addPoint(offset, mHeight-offset);
+    path.addPoint(scr.mWidth-offset, scr.mHeight-offset);
+    path.addPoint(offset, scr.mHeight-offset);
 
-    path.addPoint(offset, mHeight-offset);
+    path.addPoint(offset, scr.mHeight-offset);
     path.addPoint(offset, offset);
 
     path.addPoint(offset, offset);
-    path.addPoint(mWidth-offset, offset);
+    path.addPoint(scr.mWidth-offset, offset);
   }
 }

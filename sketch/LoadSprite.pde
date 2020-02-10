@@ -3,7 +3,7 @@ class LoadSprite
   PImage sprImg, currImg;
   int frames = 0;
   int currFrame = 0;
-  float scale = mScale;
+  float scale = 1;
 
   // Real framerate divided by
   int animSpdCount = 0;

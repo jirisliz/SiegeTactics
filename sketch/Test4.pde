@@ -26,10 +26,10 @@ class Test4 extends Level
     for (int i = 0; i < numOfAttackers; i++) 
     {
       SoldierBasic s1 = new SoldierBasic(
-        mWidth*i/(2*numOfAttackers)+
-        mWidth/2-mWidth*(numOfAttackers/2)/(2*numOfAttackers), 
-        mHeight*4/5);
-      s1.primaryTarget = new PVector(mWidth/2, mHeight/4);
+        scr.mWidth*i/(2*numOfAttackers)+
+        scr.mWidth/2-scr.mWidth*(numOfAttackers/2)/(2*numOfAttackers), 
+        scr.mHeight*4/5);
+      s1.primaryTarget = new PVector(scr.mWidth/2, scr.mHeight/4);
       s1.target = s1.primaryTarget;
       s1.setDir(Dirs.LD);
       s1.setState(States.seek);
@@ -39,11 +39,11 @@ class Test4 extends Level
     for (int i = 0; i < numOfDefenders; i++) 
     {
       SoldierBasic s2 = new SoldierBasic(
-        mWidth*i/(3*numOfDefenders)+
-        mWidth/2-mWidth*(numOfDefenders/2)/(3*numOfDefenders), 
-        mHeight/5, 
+        scr.mWidth*i/(3*numOfDefenders)+
+        scr.mWidth/2-scr.mWidth*(numOfDefenders/2)/(3*numOfDefenders), 
+        scr.mHeight/5, 
         "BasicSpearman2");
-      s2.primaryTarget = new PVector(mWidth/2, mHeight*3/4);
+      s2.primaryTarget = new PVector(scr.mWidth/2, scr.mHeight*3/4);
       s2.target = s2.primaryTarget;
       s2.setDir(Dirs.LD);
       s2.setState(States.seek);
@@ -95,7 +95,7 @@ class Test4 extends Level
           
     if(debug) 
     {
-      PVector target = screen2World(new PVector(mouseX, mouseY));
+      PVector target = scr.screen2World(new PVector(mouseX, mouseY));
       fill(120);
       ellipse(target.x, target.y, 20, 20);
     }
@@ -108,8 +108,8 @@ class Test4 extends Level
   {
     // draw grass with tiles
     int side = grass.getTileSide();
-    int rs = (int) (mWidth/(side)+1) ;
-    int hs = (int) (mHeight/(side)+1) ;
+    int rs = (int) (scr.mWidth/(side)+1) ;
+    int hs = (int) (scr.mHeight/(side)+1) ;
     backgr = createImage(rs*side, hs*side, ARGB);
     
     for(int i = 0 ; i <= rs ; i++) 
@@ -133,7 +133,7 @@ class Test4 extends Level
   
   void setTargetMouse() 
   {
-    PVector target = screen2World(new PVector(mouseX, mouseY));
+    PVector target = scr.screen2World(new PVector(mouseX, mouseY));
     
     // Set targets as last mouse click
     // create little formation 4x3
