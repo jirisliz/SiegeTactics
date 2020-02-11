@@ -7,7 +7,7 @@ class Screen
   float mScaleOld = 1;
   float mDistOld = 0;
   float mScaleMin = 0.5;
-  float mScaleMax = 6;
+  float mScaleMax =10;
   boolean mTransl = false;
   float mTransX, mTransY;
   float mTransXOld = 0, mTransYOld = 0;

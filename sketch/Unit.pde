@@ -59,25 +59,27 @@ abstract class Unit extends Vehicle
 
   void loadStdAnims(String unitName) 
   {
-    anim_iddleRU = new LoadSprite(unitName+"-iddleRU.png", 8);
-    anim_iddleLU = new LoadSprite(unitName+"-iddleLU.png", 8);
-    anim_iddleRD = new LoadSprite(unitName+"-iddleRD.png", 8);
-    anim_iddleLD = new LoadSprite(unitName+"-iddleLD.png", 8);    
+    String folder = dataPath(unitName);
+    
+    anim_iddleRU = new LoadSprite(folder+"/" +unitName+"-iddleRU.png", 8);
+    anim_iddleLU = new LoadSprite(folder+"/" +unitName+"-iddleLU.png", 8);
+    anim_iddleRD = new LoadSprite(folder+"/" +unitName+"-iddleRD.png", 8);
+    anim_iddleLD = new LoadSprite(folder+"/" +unitName+"-iddleLD.png", 8);    
 
-    anim_attackRU = new LoadSprite(unitName+"-attackRU.png", 5);
-    anim_attackLU = new LoadSprite(unitName+"-attackLU.png", 5);
-    anim_attackRD = new LoadSprite(unitName+"-attackRD.png", 5);
-    anim_attackLD = new LoadSprite(unitName+"-attackLD.png", 5);
+    anim_attackRU = new LoadSprite(folder+"/" +unitName+"-attackRU.png", 5);
+    anim_attackLU = new LoadSprite(folder+"/" +unitName+"-attackLU.png", 5);
+    anim_attackRD = new LoadSprite(folder+"/" +unitName+"-attackRD.png", 5);
+    anim_attackLD = new LoadSprite(folder+"/" +unitName+"-attackLD.png", 5);
 
-    anim_attack2RU = new LoadSprite(unitName+"-attack2RU.png", 5);
-    anim_attack2LU = new LoadSprite(unitName+"-attack2LU.png", 5);
-    anim_attack2RD = new LoadSprite(unitName+"-attack2RD.png", 5);
-    anim_attack2LD = new LoadSprite(unitName+"-attack2LD.png", 5);
+    anim_attack2RU = new LoadSprite(folder+"/" +unitName+"-attack2RU.png", 5);
+    anim_attack2LU = new LoadSprite(folder+"/" +unitName+"-attack2LU.png", 5);
+    anim_attack2RD = new LoadSprite(folder+"/" +unitName+"-attack2RD.png", 5);
+    anim_attack2LD = new LoadSprite(folder+"/" +unitName+"-attack2LD.png", 5);
 
-    anim_runRU = new LoadSprite(unitName+"-runRU.png", 4);
-    anim_runLU = new LoadSprite(unitName+"-runLU.png", 4);
-    anim_runRD = new LoadSprite(unitName+"-runRD.png", 4);
-    anim_runLD = new LoadSprite(unitName+"-runLD.png", 4);
+    anim_runRU = new LoadSprite(folder+"/" +unitName+"-runRU.png", 4);
+    anim_runLU = new LoadSprite(folder+"/" +unitName+"-runLU.png", 4);
+    anim_runRD = new LoadSprite(folder+"/" +unitName+"-runRD.png", 4);
+    anim_runLD = new LoadSprite(folder+"/" +unitName+"-runLD.png", 4);
 
     updateCurrAnim();
   }
@@ -334,7 +336,7 @@ abstract class Unit extends Vehicle
       animCurr.draw(position.x, position.y);
       // Draw lives
       stroke(30, 200, 30);
-      strokeWeight(3);
+      strokeWeight(2);
       int l = (int) map(lives, 0, livesMax, 1, r);
       line(position.x-l, position.y-r, 
         position.x+l, position.y-r);

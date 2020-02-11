@@ -1,5 +1,5 @@
 // Debug data rendering
-static boolean debug = true;
+static boolean debug = false;
 
 Screen scr;
 
