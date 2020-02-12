@@ -1,8 +1,12 @@
+import android.view.KeyEvent;
+
 // Debug data rendering
 static boolean debug = false; 
 Screen scr;
 
 MainMenu main;
+
+int state = 0;
 
 void setup() 
 {
@@ -37,6 +41,12 @@ void mouseReleased()
 {
   main.mouseReleased();
 }
+
+void onBackPressed() 
+{
+    main.onBackPressed();
+  }
+
 
 /*
 

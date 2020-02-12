@@ -3,6 +3,7 @@ class Button
   PVector pos;
   PVector size;
   String text;
+  PFont font;
   boolean pressed = false;
   
   int fill = 170;
@@ -10,6 +11,9 @@ class Button
 
   Button(PVector po, PVector sz, String tx) 
   {
+    // fonts: Monospaced-BoldItalic Serif-BoldItalic SansSerif-Italic SansSerif-BoldItalic Monospaced-Bold SansSerif-Bold SansSerif Monospaced-Italic Serif-Italic Serif Monospaced Serif-Bold
+
+    font = createFont("Monospaced-Bold", 50);
     pos=po;
     size=sz;
     text=tx;
@@ -30,6 +34,7 @@ class Button
   void reset() 
   {
     pressed = false;
+    fill = fillIddle;
   }
 
   void mouseReleased(float trY)
@@ -44,7 +49,8 @@ class Button
   void setStyle() 
   {
     stroke(30);
-    textSize(50);
+    //textSize(50);
+    textFont(font);
     textAlign(CENTER);
   }
 

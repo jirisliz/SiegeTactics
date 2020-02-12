@@ -29,16 +29,16 @@ class MainMenu
   void initMain()
   {
     btnStart = 
-      new Button(new PVector(width/2-width/4, height/5), 
-      new PVector(width/2, height/8), 
+      new Button(new PVector(width/2-width/4, height*7/10), 
+      new PVector(width/2, height/12), 
       "Start"); 
     btnDesigner = 
-      new Button(new PVector(width/2-width/4, height*2/5), 
-      new PVector(width/2, height/8), 
+      new Button(new PVector(width/2-width/4, height*8/10), 
+      new PVector(width/2, height/12), 
       "Designer");
     btnExit = 
-      new Button(new PVector(width/2-width/4, height*3/5), 
-      new PVector(width/2, height/8), 
+      new Button(new PVector(width/2-width/4, height*9/10), 
+      new PVector(width/2, height/12), 
       "Exit");
   }
 
@@ -54,6 +54,7 @@ class MainMenu
 
   void draw() 
   {
+    background(255);
     switch(state)
     {
     case main:
@@ -80,7 +81,7 @@ class MainMenu
     switch(state)
     {
     case main:
-      
+
       break;
     case select:
 
@@ -99,7 +100,7 @@ class MainMenu
     switch(state)
     {
     case main:
-      
+
       break;
     case select:
 
@@ -136,6 +137,26 @@ class MainMenu
     }
   }
 
+  void onBackPressed() 
+  {
+    switch(state)
+    {
+    case main:
+      getActivity().finish();
+      break;
+    case select:
+
+      break;
+    case game:
+
+      break;
+    case designer:
+      dsg.onBackPressed();
+      checkDesigner();
+      break;
+    }
+  }
+
   void checkMainBtns() 
   {
     if (btnStart.pressed)
@@ -155,10 +176,10 @@ class MainMenu
       getActivity().finish();
     }
   }
-  
+
   void checkDesigner() 
   {
-    if(dsg.finished)
+    if (dsg.finished)
     {
       dsg.reset();
       state=MainStates.main;
