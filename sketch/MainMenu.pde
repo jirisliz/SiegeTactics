@@ -14,8 +14,10 @@ class MainMenu
   ScrollBar scrollBar;
 
   // designer:
-  Designer dsg;
+  Creator dsg;
 
+  Screen mScr;
+  Level level;
 
   MainMenu()
   {
@@ -23,7 +25,11 @@ class MainMenu
 
     initSelect();
 
-    initDesigner();
+    initCreator();
+
+    mScr = new Screen(400, 800);
+    scr = mScr;
+    level = new Test4();
   }
 
   void initMain()
@@ -35,7 +41,7 @@ class MainMenu
     btnDesigner = 
       new Button(new PVector(width/2-width/4, height*8/10), 
       new PVector(width/2, height/12), 
-      "Designer");
+      "Creator");
     btnExit = 
       new Button(new PVector(width/2-width/4, height*9/10), 
       new PVector(width/2, height/12), 
@@ -47,9 +53,9 @@ class MainMenu
     scrollBar = new ScrollBar();
   }
 
-  void initDesigner()
+  void initCreator()
   {
-    dsg = new Designer();
+    dsg = new Creator();
   }
 
   void draw() 
@@ -58,6 +64,10 @@ class MainMenu
     switch(state)
     {
     case main:
+      scr.transformPush();
+      level.draw();
+      scr.transformPop();
+
       pushStyle();
       btnStart.draw(0);
       btnDesigner.draw(0);
@@ -71,6 +81,10 @@ class MainMenu
 
       break;
     case designer:
+      scr.transformPush();
+      level.draw();
+      scr.transformPop();
+
       dsg.draw();
       break;
     }
@@ -100,7 +114,7 @@ class MainMenu
     switch(state)
     {
     case main:
-
+      mScr.mouseDragged();
       break;
     case select:
 
@@ -109,6 +123,7 @@ class MainMenu
 
       break;
     case designer:
+      mScr.mouseDragged(); 
       dsg.mouseDragged();
       break;
     }
@@ -168,6 +183,7 @@ class MainMenu
     {
       btnDesigner.reset();
       state=MainStates.designer;
+      mScr.mHeight = 1200;
     }
 
     if (btnExit.pressed)
@@ -183,6 +199,7 @@ class MainMenu
     {
       dsg.reset();
       state=MainStates.main;
+      mScr.mHeight = 800;
     }
   }
 }

@@ -49,7 +49,7 @@ class Button
   void setStyle() 
   {
     stroke(30);
-    //textSize(50);
+    strokeWeight(4);
     textFont(font);
     textAlign(CENTER);
   }
@@ -60,7 +60,7 @@ class Button
     {
       setStyle();
       if(fill < fillIddle) fill++;
-      fill(fill);
+      fill(fill, 150);
       rect(pos.x,pos.y,size.x,size.y,(size.x+size.y)/20);
       fill(25);
       text(text, pos.x+size.x/2,pos.y+size.y/2+25);

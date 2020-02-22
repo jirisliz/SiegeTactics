@@ -204,7 +204,7 @@ abstract class Unit extends Vehicle
     }
   }
 
-  void stillAlive() 
+  boolean stillAlive() 
   {
     if (lives <= 0)
     {
@@ -213,6 +213,7 @@ abstract class Unit extends Vehicle
       state = States.dead;
       animCurr = null;
     }
+    return alive;
   }
 
 

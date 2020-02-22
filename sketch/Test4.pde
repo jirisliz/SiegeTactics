@@ -17,22 +17,27 @@ class Test4 extends Level
     
     createBackgr();
 
+    reset();
+  }
+  
+  void reset() 
+  {
     soldiers = new ArrayList<SoldierBasic>();
     soldiers2 = new ArrayList<SoldierBasic>();
 
-    int numOfAttackers = 20;
-    int numOfDefenders = 15;
+    int numOfAttackers = 100;
+    int numOfDefenders = 100;
 
     for (int i = 0; i < numOfAttackers; i++) 
     {
       SoldierBasic s1 = new SoldierBasic(
         scr.mWidth*i/(2*numOfAttackers)+
         scr.mWidth/2-scr.mWidth*(numOfAttackers/2)/(2*numOfAttackers), 
-        scr.mHeight*4/5);
+        scr.mHeight);
       s1.primaryTarget = new PVector(scr.mWidth/2, scr.mHeight/4);
       s1.target = s1.primaryTarget;
       s1.setDir(Dirs.LD);
-      s1.setState(States.seek);
+      s1.setState(States.attack);
       soldiers.add(s1);
     }
 
@@ -41,13 +46,12 @@ class Test4 extends Level
       SoldierBasic s2 = new SoldierBasic(
         scr.mWidth*i/(3*numOfDefenders)+
         scr.mWidth/2-scr.mWidth*(numOfDefenders/2)/(3*numOfDefenders), 
-        scr.mHeight/5, 
+        0, 
         "BasicSpearman2");
       s2.primaryTarget = new PVector(scr.mWidth/2, scr.mHeight*3/4);
       s2.target = s2.primaryTarget;
       s2.setDir(Dirs.LD);
-      s2.setState(States.seek);
-      s2.applySeek();
+      s2.setState(States.attack);
       soldiers2.add(s2);
     }
   }
@@ -68,17 +72,22 @@ class Test4 extends Level
       r.add(s);
     }
 
+    boolean anyLeft = false;
     // Evaluate deads after all actions performed
     for (SoldierBasic s : soldiers) 
     {
-      s.stillAlive();
+      if(s.stillAlive()) anyLeft = true;
     }
+    if(!anyLeft)reset();
+    
+    anyLeft = false;
     for (SoldierBasic s : soldiers2) 
     {
-      s.stillAlive();
+      if(s.stillAlive()) anyLeft = true;
     }
-
-    //setTargetEnemies();
+    if(!anyLeft)reset(); 
+    
+    setTargetEnemies();
   }
   
   void mouseClicked() 
