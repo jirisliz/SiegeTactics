@@ -1,6 +1,7 @@
 class Renderer
 {
   ArrayList<ArrayList<Object>> objects;
+  ArrayList<Object> back;
   
   Renderer() 
   {
@@ -9,6 +10,7 @@ class Renderer
     {
       objects.add(new ArrayList<Object>());
     }
+    back = new ArrayList<Object>();
   }
   
   void add(Object o) 
@@ -18,8 +20,14 @@ class Renderer
     {
       return;
     }
-    
-    objects.get(pos).add(o);
+    if(o.active)
+    {
+      objects.get(pos).add(o);
+    }
+    else
+    {
+      back.add(o);
+    }
   }
   
   void clear() 
@@ -29,10 +37,15 @@ class Renderer
       ArrayList<Object> line = objects.get(i);
       line.clear();
     }
+    back.clear();
   }
   
   void draw() 
   {
+    for(Object o : back) 
+    {
+      o.draw();
+    }
     for(ArrayList<Object> line : objects) 
     {
       if(line != null) 

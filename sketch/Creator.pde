@@ -13,9 +13,13 @@ class Creator
   // Used to exit creator 
   boolean finished = false;
 
+  Screen mScr;
+  LevelLoader level;
+
   Creator() 
   {
     initMenu();
+    initCreator();
   }
 
   void initMenu() 
@@ -39,6 +43,17 @@ class Creator
     btnsMenu.add(btnBack);
   }
 
+  void initCreator() 
+  {
+    level = new LevelLoader();
+    // Create screen for creator
+    mScr = new Screen((int) level.getLevelSize().x, 
+      (int) level.getLevelSize().y);
+    mScr.addFrame(16*4);
+    mScr.fitWidth();
+    mScr.checkBorders();
+  }
+
   void draw() 
   {
     switch(state)
@@ -58,7 +73,10 @@ class Creator
 
       break;
     case creator:
-
+      background(0);
+      mScr.transformPush();
+      level.draw();
+      mScr.transformPop();
       break;
     }
   }
@@ -77,22 +95,52 @@ class Creator
 
       break;
     case creator:
-
+    
       break;
     }
   }
 
   void mouseDragged() 
   {
+    switch(state)
+    {
+    case menu:
+
+      break;
+    case select:
+
+      break;
+    case sizemap:
+
+      break;
+    case creator:
+    mScr.mouseDragged(); 
+      break;
+    }
+    
   }
 
   void mouseReleased() 
   {
+    switch(state)
+    {
+    case menu:
     for (Button btn : btnsMenu) 
     {
       btn.mouseReleased(0);
     }
-    checkBtns();
+    checkBtns(); 
+      break;
+    case select:
+
+      break;
+    case sizemap:
+
+      break;
+    case creator:
+    level.mouseReleased(mScr);
+      break;
+    } 
   }
 
   void onBackPressed() 

@@ -19,12 +19,19 @@ class Screen
   int mWidth = 400;
   int mHeight = 800;
 
+  int mOffX = width/2;
+  int mOffY = height/2;
 
   Screen(int w, int h) 
   {
     mWidth = w;
     mHeight = h;
 
+    init();
+  }
+
+  void init() 
+  {
     // Set min zoom
     float mScaleMin1 = (float) displayWidth / (float) mWidth;
     float mScaleMin2 = (float) displayHeight / (float) mHeight;
@@ -40,29 +47,47 @@ class Screen
     mTransX = -mWidth/2;
     mTransY = -mHeight/2;
   }
-  
- PVector world2Screen(PVector w) 
-{
-  float sX = ((w.x+ mTransX) * mScale +width/2 );
-  float sY = ((w.y + mTransY) * mScale +height/2 );
 
-  return new PVector(sX, sY);
-}
+  PVector world2Screen(PVector w) 
+  {
+    float sX = ((w.x + mTransX) * mScale + mOffX );
+    float sY = ((w.y + mTransY) * mScale + mOffY );
 
-PVector screen2World(PVector s) 
-{
-  float wX = ((s.x-width/2) / mScale) - mTransX;
-  float wY = ((s.y-height/2)/ mScale) - mTransY;
+    return new PVector(sX, sY);
+  }
 
-  return new PVector(wX, wY);
-}
+  PVector screen2World(PVector s) 
+  {
+    float wX = ((s.x-mOffX) / mScale) - (mTransX);
+    float wY = ((s.y-mOffY)/ mScale) - (mTransY);
+
+    return new PVector(wX, wY);
+  }
+
+  void fitWidth() 
+  {
+    mScaleMin = (float) displayWidth / (float) mWidth;
+    mScale = mScaleMin;
+  }
+
+  void fitHeight() 
+  {
+    mScaleMin = (float) displayWidth / (float) mHeight;
+    mScale = mScaleMin;
+  }
+
+  void addFrame(int sz) 
+  {
+    mHeight = mHeight+sz;
+    //init();
+  }
 
   // Call from draw before game displayed
   void transformPush() 
   {
     // move origin to screen center
     pushMatrix();
-    translate(width/2, height/2);
+    translate(mOffX, mOffY);
 
     // do game scale and transtation
     pushMatrix();
@@ -75,19 +100,19 @@ PVector screen2World(PVector s)
   {
     popMatrix();
     popMatrix();
-    
+
     checkTouch();
   }
-  
+
   void checkTouch() 
-{
-  if (touches.length == 0) 
   {
-    mTrStart = false;
-    mTransl = false;
-    mScaling = false;
+    if (touches.length == 0) 
+    {
+      mTrStart = false;
+      mTransl = false;
+      mScaling = false;
+    }
   }
-}
 
   void mouseDragged() 
   {
@@ -146,35 +171,41 @@ PVector screen2World(PVector s)
 
       if (mScaling) 
       {
-        float scl = (PVector.dist(f1, f2)-mDistOld) / (height/2);
+        float scl = (PVector.dist(f1, f2)-mDistOld) / (mOffY);
         mScale = constrain(mScaleOld + scl*2, mScaleMin, mScaleMax);
       }
+      
+      checkBorders();
+    }
+  }
 
-      PVector sOrig = world2Screen(new PVector(0, 0));
-
-      if (sOrig.x > 0)
-      {
-        sOrig.x -= width/2;
-        mTransX = screen2World(sOrig).x;
-      }
-
-      if (sOrig.y > 0)
-      {
-        sOrig.y -= height/2;
-        mTransY = screen2World(sOrig).y;
-      }
-
-      sOrig = world2Screen(new PVector(mWidth, mHeight));
-      if (sOrig.x < width)
-      { 
-        mTransX = -mWidth+width/(2*mScale);
-      }
+  void checkBorders() 
+  {
+    PVector sOrig = world2Screen(new PVector(0, 0));
 
 
-      if (sOrig.y < height)
-      {
-        mTransY = -mHeight+height/(2*mScale);
-      }
+    if (sOrig.x > 0)
+    {
+      sOrig.x -= mOffX;
+      mTransX = screen2World(sOrig).x;
+    }
+
+    if (sOrig.y > 0)
+    {
+      sOrig.y -= mOffY;
+      mTransY = screen2World(sOrig).y;
+    }
+
+    sOrig = world2Screen(new PVector(mWidth, mHeight));
+    if (sOrig.x < width)
+    { 
+      mTransX = -mWidth+width/(2*mScale);
+    }
+
+
+    if (sOrig.y < height)
+    {
+      mTransY = -mHeight+height/(2*mScale);
     }
   }
 }

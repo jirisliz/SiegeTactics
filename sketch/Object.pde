@@ -2,7 +2,7 @@ abstract class Object
 {
   PVector position;
   PVector orig; // Local origin
-  boolean active = true;
+  boolean active = true; // Used for collisions and separations
   
   void setOrig(PVector o)
   {

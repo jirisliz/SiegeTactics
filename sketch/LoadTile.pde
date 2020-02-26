@@ -3,9 +3,11 @@ class LoadTile
   PImage tileImg; 
   int xNum, yNum;
   float scale = 1;
+  String path;
   
-  LoadTile(String path, int axNum, int ayNum) 
+  LoadTile(String p, int axNum, int ayNum) 
   {
+    path = p;
     tileImg = null;
     xNum = axNum;
     yNum = ayNum;

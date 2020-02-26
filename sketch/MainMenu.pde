@@ -27,7 +27,7 @@ class MainMenu
 
     initCreator();
 
-    mScr = new Screen(400, 800);
+    mScr = new Screen(16*16, 16*32);
     scr = mScr;
     level = new Test4();
   }
@@ -64,9 +64,9 @@ class MainMenu
     switch(state)
     {
     case main:
-      scr.transformPush();
+      mScr.transformPush();
       level.draw();
-      scr.transformPop();
+      mScr.transformPop();
 
       pushStyle();
       btnStart.draw(0);
@@ -81,9 +81,12 @@ class MainMenu
 
       break;
     case designer:
-      scr.transformPush();
-      level.draw();
-      scr.transformPop();
+      if (dsg.state == CreatorStates.menu) 
+      {
+        mScr.transformPush();
+        level.draw();
+        mScr.transformPop();
+      }
 
       dsg.draw();
       break;
@@ -183,7 +186,6 @@ class MainMenu
     {
       btnDesigner.reset();
       state=MainStates.designer;
-      mScr.mHeight = 1200;
     }
 
     if (btnExit.pressed)
@@ -199,7 +201,7 @@ class MainMenu
     {
       dsg.reset();
       state=MainStates.main;
-      mScr.mHeight = 800;
+      scr = mScr;
     }
   }
 }
