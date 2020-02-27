@@ -1,3 +1,8 @@
+enum LevelLoaderStates
+{
+  grass, walls, units;
+}
+
 class LevelLoader extends Level 
 {
   Renderer r;

@@ -2,6 +2,8 @@ import android.view.KeyEvent;
 
 // Debug data rendering
 static boolean debug = false; 
+boolean permissionWrite = false;
+boolean permissionRead = false;
 Screen scr;
 
 MainMenu main;
@@ -19,6 +21,14 @@ void setup()
   noSmooth();
   fill(0);
 
+  requestPermission(
+    "android.permission.WRITE_EXTERNAL_STORAGE", 
+    "handlePermissionWrite");
+
+  requestPermission(
+    "android.permission.READ_EXTERNAL_STORAGE", 
+    "handlePermissionRead");
+    
   main = new MainMenu();
 }
 
@@ -47,52 +57,14 @@ void onBackPressed()
   main.onBackPressed();
 }
 
+void handlePermissionWrite(boolean granted)
+{
+  println("WRITE_EXTERNAL_STORAGE: "+granted); 
+  permissionWrite = granted;
+}
 
-/*
-
- Screen scr;
- 
- Level level;
- 
- void setup() 
- {
- orientation(PORTRAIT);
- //size( displayWidth , displayHeight , P2D);
- fullScreen();
- 
- //frameRate(20);
- 
- noSmooth();
- fill(0);
- 
- scr = new Screen(400,800);
- 
- level = new Test4();
- }
- 
- void draw() 
- {
- scr.transformPush();
- 
- level.draw();
- 
- scr.transformPop();
- }
- 
- void mousePressed() 
- {
- }
- 
- void mouseDragged() 
- {
- scr.mouseDragged();
- }
- 
- void mouseReleased() 
- {
- if (touches.length == 1 && !scr.mTrStart) 
- {
- level.mouseClickedEvent();
- }
- }
- */
+void handlePermissionRead(boolean granted)
+{
+  println("READ_EXTERNAL_STORAGE: "+granted); 
+  permissionRead = granted;
+}
