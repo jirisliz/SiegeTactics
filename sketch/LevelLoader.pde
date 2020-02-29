@@ -16,6 +16,7 @@ class LevelLoader extends Level
   PGraphics backgr;
   
   String levelName;
+  String levelFolder = "levels";
 
   LevelLoader() 
   {
@@ -89,6 +90,27 @@ class LevelLoader extends Level
   boolean save2File() 
   {
     boolean ret = false;
+    levelName = "/test.csv";
+    
+    String path = Storage.createFolder(levelFolder);
+    println(path);
+    
+    Table table = new Table(); 
+    table.addColumn("id"); 
+    table.addColumn("species"); 
+    table.addColumn("name"); 
+    TableRow newRow = table.addRow(); 
+    newRow.setInt("id", table.getRowCount() - 1); 
+    newRow.setString("species", "Panthera leo"); 
+    newRow.setString("name", "Lion"); 
+    
+    if(path != null) 
+    {
+      String testPath =path+levelName;
+      saveTable(table, testPath);
+      println("test file saved to: "+testPath);
+    }
+    else return false;
     
     return ret;
   }

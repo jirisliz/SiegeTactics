@@ -167,6 +167,7 @@ class Creator
     if (btnBack.pressed)
     {
       btnBack.reset();
+      level.save2File();
       finished = true;
     }
 
