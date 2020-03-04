@@ -9,6 +9,8 @@ class Creator
   Screen scr;
   Button btnNew, btnOpen, btnBack;
   ArrayList<Button> btnsMenu;
+  
+  DialogTextEdit dte;
 
   // Used to exit creator 
   boolean finished = false;
@@ -45,6 +47,9 @@ class Creator
 
   void initCreator() 
   {
+    dte = new DialogTextEdit(sketch);
+    dte.title = "Level name";
+    dte.message = "Tipe name for new level.";
     level = new LevelLoader();
     // Create screen for creator
     mScr = new Screen((int) level.getLevelSize().x, 
@@ -167,6 +172,7 @@ class Creator
     if (btnBack.pressed)
     {
       btnBack.reset();
+      level.levelName = dte.txt;
       level.save2File();
       finished = true;
     }
@@ -175,6 +181,7 @@ class Creator
     {
       btnNew.reset();
       state = CreatorStates.creator;
+      dte.showAddItemDialog(sketch);
     }
   }
 

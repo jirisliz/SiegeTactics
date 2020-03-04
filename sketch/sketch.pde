@@ -1,5 +1,7 @@
 import android.view.KeyEvent;
 
+PApplet sketch = this;
+
 // Debug data rendering
 static boolean debug = false; 
 boolean permissionWrite = false;

@@ -1,6 +1,6 @@
-enum LevelLoaderStates
+enum LevelLoaderTypes
 {
-  grass, walls, units;
+  map, back, wall, unit;
 }
 
 class LevelLoader extends Level 
@@ -12,9 +12,10 @@ class LevelLoader extends Level
 
   LoadTile ground;
   ArrayList<BackParams> grList;
+  StringDict saveTypes;
   ArrayList<Wall> walls;
   PGraphics backgr;
-  
+
   String levelName;
   String levelFolder = "levels";
 
@@ -32,7 +33,7 @@ class LevelLoader extends Level
 
   void init() 
   {
-    ground = new LoadTile("grass1.png",3,3);
+    ground = new LoadTile("grass1.png", 3, 3);
     grList = new ArrayList<BackParams>();
     walls = new ArrayList<Wall>();
     attackers = new ArrayList<SoldierBasic>();
@@ -42,7 +43,7 @@ class LevelLoader extends Level
     PVector sz = getLevelSize();
     backgr = createGraphics((int) sz.x, (int) sz.y);
     backgr.beginDraw();
-    backgr.background(50, 50,130);
+    backgr.background(50, 50, 130);
     backgr.stroke(180);
     for (int i = 0; i < mGridCols; i++) 
     {
@@ -74,43 +75,92 @@ class LevelLoader extends Level
     x = x/mBlockSz*mBlockSz;
     y = y/mBlockSz*mBlockSz;
     backgr.beginDraw();
-    int xTile = (int) random(0,2.4);
-    int yTile = (int) random(0,2.4);
-    backgr.image(ground.getTile(xTile, yTile),x,y);
-    
+    int xTile = (int) random(0, 2.4);
+    int yTile = (int) random(0, 2.4);
+    backgr.image(ground.getTile(xTile, yTile), x, y);
+
     backgr.endDraw(); 
-    
+
     // add to list for saving purposes 
-    grList.add(new BackParams(
-                new PVector(x, y), 
-                ground.path,
-                new PVector(xTile, yTile)));
+    BackParams bck = new BackParams(
+      new PVector(x, y), 
+      ground.path, 
+      new PVector(xTile, yTile));
+    add2GrList(bck);
   }
   
+  void add2GrList(BackParams bck) 
+  {
+    // check if same position occupied 
+    ArrayList<BackParams> toRemove = new ArrayList<BackParams>();
+    for (BackParams bp : grList)
+    {
+      PVector itemList = bp.pos;
+      PVector itemNew = bck.pos;
+      if(itemList.x == itemNew.x && itemList.y == itemNew.y)
+      {
+        // remove old one from the list
+        toRemove.add(bp);
+      }
+    }
+    
+    for(BackParams re : toRemove) 
+    {
+      grList.remove(re);
+    }
+    
+    // add to list
+    grList.add(bck);
+  }
+
   boolean save2File() 
   {
     boolean ret = false;
-    levelName = "/test.csv";
-    
+    //levelName = "test.csv";
+
     String path = Storage.createFolder(levelFolder);
     println(path);
-    
+
     Table table = new Table(); 
-    table.addColumn("id"); 
-    table.addColumn("species"); 
-    table.addColumn("name"); 
-    TableRow newRow = table.addRow(); 
-    newRow.setInt("id", table.getRowCount() - 1); 
-    newRow.setString("species", "Panthera leo"); 
-    newRow.setString("name", "Lion"); 
+    table.addColumn("type"); 
+    table.addColumn("x"); 
+    table.addColumn("y"); 
+    table.addColumn("file"); 
+    table.addColumn("param1");
+    table.addColumn("param2");
     
-    if(path != null) 
+    // Standard map size
+    TableRow newRow = table.addRow(); 
+    newRow.setInt("type", LevelLoaderTypes.map.ordinal()); 
+    newRow.setInt("x", (int) mGridCols); 
+    newRow.setInt("y", (int) mGridRows); 
+    newRow.setInt("param1", (int)  mBlockSz);
+    
+    // Backs save
+    for (BackParams bp : grList) 
     {
-      String testPath =path+levelName;
-      saveTable(table, testPath);
-      println("test file saved to: "+testPath);
+      newRow = table.addRow(); 
+      newRow.setInt("type", LevelLoaderTypes.back.ordinal()); 
+      newRow.setInt("x", (int)  bp.pos.x); 
+      newRow.setInt("y", (int)  bp.pos.y); 
+      newRow.setString("file", bp.tileName);
+      newRow.setInt("param1", (int)  bp.tilePos.x); 
+      newRow.setInt("param2", (int)  bp.tilePos.y); 
     }
-    else return false;
+
+    if (path != null) 
+    {
+      String filePath =path+"/"+levelName+".csv";
+      saveTable(table, filePath);
+      println("test file saved to: "+filePath);
+    } else return false;
+
+    return ret;
+  }
+  
+  boolean loadFromFile() 
+  {
+    boolean ret = false;
     
     return ret;
   }
@@ -120,12 +170,12 @@ class BackParams
 {
   PVector pos;
   String tileName;
-  PVector tileSz;
-  
-  BackParams(PVector p, String tN, PVector tS) 
+  PVector tilePos;
+
+  BackParams(PVector p, String tName, PVector tPos) 
   {
     pos = p;
-    tileName = tN;
-    tileSz = tS;
+    tileName = tName;
+    tilePos = tPos;
   }
 }
