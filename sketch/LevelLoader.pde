@@ -38,8 +38,13 @@ class LevelLoader extends Level
     walls = new ArrayList<Wall>();
     attackers = new ArrayList<SoldierBasic>();
     defenders = new ArrayList<SoldierBasic>();
-
-    // Draw grid
+    
+    // Draw grid 
+    drawGrid();
+  }
+  
+  void drawGrid() 
+  {
     PVector sz = getLevelSize();
     backgr = createGraphics((int) sz.x, (int) sz.y);
     backgr.beginDraw();
@@ -55,7 +60,7 @@ class LevelLoader extends Level
       backgr.line(0, j*mBlockSz, sz.x, j*mBlockSz);
     }
 
-    backgr.endDraw();
+    backgr.endDraw(); 
   }
 
   void update() 
@@ -87,6 +92,11 @@ class LevelLoader extends Level
       ground.path, 
       new PVector(xTile, yTile));
     add2GrList(bck);
+  }
+  
+  void drawBack(BackParams bck) 
+  {
+    
   }
   
   void add2GrList(BackParams bck) 
@@ -164,9 +174,24 @@ class LevelLoader extends Level
     String path = Storage.createFolder(levelFolder);
     if (path != null) 
     {
-      String filePath =path+"/"+levelName+".csv";
-      Table table = loadTable(filePath, "header");
+      // Crear previous data
+      grList.clear();
+      drawGrid();
       
+      Table table;
+      try
+      {
+        String filePath =path+"/"+levelName+".csv";
+        table = loadTable(filePath, "header");
+      }
+      catch(Exception ex) 
+      {
+        println("exception loadFromFile: "+ex);
+        return false;
+      }
+      
+      
+      // Load level
       for (int i = 0; i<table.getRowCount(); i++) 
       {
         TableRow row = table.getRow(i);
@@ -181,8 +206,21 @@ class LevelLoader extends Level
         switch(type)
         {
         case map:
+        mGridCols = x;
+        mGridRows = y;
+        mBlockSz = param1;
           break;
         case back:
+        PVector p = new PVector(x, y);
+        String tn = file;
+        PVector tp = new PVector(param1, param2);
+        ground = new LoadTile("grass1.png", 3, 3);
+        backgr.beginDraw();
+        backgr.image(ground.getTile((int) tp.x, (int) tp.y), x, y);
+        backgr.endDraw(); 
+        
+        BackParams b = new BackParams(p, tn, tp);
+        grList.add(b);
           break;
         case wall:
           break;

@@ -7,9 +7,15 @@ class Creator
 {
   CreatorStates state = CreatorStates.menu;
   Screen scr;
+
+  // Main gui
   Button btnNew, btnOpen, btnBack;
   ArrayList<Button> btnsMenu;
-  
+
+  // Creator gui
+  Button btnBck, btnWall, btnUnit;
+  ArrayList<Button> btnsCreator;
+
   DialogTextEdit dte;
 
   // Used to exit creator 
@@ -17,6 +23,7 @@ class Creator
 
   Screen mScr;
   LevelLoader level;
+  boolean levelLoaded = false;
 
   Creator() 
   {
@@ -47,6 +54,31 @@ class Creator
 
   void initCreator() 
   {
+    btnBck = 
+      new Button(new PVector(width/15, height*12/15), 
+      new PVector(width/4, height/16), 
+      "Background");
+
+    btnWall = 
+      new Button(new PVector(width/15, height*13/15), 
+      new PVector(width/4, height/16), 
+      "Walls");
+
+    btnUnit = 
+      new Button(new PVector(width/15, height*14/15), 
+      new PVector(width/4, height/16), 
+      "Units");
+
+    PFont font = createFont("Monospaced-Bold", 30);
+    btnBck.font = font;
+    btnWall.font = font;
+    btnUnit.font = font;
+
+    btnsCreator = new ArrayList<Button>();
+    btnsCreator.add(btnBck);
+    btnsCreator.add(btnWall);
+    btnsCreator.add(btnUnit);
+
     dte = new DialogTextEdit(sketch);
     dte.title = "Level name";
     dte.message = "Tipe name for new level.";
@@ -78,10 +110,24 @@ class Creator
 
       break;
     case creator:
+      if (!levelLoaded && dte.finished) 
+      {
+        levelLoaded = true;
+        level.levelName = dte.txt;
+        println("load file name: " + level.levelName);
+        level.loadFromFile();
+      }
       background(0);
       mScr.transformPush();
       level.draw();
       mScr.transformPop();
+
+      pushStyle();
+      for (Button btn : btnsCreator) 
+      {
+        btn.draw(0);
+      }
+      popStyle(); 
       break;
     }
   }
@@ -100,7 +146,7 @@ class Creator
 
       break;
     case creator:
-    
+
       break;
     }
   }
@@ -119,10 +165,9 @@ class Creator
 
       break;
     case creator:
-    mScr.mouseDragged(); 
+      mScr.mouseDragged(); 
       break;
     }
-    
   }
 
   void mouseReleased() 
@@ -130,11 +175,11 @@ class Creator
     switch(state)
     {
     case menu:
-    for (Button btn : btnsMenu) 
-    {
-      btn.mouseReleased(0);
-    }
-    checkBtns(); 
+      for (Button btn : btnsMenu) 
+      {
+        btn.mouseReleased(0);
+      }
+      checkBtns(); 
       break;
     case select:
 
@@ -143,9 +188,9 @@ class Creator
 
       break;
     case creator:
-    level.mouseReleased(mScr);
+      level.mouseReleased(mScr);
       break;
-    } 
+    }
   }
 
   void onBackPressed() 
@@ -169,19 +214,32 @@ class Creator
 
   void checkBtns() 
   {
+    if (btnNew.pressed)
+    {
+      btnNew.reset();
+      levelLoaded = false;
+      state = CreatorStates.creator;
+      dte.showAddItemDialog("");
+    }
+
+    if (btnOpen.pressed)
+    {
+      btnOpen.reset();
+
+      File[] files = Storage.getFilesList(
+        Storage.createFolder(level.levelFolder));
+      for (int i = 0; i <= files.length - 1; i++)   
+      {
+        println(files[i].getName());
+      }
+    }
+
     if (btnBack.pressed)
     {
       btnBack.reset();
       level.levelName = dte.txt;
       level.save2File();
       finished = true;
-    }
-
-    if (btnNew.pressed)
-    {
-      btnNew.reset();
-      state = CreatorStates.creator;
-      dte.showAddItemDialog(sketch);
     }
   }
 

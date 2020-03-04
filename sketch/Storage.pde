@@ -19,6 +19,14 @@ static class Storage
     return externalDir.getAbsolutePath();
   }
   
+  static File[] getFilesList(String path) 
+  {
+    File dir = new File(path);
+    File[] files = dir.listFiles();
+    
+    return files;
+  }
+  
   static String createFolder(String fn)
   {
     File f = new File(getPath(), fn);
