@@ -161,7 +161,36 @@ class LevelLoader extends Level
   boolean loadFromFile() 
   {
     boolean ret = false;
-    
+    String path = Storage.createFolder(levelFolder);
+    if (path != null) 
+    {
+      String filePath =path+"/"+levelName+".csv";
+      Table table = loadTable(filePath, "header");
+      
+      for (int i = 0; i<table.getRowCount(); i++) 
+      {
+        TableRow row = table.getRow(i);
+        LevelLoaderTypes type = LevelLoaderTypes.value()[row.getInt("type")];
+        int x = row.getInt("x");
+        int y = row.getInt("y");
+        String file = row.getString("file");
+        int param1 = row.getString("param1");
+        int param2 = row.getString("param2");
+
+        // Load data according to type
+        switch(type)
+        {
+        case map:
+          break;
+        case back:
+          break;
+        case wall:
+          break;
+        case unit:
+          break;
+        }
+      }
+    }
     return ret;
   }
 }
