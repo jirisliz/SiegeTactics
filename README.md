@@ -11,3 +11,6 @@ All units will be autonomous. Player can give orders about their basic behavior,
 ## Future plans
  - I'd like to add level designer. In the future, players could make their own levels and hopefully share it.
  - PVP mode: two players choose one level and sites. Then both players create attack/defenf plans and start the battle.
+
+# Platform
+The game is written using [Processing for Android](https://android.processing.org/) and is mostly written in [APDE Android app](https://play.google.com/store/apps/details?id=com.calsignlabs.apde).
