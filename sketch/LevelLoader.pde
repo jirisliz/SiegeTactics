@@ -170,12 +170,12 @@ class LevelLoader extends Level
       for (int i = 0; i<table.getRowCount(); i++) 
       {
         TableRow row = table.getRow(i);
-        LevelLoaderTypes type = LevelLoaderTypes.value()[row.getInt("type")];
+        LevelLoaderTypes type = LevelLoaderTypes.values()[row.getInt("type")];
         int x = row.getInt("x");
         int y = row.getInt("y");
         String file = row.getString("file");
-        int param1 = row.getString("param1");
-        int param2 = row.getString("param2");
+        int param1 = row.getInt("param1");
+        int param2 = row.getInt("param2");
 
         // Load data according to type
         switch(type)
