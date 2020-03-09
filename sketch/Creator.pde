@@ -6,6 +6,7 @@ enum CreatorStates
 class Creator
 {
   CreatorStates state = CreatorStates.menu;
+  CreatorStates prevState = CreatorStates.menu;
   Screen scr;
 
   // Main gui
@@ -15,6 +16,9 @@ class Creator
   // Creator gui
   Button btnBck, btnWall, btnUnit;
   ArrayList<Button> btnsCreator;
+
+  // Select gui
+  ScrollBar scrlbSelect;
 
   DialogTextEdit dte;
 
@@ -29,6 +33,7 @@ class Creator
   {
     initMenu();
     initCreator();
+    initSelect();
   }
 
   void initMenu() 
@@ -91,6 +96,11 @@ class Creator
     mScr.checkBorders();
   }
 
+  void initSelect() 
+  {
+    scrlbSelect = null;
+  }
+
   void draw() 
   {
     switch(state)
@@ -104,7 +114,7 @@ class Creator
       popStyle(); 
       break;
     case select:
-
+      if (scrlbSelect != null) scrlbSelect.draw();
       break;
     case sizemap:
 
@@ -112,10 +122,8 @@ class Creator
     case creator:
       if (!levelLoaded && dte.finished) 
       {
-        levelLoaded = true;
-        level.levelName = dte.txt;
-        println("load file name: " + level.levelName);
-        level.loadFromFile();
+        fullScreen();
+        loadLevel(dte.txt);
       }
       background(0);
       mScr.transformPush();
@@ -132,6 +140,15 @@ class Creator
     }
   }
 
+  void loadLevel(String name) 
+  {
+    fullScreen();
+    levelLoaded = true;
+    level.levelName = name;
+    println("load file name: " + level.levelName);
+    level.loadFromFile();
+  }
+
   void mousePressed() 
   {
     switch(state)
@@ -140,7 +157,10 @@ class Creator
 
       break;
     case select:
-
+      if (scrlbSelect != null) 
+      {
+        scrlbSelect.open();
+      }
       break;
     case sizemap:
 
@@ -159,7 +179,10 @@ class Creator
 
       break;
     case select:
-
+      if (scrlbSelect != null) 
+      {
+        scrlbSelect.update(mouseY - pmouseY);
+      }
       break;
     case sizemap:
 
@@ -179,16 +202,25 @@ class Creator
       {
         btn.mouseReleased(0);
       }
-      checkBtns(); 
+      checkMenuBtns(); 
       break;
     case select:
-
+      if (scrlbSelect != null) 
+      {
+        scrlbSelect.close();
+        checkSelectBtns();
+      } 
       break;
     case sizemap:
 
       break;
     case creator:
-      level.mouseReleased(mScr);
+      for (Button btn : btnsCreator) 
+      {
+        btn.mouseReleased(0);
+      }
+      boolean btnPressed = checkCreatorBtns(); 
+      if (!btnPressed)level.mouseReleased(mScr);
       break;
     }
   }
@@ -201,7 +233,7 @@ class Creator
       finished = true;
       break;
     case select:
-
+      state = CreatorStates.menu;
       break;
     case sizemap:
 
@@ -212,7 +244,27 @@ class Creator
     }
   }
 
-  void checkBtns() 
+  ScrollBar createFilesScrollBar(String dir, String ext) 
+  {
+    ScrollBar scrlb = new ScrollBar();
+    // list levels
+    File[] files = Storage.getFilesList(dir);
+    if (files.length > 0)scrlb = new ScrollBar();
+    else return null;
+    for (int i = 0; i <= files.length - 1; i++)   
+    {
+      String name = files[i].getName();
+      if (name.contains(ext))
+      {
+        name = name.replace(ext, "");
+        println("scrollBar add: " + name);
+        scrlb.add(name);
+      }
+    }
+    return scrlb;
+  }
+
+  void checkMenuBtns() 
   {
     if (btnNew.pressed)
     {
@@ -225,12 +277,16 @@ class Creator
     if (btnOpen.pressed)
     {
       btnOpen.reset();
-
-      File[] files = Storage.getFilesList(
-        Storage.createFolder(level.levelFolder));
-      for (int i = 0; i <= files.length - 1; i++)   
+      String path = Storage.createFolder(level.levelFolder);
+      scrlbSelect = 
+        createFilesScrollBar(path, ".csv");
+      if (scrlbSelect != null) 
       {
-        println(files[i].getName());
+        prevState = CreatorStates.menu; 
+        state = CreatorStates.select;
+      } else
+      {
+        println("No valid level to load.");
       }
     }
 
@@ -240,6 +296,73 @@ class Creator
       level.levelName = dte.txt;
       level.save2File();
       finished = true;
+    }
+  }
+
+  boolean checkCreatorBtns() 
+  {
+    boolean ret = false;
+    if (btnBck.pressed)
+    {
+      btnBck.reset();
+      ret = true;
+      String backsDir = dataPath(Storage.dataDirBacks);
+      println(backsDir);
+      scrlbSelect = 
+        createFilesScrollBar(backsDir, ".png");
+      if (scrlbSelect != null) 
+      {
+        prevState = CreatorStates.creator; 
+        state = CreatorStates.select;
+      } else
+      {
+        println("No valid tile to load.");
+      }
+    }
+
+    if (btnWall.pressed)
+    {
+      btnWall.reset();
+      ret = true;
+    }
+
+    if (btnUnit.pressed)
+    {
+      btnUnit.reset();
+      ret = true;
+    }
+    return ret;
+  }
+
+  void checkSelectBtns() 
+  {
+    Button btn;
+    switch(prevState)
+    {
+    case menu:
+      btn = scrlbSelect.getLastClickedBtn();
+
+      if (btn != null) 
+      {
+        loadLevel(btn.text);
+        state = CreatorStates.creator;
+      }
+      break;
+    case select:
+
+      break;
+    case sizemap:
+
+      break;
+    case creator:
+      btn = scrlbSelect.getLastClickedBtn();
+
+      if (btn != null) 
+      {
+        level.loadGround(btn.text+".png");
+        state = CreatorStates.creator;
+      }
+      break;
     }
   }
 

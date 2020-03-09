@@ -11,8 +11,9 @@ class Test4 extends Level
 
   Test4() 
   {
-    grass = new LoadTile("grass1.png",3,3); 
-
+    String backsDir = dataPath(Storage.dataDirBacks); 
+    grass = new LoadTile(backsDir+"/" + "grass1.png",16); 
+    
     r = new Renderer();
     
     createBackgr();
@@ -126,8 +127,7 @@ class Test4 extends Level
       for(int j = 0 ; j <= hs ; j++) 
       {
         backgr.copy(
-         grass.getTile((int) random(0,2.4),
-                       (int) random(0,2.4)), 
+         grass.getRandTile(), 
                        0,0,side,side,
                        i*side,j*side,side,side);
           

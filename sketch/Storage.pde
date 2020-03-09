@@ -2,6 +2,10 @@ import android.os.Environment;
 
 static class Storage
 {
+  // Data folders
+  static String dataDirBacks = "backs";
+  
+  // Game folders
   static String gameFolder = "SiegeTactics";
 
   static String getPath() 

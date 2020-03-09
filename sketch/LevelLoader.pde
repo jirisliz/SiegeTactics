@@ -33,7 +33,8 @@ class LevelLoader extends Level
 
   void init() 
   {
-    ground = new LoadTile("grass1.png", 3, 3);
+    loadGround("grass1.png");
+    
     grList = new ArrayList<BackParams>();
     walls = new ArrayList<Wall>();
     attackers = new ArrayList<SoldierBasic>();
@@ -41,6 +42,22 @@ class LevelLoader extends Level
     
     // Draw grid 
     drawGrid();
+  }
+  
+  boolean loadGround(String name) 
+  {
+    boolean ret = false;
+    try
+    {
+      String backsDir = dataPath(Storage.dataDirBacks); 
+    ground = new LoadTile(backsDir+"/" + name, 16); 
+    ret = true;
+    }
+    catch(Exception ex) 
+    {
+      println("loadGround exception; "+ ex);
+    }
+    return ret;
   }
   
   void drawGrid() 
@@ -74,15 +91,15 @@ class LevelLoader extends Level
 
   void mouseReleased(Screen screen) 
   {
+    if(screen.mTrStart)return;
     PVector target = screen.screen2World(new PVector(mouseX, mouseY));
     int x = (int) target.x;
     int y = (int) target.y;
     x = x/mBlockSz*mBlockSz;
     y = y/mBlockSz*mBlockSz;
     backgr.beginDraw();
-    int xTile = (int) random(0, 2.4);
-    int yTile = (int) random(0, 2.4);
-    backgr.image(ground.getTile(xTile, yTile), x, y);
+    
+    backgr.image(ground.getRandTile(), x, y);
 
     backgr.endDraw(); 
 
@@ -90,7 +107,7 @@ class LevelLoader extends Level
     BackParams bck = new BackParams(
       new PVector(x, y), 
       ground.path, 
-      new PVector(xTile, yTile));
+      new PVector(ground.xLast, ground.yLast));
     add2GrList(bck);
   }
   
@@ -126,7 +143,8 @@ class LevelLoader extends Level
   boolean save2File() 
   {
     boolean ret = false;
-    //levelName = "test.csv";
+    
+    if(levelName.length() == 0)return ret;
 
     String path = Storage.createFolder(levelFolder);
     println(path);
@@ -214,7 +232,8 @@ class LevelLoader extends Level
         PVector p = new PVector(x, y);
         String tn = file;
         PVector tp = new PVector(param1, param2);
-        ground = new LoadTile("grass1.png", 3, 3);
+        String backsDir = dataPath(Storage.dataDirBacks); 
+        ground = new LoadTile(backsDir+"/" + tn,16); 
         backgr.beginDraw();
         backgr.image(ground.getTile((int) tp.x, (int) tp.y), x, y);
         backgr.endDraw(); 

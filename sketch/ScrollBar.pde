@@ -13,6 +13,8 @@ class ScrollBar {
   
   ArrayList<Button> btns;
   
+  Button lastClickedBtn = null;
+  
   ScrollBar(float w, float h) {
     totalHeight = h;
     barWidth = w;
@@ -58,6 +60,15 @@ class ScrollBar {
    }
    recalcSz();
  }
+ 
+ void add(String name) 
+ {
+   int i = btns.size();
+   PVector po = new PVector(20, i * 0.1 * height + 20);
+   PVector sz = new PVector(width-40, 0.1 * height - 20);
+   Button btn = new Button(po, sz, name);
+   add(btn);
+ }
   
   void open() {
     opacity = 150;
@@ -69,6 +80,14 @@ class ScrollBar {
     pressed = false;
     if(abs(initPos-translateY) > 20)
        velocity=constrain(lastPos-translateY, -100,100);
+       
+    if (!this.moving) 
+    {
+      for (Button btn : btns) {
+        btn.mouseReleased(translateY);
+      }
+    }
+    checkBtns();
   }
   void update(float dy) { 
     if (totalHeight + translateY + dy > height) {
@@ -78,7 +97,30 @@ class ScrollBar {
       lastPos=translateY-dy;
     }
   }
+  
+  void checkBtns() 
+  {
+    for (Button btn : btns) {
+    if(btn.pressed) 
+    {
+      btn.reset();
+      lastClickedBtn = btn;
+    }
+   } 
+  }
+  
   void draw() {
+    background(0);
+    pushMatrix();
+    translate(0, this.translateY);
+    pushStyle();
+    btns.get(0).setStyle();
+    for (Button btn : btns) {
+      btn.draw(translateY);
+    }
+    popStyle();
+    popMatrix();
+    
     if(velocity < -2*inertia)
     {
       velocity += inertia;
@@ -117,4 +159,10 @@ class ScrollBar {
       popStyle();
     }
   }
+  
+  Button getLastClickedBtn() 
+  {
+    return lastClickedBtn;
+  }
+  
 }
