@@ -23,7 +23,7 @@ abstract class Unit extends Vehicle
 
   LoadSprite anim_runRU, anim_runLU, 
     anim_runRD, anim_runLD;
-    
+
   LoadSprite anim_deadR;
 
   LoadSprite animCurr;
@@ -61,7 +61,7 @@ abstract class Unit extends Vehicle
   void loadStdAnims(String unitName) 
   {
     String folder = dataPath(unitName);
-    
+
     anim_iddleRU = new LoadSprite(folder+"/" +unitName+"-iddleRU.png", 8);
     anim_iddleLU = new LoadSprite(folder+"/" +unitName+"-iddleLU.png", 8);
     anim_iddleRD = new LoadSprite(folder+"/" +unitName+"-iddleRD.png", 8);
@@ -81,7 +81,7 @@ abstract class Unit extends Vehicle
     anim_runLU = new LoadSprite(folder+"/" +unitName+"-runLU.png", 4);
     anim_runRD = new LoadSprite(folder+"/" +unitName+"-runRD.png", 4);
     anim_runLD = new LoadSprite(folder+"/" +unitName+"-runLD.png", 4);
-    
+
     anim_deadR = new LoadSprite(folder+"/" +unitName+"-deadR.png", 4);
 
     updateCurrAnim();
@@ -161,7 +161,7 @@ abstract class Unit extends Vehicle
       break;
     }
   }
-  
+
   void setDeadAnim() 
   {
     animCurr = anim_deadR;
@@ -178,8 +178,7 @@ abstract class Unit extends Vehicle
     } else if (state == States.stand) 
     {
       setIddleAnim();
-    }
-    else if(state == States.dead) 
+    } else if (state == States.dead) 
     {
       setDeadAnim();
     }

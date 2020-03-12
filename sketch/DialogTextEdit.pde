@@ -10,11 +10,11 @@ class DialogTextEdit
   PApplet th;
   Context ctx;
   Activity act;
-  
+
   String title = "";
   String message = "";
   String txt = "";
-  
+
   boolean finished = false;
 
   DialogTextEdit(PApplet aTh) 
@@ -48,6 +48,10 @@ class DialogTextEdit
         )
         .setNegativeButton("Cancel", null)
           .create();
+
+
+        //dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        //dialog.setContentView(R.layout.activity_no_title_dialog);
         dialog.show();
       }
     }

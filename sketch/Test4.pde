@@ -34,7 +34,8 @@ class Test4 extends Level
       SoldierBasic s1 = new SoldierBasic(
         scr.mWidth*i/(2*numOfAttackers)+
         scr.mWidth/2-scr.mWidth*(numOfAttackers/2)/(2*numOfAttackers), 
-        scr.mHeight);
+        scr.mHeight, 
+        "BasicSpearman");
       s1.primaryTarget = new PVector(scr.mWidth/2, scr.mHeight/4);
       s1.target = s1.primaryTarget;
       s1.setDir(Dirs.LD);

@@ -5,7 +5,9 @@ class Button
   String text;
   PFont font;
   boolean pressed = false;
+  boolean checked = false;
   
+  int fillChecked = 210;
   int fill = 170;
   int fillIddle = 170;
 
@@ -45,6 +47,11 @@ class Button
       fill = 80;
     }
   }
+  
+  void setChecked(boolean state) 
+  {
+    checked = state;
+  }
 
   void setStyle() 
   {
@@ -60,7 +67,8 @@ class Button
     {
       setStyle();
       if(fill < fillIddle) fill++;
-      fill(fill, 150);
+      if(checked) fill(fillChecked, 250);
+      else fill(fill, 150);
       rect(pos.x,pos.y,size.x,size.y,(size.x+size.y)/20);
       fill(25);
       text(text, pos.x+size.x/2,pos.y+size.y/2+25);

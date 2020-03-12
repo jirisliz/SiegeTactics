@@ -14,7 +14,10 @@ class LevelLoader extends Level
   ArrayList<BackParams> grList;
   StringDict saveTypes;
   ArrayList<Wall> walls;
+  
+  // Selections
   PGraphics backgr;
+  String unitName = Defs.units[0];;
 
   String levelName;
   String levelFolder = "levels";
@@ -33,25 +36,26 @@ class LevelLoader extends Level
 
   void init() 
   {
+    r = new Renderer();
     loadGround("grass1.png");
-    
+
     grList = new ArrayList<BackParams>();
     walls = new ArrayList<Wall>();
     attackers = new ArrayList<SoldierBasic>();
     defenders = new ArrayList<SoldierBasic>();
-    
+
     // Draw grid 
     drawGrid();
   }
-  
+
   boolean loadGround(String name) 
   {
     boolean ret = false;
     try
     {
       String backsDir = dataPath(Storage.dataDirBacks); 
-    ground = new LoadTile(backsDir+"/" + name, 16); 
-    ret = true;
+      ground = new LoadTile(backsDir+"/" + name, 16); 
+      ret = true;
     }
     catch(Exception ex) 
     {
@@ -60,6 +64,11 @@ class LevelLoader extends Level
     return ret;
   }
   
+  void setUnit(String name)
+  {
+    unitName = name;
+  } 
+
   void drawGrid() 
   {
     PVector sz = getLevelSize();
@@ -77,28 +86,40 @@ class LevelLoader extends Level
       backgr.line(0, j*mBlockSz, sz.x, j*mBlockSz);
     }
 
-    backgr.endDraw(); 
+    backgr.endDraw();
   }
 
   void update() 
   {
+    r.clear(); 
+    for (SoldierBasic s : attackers) 
+    {
+      r.add(s);
+    }
+
+    for (SoldierBasic s : defenders) 
+    {
+      r.add(s);
+    }
   }
 
   void draw() 
   {
     image(backgr, 0, 0);
+    update();
+    r.draw();
   }
 
-  void mouseReleased(Screen screen) 
+  void clickBackgr(Screen screen) 
   {
-    if(screen.mTrStart)return;
+    if (screen.mTrStart || ground == null)return;
     PVector target = screen.screen2World(new PVector(mouseX, mouseY));
     int x = (int) target.x;
     int y = (int) target.y;
     x = x/mBlockSz*mBlockSz;
     y = y/mBlockSz*mBlockSz;
     backgr.beginDraw();
-    
+
     backgr.image(ground.getRandTile(), x, y);
 
     backgr.endDraw(); 
@@ -110,12 +131,35 @@ class LevelLoader extends Level
       new PVector(ground.xLast, ground.yLast));
     add2GrList(bck);
   }
-  
-  void drawBack(BackParams bck) 
+
+  void clickWalls(Screen screen) 
   {
+    if (screen.mTrStart)return;
+    PVector target = screen.screen2World(new PVector(mouseX, mouseY));
+    int x = (int) target.x;
+    int y = (int) target.y;
+    
     
   }
-  
+
+  void clickUnits(Screen screen) 
+  {
+    if (screen.mTrStart)return;
+    PVector target = screen.screen2World(new PVector(mouseX, mouseY));
+    int x = (int) target.x;
+    int y = (int) target.y;
+    
+    SoldierBasic s1 = new SoldierBasic(
+        x, y, 
+        unitName);
+      s1.setState(States.stand);
+    attackers.add(s1);
+  }
+
+  void drawBack(BackParams bck) 
+  {
+  }
+
   void add2GrList(BackParams bck) 
   {
     // check if same position occupied 
@@ -124,18 +168,18 @@ class LevelLoader extends Level
     {
       PVector itemList = bp.pos;
       PVector itemNew = bck.pos;
-      if(itemList.x == itemNew.x && itemList.y == itemNew.y)
+      if (itemList.x == itemNew.x && itemList.y == itemNew.y)
       {
         // remove old one from the list
         toRemove.add(bp);
       }
     }
-    
-    for(BackParams re : toRemove) 
+
+    for (BackParams re : toRemove) 
     {
       grList.remove(re);
     }
-    
+
     // add to list
     grList.add(bck);
   }
@@ -143,8 +187,8 @@ class LevelLoader extends Level
   boolean save2File() 
   {
     boolean ret = false;
-    
-    if(levelName.length() == 0)return ret;
+
+    if (levelName.length() == 0)return ret;
 
     String path = Storage.createFolder(levelFolder);
     println(path);
@@ -156,14 +200,14 @@ class LevelLoader extends Level
     table.addColumn("file"); 
     table.addColumn("param1");
     table.addColumn("param2");
-    
+
     // Standard map size
     TableRow newRow = table.addRow(); 
     newRow.setInt("type", LevelLoaderTypes.map.ordinal()); 
     newRow.setInt("x", (int) mGridCols); 
     newRow.setInt("y", (int) mGridRows); 
     newRow.setInt("param1", (int)  mBlockSz);
-    
+
     // Backs save
     for (BackParams bp : grList) 
     {
@@ -173,7 +217,7 @@ class LevelLoader extends Level
       newRow.setInt("y", (int)  bp.pos.y); 
       newRow.setString("file", bp.tileName);
       newRow.setInt("param1", (int)  bp.tilePos.x); 
-      newRow.setInt("param2", (int)  bp.tilePos.y); 
+      newRow.setInt("param2", (int)  bp.tilePos.y);
     }
 
     if (path != null) 
@@ -185,7 +229,7 @@ class LevelLoader extends Level
 
     return ret;
   }
-  
+
   boolean loadFromFile() 
   {
     boolean ret = false;
@@ -195,7 +239,7 @@ class LevelLoader extends Level
       // Crear previous data
       grList.clear();
       drawGrid();
-      
+
       Table table;
       try
       {
@@ -207,8 +251,8 @@ class LevelLoader extends Level
         println("exception loadFromFile: "+ex);
         return false;
       }
-      
-      
+
+
       // Load level
       for (int i = 0; i<table.getRowCount(); i++) 
       {
@@ -224,22 +268,22 @@ class LevelLoader extends Level
         switch(type)
         {
         case map:
-        mGridCols = x;
-        mGridRows = y;
-        mBlockSz = param1;
+          mGridCols = x;
+          mGridRows = y;
+          mBlockSz = param1;
           break;
         case back:
-        PVector p = new PVector(x, y);
-        String tn = file;
-        PVector tp = new PVector(param1, param2);
-        String backsDir = dataPath(Storage.dataDirBacks); 
-        ground = new LoadTile(backsDir+"/" + tn,16); 
-        backgr.beginDraw();
-        backgr.image(ground.getTile((int) tp.x, (int) tp.y), x, y);
-        backgr.endDraw(); 
-        
-        BackParams b = new BackParams(p, tn, tp);
-        grList.add(b);
+          PVector p = new PVector(x, y);
+          String tn = file;
+          PVector tp = new PVector(param1, param2);
+          String backsDir = dataPath(Storage.dataDirBacks); 
+          ground = new LoadTile(backsDir+"/" + tn, 16); 
+          backgr.beginDraw();
+          backgr.image(ground.getTile((int) tp.x, (int) tp.y), x, y);
+          backgr.endDraw(); 
+
+          BackParams b = new BackParams(p, tn, tp);
+          grList.add(b);
           break;
         case wall:
           break;

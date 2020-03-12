@@ -5,11 +5,13 @@ class ScrollBar {
   float barWidth;
   
   float velocity=0;
-  float inertia=0.8;
+  float inertia=0.6;
   float lastPos;
   float initPos;
   boolean pressed = false;
   boolean moving = false;
+  
+  int layoutTopSpace = 100;
   
   ArrayList<Button> btns;
   
@@ -64,8 +66,8 @@ class ScrollBar {
  void add(String name) 
  {
    int i = btns.size();
-   PVector po = new PVector(20, i * 0.1 * height + 20);
-   PVector sz = new PVector(width-40, 0.1 * height - 20);
+   PVector po = new PVector(20, i * 0.08 * height + 20 + layoutTopSpace);
+   PVector sz = new PVector(width-40, 0.08 * height - 20);
    Button btn = new Button(po, sz, name);
    add(btn);
  }
@@ -155,6 +157,7 @@ class ScrollBar {
       float h = frac * height;
       pushStyle();
       fill(150, opacity);
+      stroke(120);
       rect(x, y, w, h, 0.2 * w);
       popStyle();
     }

@@ -60,17 +60,18 @@ class Creator
   void initCreator() 
   {
     btnBck = 
-      new Button(new PVector(width/15, height*12/15), 
+      new Button(new PVector(width/8, height*14/15), 
       new PVector(width/4, height/16), 
       "Background");
+    btnBck.setChecked(true);
 
     btnWall = 
-      new Button(new PVector(width/15, height*13/15), 
+      new Button(new PVector(width/8+width/4, height*14/15), 
       new PVector(width/4, height/16), 
       "Walls");
 
     btnUnit = 
-      new Button(new PVector(width/15, height*14/15), 
+      new Button(new PVector(width/8+width*2/4, height*14/15), 
       new PVector(width/4, height/16), 
       "Units");
 
@@ -124,6 +125,11 @@ class Creator
       {
         fullScreen();
         loadLevel(dte.txt);
+      }
+      if (!levelLoaded && dte.finished) 
+      {
+        level.levelName = dte.txt;
+        dte.finished = false;
       }
       background(0);
       mScr.transformPush();
@@ -220,7 +226,21 @@ class Creator
         btn.mouseReleased(0);
       }
       boolean btnPressed = checkCreatorBtns(); 
-      if (!btnPressed)level.mouseReleased(mScr);
+      if (!btnPressed)
+      {
+        if (btnBck.checked)
+        {
+          level.clickBackgr(mScr);
+        }
+        if (btnWall.checked)
+        {
+          level.clickWalls(mScr);
+        }
+        if (btnUnit.checked)
+        {
+          level.clickUnits(mScr);
+        }
+      }
       break;
     }
   }
@@ -257,9 +277,21 @@ class Creator
       if (name.contains(ext))
       {
         name = name.replace(ext, "");
-        println("scrollBar add: " + name);
+        //println("scrollBar add: " + name);
         scrlb.add(name);
       }
+    }
+    return scrlb;
+  }
+  
+  ScrollBar createStringsScrollBar(String[] strs) 
+  {
+    ScrollBar scrlb = new ScrollBar();
+    if(strs.length == 0) return null;
+    
+    for (int i = 0; i <= strs.length - 1; i++)   
+    {
+      scrlb.add(strs[i]);
     }
     return scrlb;
   }
@@ -293,7 +325,6 @@ class Creator
     if (btnBack.pressed)
     {
       btnBack.reset();
-      level.levelName = dte.txt;
       level.save2File();
       finished = true;
     }
@@ -305,6 +336,10 @@ class Creator
     if (btnBck.pressed)
     {
       btnBck.reset();
+      btnBck.setChecked(true);
+      btnWall.setChecked(false);
+      btnUnit.setChecked(false); 
+      
       ret = true;
       String backsDir = dataPath(Storage.dataDirBacks);
       println(backsDir);
@@ -323,12 +358,28 @@ class Creator
     if (btnWall.pressed)
     {
       btnWall.reset();
+      btnBck.setChecked(false);
+      btnWall.setChecked(true);
+      btnUnit.setChecked(false); 
+      
       ret = true;
     }
 
     if (btnUnit.pressed)
     {
       btnUnit.reset();
+      btnBck.setChecked(false);
+      btnWall.setChecked(false);
+      btnUnit.setChecked(true); 
+      
+      scrlbSelect = createStringsScrollBar(Defs.units);
+      
+      if (scrlbSelect != null) 
+      {
+        prevState = CreatorStates.creator; 
+        state = CreatorStates.select;
+      } 
+      
       ret = true;
     }
     return ret;
@@ -359,7 +410,18 @@ class Creator
 
       if (btn != null) 
       {
-        level.loadGround(btn.text+".png");
+        if (btnBck.checked)
+        {
+          level.loadGround(btn.text+".png");
+        }
+        if (btnWall.checked)
+        {
+          
+        }
+        if (btnUnit.checked)
+        {
+          level.setUnit(btn.text);
+        }
         state = CreatorStates.creator;
       }
       break;
