@@ -34,6 +34,7 @@ abstract class Unit extends Vehicle
   // Unit vars
   String unitType;
   States state = States.walk;
+  int currAttack = 0;
   Dirs dir = Dirs.RU;
   int livesMax = 10;
   int lives = livesMax;
@@ -62,27 +63,27 @@ abstract class Unit extends Vehicle
   {
     String folder = dataPath(unitName);
 
-    anim_iddleRU = new LoadSprite(folder+"/" +unitName+"-iddleRU.png", 8);
-    anim_iddleLU = new LoadSprite(folder+"/" +unitName+"-iddleLU.png", 8);
-    anim_iddleRD = new LoadSprite(folder+"/" +unitName+"-iddleRD.png", 8);
-    anim_iddleLD = new LoadSprite(folder+"/" +unitName+"-iddleLD.png", 8);    
+    anim_iddleRU = new LoadSprite(folder+"/" +"iddleRU.png", 8);
+    anim_iddleLU = new LoadSprite(folder+"/" +"iddleLU.png", 8);
+    anim_iddleRD = new LoadSprite(folder+"/" +"iddleRD.png", 8);
+    anim_iddleLD = new LoadSprite(folder+"/" +"iddleLD.png", 8);    
 
-    anim_attackRU = new LoadSprite(folder+"/" +unitName+"-attackRU.png", 5);
-    anim_attackLU = new LoadSprite(folder+"/" +unitName+"-attackLU.png", 5);
-    anim_attackRD = new LoadSprite(folder+"/" +unitName+"-attackRD.png", 5);
-    anim_attackLD = new LoadSprite(folder+"/" +unitName+"-attackLD.png", 5);
+    anim_attackRU = new LoadSprite(folder+"/" +"attackRU.png", 5);
+    anim_attackLU = new LoadSprite(folder+"/" +"attackLU.png", 5);
+    anim_attackRD = new LoadSprite(folder+"/" +"attackRD.png", 5);
+    anim_attackLD = new LoadSprite(folder+"/" +"attackLD.png", 5);
 
-    anim_attack2RU = new LoadSprite(folder+"/" +unitName+"-attack2RU.png", 5);
-    anim_attack2LU = new LoadSprite(folder+"/" +unitName+"-attack2LU.png", 5);
-    anim_attack2RD = new LoadSprite(folder+"/" +unitName+"-attack2RD.png", 5);
-    anim_attack2LD = new LoadSprite(folder+"/" +unitName+"-attack2LD.png", 5);
+    anim_attack2RU = new LoadSprite(folder+"/" +"attack2RU.png", 5);
+    anim_attack2LU = new LoadSprite(folder+"/" +"attack2LU.png", 5);
+    anim_attack2RD = new LoadSprite(folder+"/" +"attack2RD.png", 5);
+    anim_attack2LD = new LoadSprite(folder+"/" +"attack2LD.png", 5);
 
-    anim_runRU = new LoadSprite(folder+"/" +unitName+"-runRU.png", 4);
-    anim_runLU = new LoadSprite(folder+"/" +unitName+"-runLU.png", 4);
-    anim_runRD = new LoadSprite(folder+"/" +unitName+"-runRD.png", 4);
-    anim_runLD = new LoadSprite(folder+"/" +unitName+"-runLD.png", 4);
+    anim_runRU = new LoadSprite(folder+"/" +"runRU.png", 4);
+    anim_runLU = new LoadSprite(folder+"/" +"runLU.png", 4);
+    anim_runRD = new LoadSprite(folder+"/" +"runRD.png", 4);
+    anim_runLD = new LoadSprite(folder+"/" +"runLD.png", 4);
 
-    anim_deadR = new LoadSprite(folder+"/" +unitName+"-deadR.png", 4);
+    anim_deadR = new LoadSprite(folder+"/" +"deadR.png", 4);
 
     updateCurrAnim();
   }
@@ -145,26 +146,50 @@ abstract class Unit extends Vehicle
 
   void setAttackAnim() 
   {
-    switch(dir) 
+    if (currAttack == 0)
     {
-    case RU: 
-      animCurr = anim_attack2RU; 
-      break;
-    case RD: 
-      animCurr = anim_attack2RD; 
-      break;
-    case LD: 
-      animCurr = anim_attack2LD; 
-      break;
-    case LU: 
-      animCurr = anim_attack2LU; 
-      break;
+      switch(dir) 
+      {
+      case RU: 
+        animCurr = anim_attackRU; 
+        break;
+      case RD: 
+        animCurr = anim_attackRD; 
+        break;
+      case LD: 
+        animCurr = anim_attackLD; 
+        break;
+      case LU: 
+        animCurr = anim_attackLU; 
+        break;
+      }
+    } else if (currAttack == 1)
+    {
+      switch(dir) 
+      {
+      case RU: 
+        animCurr = anim_attack2RU; 
+        break;
+      case RD: 
+        animCurr = anim_attack2RD; 
+        break;
+      case LD: 
+        animCurr = anim_attack2LD; 
+        break;
+      case LU: 
+        animCurr = anim_attack2LU; 
+        break;
+      }
     }
   }
 
   void setDeadAnim() 
   {
     animCurr = anim_deadR;
+  }
+
+  boolean randomBool() {
+    return random(1) > .5;
   }
 
   void updateCurrAnim() 
@@ -243,6 +268,10 @@ abstract class Unit extends Vehicle
 
       if (animFullCycle) 
       {
+        if(st == States.attack) 
+        {
+          currAttack = (int) random(1.4);
+        }
         animFullCycle = false;
         if (enemyAttacking != null) 
         {
@@ -348,11 +377,15 @@ abstract class Unit extends Vehicle
     {
       animCurr.draw(position.x, position.y);
       // Draw lives
-      stroke(30, 200, 30);
-      strokeWeight(2);
-      int l = (int) map(lives, 0, livesMax, 1, r);
-      line(position.x-l, position.y-r, 
-        position.x+l, position.y-r);
+      if (alive) 
+      {
+        stroke(30, 200, 30);
+        strokeWeight(2);
+        float w = 0.8*(float)r;
+        int l = (int) map(lives, 0, livesMax, 1, w);
+        line(position.x-l, position.y-r, 
+          position.x+l, position.y-r);
+      }
     } else
     {
       fill(100);

@@ -266,11 +266,12 @@ class Creator
 
   ScrollBar createFilesScrollBar(String dir, String ext) 
   {
-    ScrollBar scrlb = new ScrollBar();
+    ScrollBar scrlb;
     // list levels
     File[] files = Storage.getFilesList(dir);
     if (files.length > 0)scrlb = new ScrollBar();
     else return null;
+    scrlb.layoutTopSpace = height/2; // for better one hand access
     for (int i = 0; i <= files.length - 1; i++)   
     {
       String name = files[i].getName();
@@ -288,7 +289,7 @@ class Creator
   {
     ScrollBar scrlb = new ScrollBar();
     if(strs.length == 0) return null;
-    
+    scrlb.layoutTopSpace = height/2; // for better one hand access
     for (int i = 0; i <= strs.length - 1; i++)   
     {
       scrlb.add(strs[i]);

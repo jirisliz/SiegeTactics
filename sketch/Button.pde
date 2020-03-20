@@ -58,7 +58,7 @@ class Button
     stroke(30);
     strokeWeight(4);
     textFont(font);
-    textAlign(CENTER);
+    textAlign(CENTER, CENTER);
   }
 
   void draw(float trY) 
@@ -71,7 +71,7 @@ class Button
       else fill(fill, 150);
       rect(pos.x,pos.y,size.x,size.y,(size.x+size.y)/20);
       fill(25);
-      text(text, pos.x+size.x/2,pos.y+size.y/2+25);
+      text(text, pos.x+size.x/2,pos.y+size.y/2);
     }
   }
 }

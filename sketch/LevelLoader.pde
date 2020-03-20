@@ -94,11 +94,13 @@ class LevelLoader extends Level
     r.clear(); 
     for (SoldierBasic s : attackers) 
     {
+      s.update(null,null,null,null);
       r.add(s);
     }
 
     for (SoldierBasic s : defenders) 
     {
+      s.update(null,null,null,null);
       r.add(s);
     }
   }
@@ -153,6 +155,7 @@ class LevelLoader extends Level
         x, y, 
         unitName);
       s1.setState(States.stand);
+      s1.dir = Dirs.RD;
     attackers.add(s1);
   }
 

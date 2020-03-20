@@ -49,7 +49,7 @@ class Test4 extends Level
         scr.mWidth*i/(3*numOfDefenders)+
         scr.mWidth/2-scr.mWidth*(numOfDefenders/2)/(3*numOfDefenders), 
         0, 
-        "BasicSpearman2");
+        "BasicArcher");
       s2.primaryTarget = new PVector(scr.mWidth/2, scr.mHeight*3/4);
       s2.target = s2.primaryTarget;
       s2.setDir(Dirs.LD);
