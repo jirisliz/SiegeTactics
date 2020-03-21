@@ -16,6 +16,7 @@ class Creator
   // Creator gui
   Button btnBck, btnWall, btnUnit;
   ArrayList<Button> btnsCreator;
+  PVector touchStart;
 
   // Select gui
   ScrollBar scrlbSelect;
@@ -172,7 +173,7 @@ class Creator
 
       break;
     case creator:
-
+      touchStart = new PVector(mouseX, mouseY);
       break;
     }
   }
@@ -195,6 +196,18 @@ class Creator
       break;
     case creator:
       mScr.mouseDragged(); 
+      if (touches.length == 1) 
+      {
+        pushStyle();
+        noFill();
+        stroke(30, 250, 30);
+        PVector start = touchStart;
+        PVector end = new PVector(mouseX-touchStart.x, 
+          mouseY-touchStart.y);
+
+        rect(start.x, start.y, end.x, end.y);
+        popStyle();
+      }      
       break;
     }
   }
@@ -230,7 +243,13 @@ class Creator
       {
         if (btnBck.checked)
         {
-          level.clickBackgr(mScr);
+          if (touchStart.dist(new PVector(mouseX, mouseY)) > 100) 
+          {
+            level.clickBackrDrag(mScr, touchStart);
+          } else
+          {
+            level.clickBackgr(mScr);
+          }
         }
         if (btnWall.checked)
         {
@@ -241,6 +260,7 @@ class Creator
           level.clickUnits(mScr);
         }
       }
+
       break;
     }
   }
@@ -284,11 +304,11 @@ class Creator
     }
     return scrlb;
   }
-  
+
   ScrollBar createStringsScrollBar(String[] strs) 
   {
     ScrollBar scrlb = new ScrollBar();
-    if(strs.length == 0) return null;
+    if (strs.length == 0) return null;
     scrlb.layoutTopSpace = height/2; // for better one hand access
     for (int i = 0; i <= strs.length - 1; i++)   
     {
@@ -340,7 +360,7 @@ class Creator
       btnBck.setChecked(true);
       btnWall.setChecked(false);
       btnUnit.setChecked(false); 
-      
+
       ret = true;
       String backsDir = dataPath(Storage.dataDirBacks);
       println(backsDir);
@@ -362,7 +382,7 @@ class Creator
       btnBck.setChecked(false);
       btnWall.setChecked(true);
       btnUnit.setChecked(false); 
-      
+
       ret = true;
     }
 
@@ -372,15 +392,15 @@ class Creator
       btnBck.setChecked(false);
       btnWall.setChecked(false);
       btnUnit.setChecked(true); 
-      
+
       scrlbSelect = createStringsScrollBar(Defs.units);
-      
+
       if (scrlbSelect != null) 
       {
         prevState = CreatorStates.creator; 
         state = CreatorStates.select;
       } 
-      
+
       ret = true;
     }
     return ret;
@@ -417,7 +437,6 @@ class Creator
         }
         if (btnWall.checked)
         {
-          
         }
         if (btnUnit.checked)
         {

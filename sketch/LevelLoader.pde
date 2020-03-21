@@ -14,10 +14,10 @@ class LevelLoader extends Level
   ArrayList<BackParams> grList;
   StringDict saveTypes;
   ArrayList<Wall> walls;
-  
+
   // Selections
   PGraphics backgr;
-  String unitName = Defs.units[0];;
+  String unitName = Defs.units[0];
 
   String levelName;
   String levelFolder = "levels";
@@ -63,7 +63,7 @@ class LevelLoader extends Level
     }
     return ret;
   }
-  
+
   void setUnit(String name)
   {
     unitName = name;
@@ -94,13 +94,13 @@ class LevelLoader extends Level
     r.clear(); 
     for (SoldierBasic s : attackers) 
     {
-      s.update(null,null,null,null);
+      s.update(null, null, null, null);
       r.add(s);
     }
 
     for (SoldierBasic s : defenders) 
     {
-      s.update(null,null,null,null);
+      s.update(null, null, null, null);
       r.add(s);
     }
   }
@@ -112,10 +112,8 @@ class LevelLoader extends Level
     r.draw();
   }
 
-  void clickBackgr(Screen screen) 
+  void addBackgr(PVector target) 
   {
-    if (screen.mTrStart || ground == null)return;
-    PVector target = screen.screen2World(new PVector(mouseX, mouseY));
     int x = (int) target.x;
     int y = (int) target.y;
     x = x/mBlockSz*mBlockSz;
@@ -134,14 +132,61 @@ class LevelLoader extends Level
     add2GrList(bck);
   }
 
+  class IntHolder { 
+    public int val = 0;
+    IntHolder(int v) 
+    {
+      val = v;
+    }
+  }
+
+  void swap(IntHolder a, IntHolder b)
+  {
+    int temp = a.val;
+    a.val = b.val;
+    b.val = temp;
+  }
+
+  void clickBackrDrag(Screen screen, PVector aStart)
+  {
+    if (screen.mTrStart || ground == null)return;
+    PVector start = screen.screen2World(aStart);
+    PVector end = screen.screen2World(new PVector(mouseX, mouseY));
+
+    IntHolder sx = new IntHolder((int) (start.x / mBlockSz));
+    IntHolder sy = new IntHolder((int) (start.y / mBlockSz)) ;
+    IntHolder ex = new IntHolder((int) (end.x / mBlockSz));
+    IntHolder ey = new IntHolder((int) (end.y / mBlockSz));
+
+    if (sx.val> ex.val) swap(sx, ex);
+    if (sy.val> ey.val) swap(sy, ey);
+
+    for (int i = sx.val; i <= ex.val; i++) 
+    {
+      for (int j = sy.val; j <= ey.val; j++) 
+      {
+        PVector target = 
+          new PVector(i*mBlockSz, j*mBlockSz);
+
+        addBackgr(target);
+      }
+    }
+  } 
+
+  void clickBackgr(Screen screen) 
+  {
+    if (screen.mTrStart || ground == null)return;
+    PVector target = screen.screen2World(new PVector(mouseX, mouseY));
+
+    addBackgr(target);
+  }
+
   void clickWalls(Screen screen) 
   {
     if (screen.mTrStart)return;
     PVector target = screen.screen2World(new PVector(mouseX, mouseY));
     int x = (int) target.x;
     int y = (int) target.y;
-    
-    
   }
 
   void clickUnits(Screen screen) 
@@ -150,12 +195,12 @@ class LevelLoader extends Level
     PVector target = screen.screen2World(new PVector(mouseX, mouseY));
     int x = (int) target.x;
     int y = (int) target.y;
-    
+
     SoldierBasic s1 = new SoldierBasic(
-        x, y, 
-        unitName);
-      s1.setState(States.stand);
-      s1.dir = Dirs.RD;
+      x, y, 
+      unitName);
+    s1.setState(States.stand);
+    s1.dir = Dirs.RD;
     attackers.add(s1);
   }
 
