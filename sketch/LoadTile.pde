@@ -42,6 +42,18 @@ class LoadTile
     }
   }
   
+  int getWidth() 
+  {
+    if(tileImg != null) return tileImg.width;
+    return 0;
+  }
+  
+  int getHeight() 
+  {
+    if(tileImg != null) return tileImg.height;
+    return 0;
+  }
+  
   int getTileSide() 
   {
     if(tileImg != null) return tileImg.width/xNum;

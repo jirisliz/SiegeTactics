@@ -34,10 +34,18 @@ class LevelLoader extends Level
     init();
   }
 
+  LevelLoader(String tile) 
+  {
+    loadTile(tile, Storage.dataDirTiles);
+    mBlockSz = ground.getTileSide();
+    mGridCols = ground.xNum;
+    mGridRows = ground.yNum;
+    init();
+  }
+
   void init() 
   {
     r = new Renderer();
-    loadGround("grass1.png");
 
     grList = new ArrayList<BackParams>();
     walls = new ArrayList<Wall>();
@@ -50,10 +58,16 @@ class LevelLoader extends Level
 
   boolean loadGround(String name) 
   {
+    return loadTile(name, Storage.dataDirBacks);
+  }
+  
+  
+boolean loadTile(String name, String dir) 
+  {
     boolean ret = false;
     try
     {
-      String backsDir = dataPath(Storage.dataDirBacks); 
+      String backsDir = dataPath(dir); 
       ground = new LoadTile(backsDir+"/" + name, 16); 
       ret = true;
     }
@@ -62,6 +76,27 @@ class LevelLoader extends Level
       println("loadGround exception; "+ ex);
     }
     return ret;
+  }
+  void drawTiles() 
+  {
+    int side = ground.getTileSide();
+    backgr.beginDraw();
+    for (int i = 0; i < ground.xNum; i++) 
+    {
+      for (int j = 0; j < ground.yNum; j++) 
+      {
+        backgr.image(ground.getTile(i, j), i*side, j*side);
+      }
+    }
+    backgr.endDraw();
+  }
+
+  void fillGround(Screen screen) 
+  {
+    PVector start = new PVector(0, 0);
+    PVector end = new PVector(screen.mWidth, screen.mHeight);
+
+    fillAreaBack(start, end);
   }
 
   void setUnit(String name)
@@ -74,7 +109,8 @@ class LevelLoader extends Level
     PVector sz = getLevelSize();
     backgr = createGraphics((int) sz.x, (int) sz.y);
     backgr.beginDraw();
-    backgr.background(50, 50, 130);
+    backgr.background(0);
+    /*
     backgr.stroke(180);
     for (int i = 0; i < mGridCols; i++) 
     {
@@ -85,7 +121,7 @@ class LevelLoader extends Level
     {
       backgr.line(0, j*mBlockSz, sz.x, j*mBlockSz);
     }
-
+    */
     backgr.endDraw();
   }
 
@@ -132,34 +168,15 @@ class LevelLoader extends Level
     add2GrList(bck);
   }
 
-  class IntHolder { 
-    public int val = 0;
-    IntHolder(int v) 
-    {
-      val = v;
-    }
-  }
-
-  void swap(IntHolder a, IntHolder b)
+  void fillAreaBack(PVector start, PVector end) 
   {
-    int temp = a.val;
-    a.val = b.val;
-    b.val = temp;
-  }
-
-  void clickBackrDrag(Screen screen, PVector aStart)
-  {
-    if (screen.mTrStart || ground == null)return;
-    PVector start = screen.screen2World(aStart);
-    PVector end = screen.screen2World(new PVector(mouseX, mouseY));
-
     IntHolder sx = new IntHolder((int) (start.x / mBlockSz));
     IntHolder sy = new IntHolder((int) (start.y / mBlockSz)) ;
     IntHolder ex = new IntHolder((int) (end.x / mBlockSz));
     IntHolder ey = new IntHolder((int) (end.y / mBlockSz));
 
-    if (sx.val> ex.val) swap(sx, ex);
-    if (sy.val> ey.val) swap(sy, ey);
+    if (sx.val> ex.val) Defs.swap(sx, ex);
+    if (sy.val> ey.val) Defs.swap(sy, ey);
 
     for (int i = sx.val; i <= ex.val; i++) 
     {
@@ -171,6 +188,15 @@ class LevelLoader extends Level
         addBackgr(target);
       }
     }
+  }
+
+  void clickBackrDrag(Screen screen)
+  {
+    if (screen.mTrStart || ground == null)return;
+    PVector start = screen.screen2World(screen.touchStart);
+    PVector end = screen.screen2World(screen.touchEnd);
+
+    fillAreaBack(start, end);
   } 
 
   void clickBackgr(Screen screen) 
@@ -181,12 +207,21 @@ class LevelLoader extends Level
     addBackgr(target);
   }
 
-  void clickWalls(Screen screen) 
+  void clickObjs(Screen screen, TilePicker tlPck) 
   {
     if (screen.mTrStart)return;
     PVector target = screen.screen2World(new PVector(mouseX, mouseY));
     int x = (int) target.x;
     int y = (int) target.y;
+    x = x/mBlockSz*mBlockSz;
+    y = y/mBlockSz*mBlockSz;
+    
+    backgr.beginDraw();
+    PGraphics tile = tlPck.getSelectedTile();
+    if(tile != null) 
+      backgr.image(tile, x, y);
+
+    backgr.endDraw(); 
   }
 
   void clickUnits(Screen screen) 

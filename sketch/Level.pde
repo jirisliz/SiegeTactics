@@ -15,6 +15,21 @@ abstract class Level
     return new PVector(mBlockSz*mGridCols, mBlockSz*mGridRows);
   }
   
+  int getWidth() 
+  {
+   return mBlockSz*mGridCols;
+  }
+  
+  int getHeight() 
+  {
+    return mBlockSz*mGridRows;
+  }
+  
+  int getBlockSz() 
+  {
+    return mBlockSz;
+  }
+  
   abstract void update();
   abstract void draw();
 }

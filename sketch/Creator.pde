@@ -1,20 +1,19 @@
 enum CreatorStates
 {
-  menu, select, sizemap, creator;
+  menu, select, sizemap, creator, newMap, tilePicker;
 }
 
 class Creator
 {
   CreatorStates state = CreatorStates.menu;
   CreatorStates prevState = CreatorStates.menu;
-  Screen scr;
 
   // Main gui
   Button btnNew, btnOpen, btnBack;
   ArrayList<Button> btnsMenu;
 
   // Creator gui
-  Button btnBck, btnWall, btnUnit;
+  Button btnBck, btnObj, btnUnit;
   ArrayList<Button> btnsCreator;
   PVector touchStart;
 
@@ -29,6 +28,9 @@ class Creator
   Screen mScr;
   LevelLoader level;
   boolean levelLoaded = false;
+
+  // Tile picker
+  TilePicker tlPck;
 
   Creator() 
   {
@@ -61,29 +63,29 @@ class Creator
   void initCreator() 
   {
     btnBck = 
-      new Button(new PVector(width/8, height*14/15), 
-      new PVector(width/4, height/16), 
+      new Button(new PVector(width/8, height*15/18), 
+      new PVector(width/4, height/19), 
       "Background");
     btnBck.setChecked(true);
 
-    btnWall = 
-      new Button(new PVector(width/8+width/4, height*14/15), 
-      new PVector(width/4, height/16), 
-      "Walls");
+    btnObj = 
+      new Button(new PVector(width/8, height*16/18), 
+      new PVector(width/4, height/19), 
+      "Objects");
 
     btnUnit = 
-      new Button(new PVector(width/8+width*2/4, height*14/15), 
-      new PVector(width/4, height/16), 
+      new Button(new PVector(width/8, height*17/18), 
+      new PVector(width/4, height/19), 
       "Units");
 
     PFont font = createFont("Monospaced-Bold", 30);
     btnBck.font = font;
-    btnWall.font = font;
+    btnObj.font = font;
     btnUnit.font = font;
 
     btnsCreator = new ArrayList<Button>();
     btnsCreator.add(btnBck);
-    btnsCreator.add(btnWall);
+    btnsCreator.add(btnObj);
     btnsCreator.add(btnUnit);
 
     dte = new DialogTextEdit(sketch);
@@ -96,11 +98,17 @@ class Creator
     mScr.addFrame(16*4);
     mScr.fitWidth();
     mScr.checkBorders();
+    mScr.selEnabled = true;
   }
 
   void initSelect() 
   {
     scrlbSelect = null;
+  }
+
+  void initTilePicker() 
+  {
+    tlPck = null;
   }
 
   void draw() 
@@ -124,12 +132,14 @@ class Creator
     case creator:
       if (!levelLoaded && dte.finished) 
       {
-        fullScreen();
+        onResume(); // this will hide top bar after dialog end
+
         loadLevel(dte.txt);
       }
-      if (!levelLoaded && dte.finished) 
+      if (levelLoaded && dte.finished) 
       {
         level.levelName = dte.txt;
+        level.fillGround(mScr); 
         dte.finished = false;
       }
       background(0);
@@ -143,6 +153,9 @@ class Creator
         btn.draw(0);
       }
       popStyle(); 
+      break;
+    case tilePicker:
+      tlPck.draw();
       break;
     }
   }
@@ -173,7 +186,10 @@ class Creator
 
       break;
     case creator:
-      touchStart = new PVector(mouseX, mouseY);
+      mScr.mousePressed();
+      break;
+    case tilePicker:
+      tlPck.mousePressed();
       break;
     }
   }
@@ -196,18 +212,9 @@ class Creator
       break;
     case creator:
       mScr.mouseDragged(); 
-      if (touches.length == 1) 
-      {
-        pushStyle();
-        noFill();
-        stroke(30, 250, 30);
-        PVector start = touchStart;
-        PVector end = new PVector(mouseX-touchStart.x, 
-          mouseY-touchStart.y);
-
-        rect(start.x, start.y, end.x, end.y);
-        popStyle();
-      }      
+      break;
+    case tilePicker:
+      tlPck.mouseDragged();
       break;
     }
   }
@@ -241,19 +248,20 @@ class Creator
       boolean btnPressed = checkCreatorBtns(); 
       if (!btnPressed)
       {
+        mScr.mouseReleased();
         if (btnBck.checked)
         {
-          if (touchStart.dist(new PVector(mouseX, mouseY)) > 100) 
+          if (mScr.selFinished) 
           {
-            level.clickBackrDrag(mScr, touchStart);
+            level.clickBackrDrag(mScr);
           } else
           {
             level.clickBackgr(mScr);
           }
         }
-        if (btnWall.checked)
+        if (btnObj.checked)
         {
-          level.clickWalls(mScr);
+          level.clickObjs(mScr, tlPck);
         }
         if (btnUnit.checked)
         {
@@ -261,6 +269,13 @@ class Creator
         }
       }
 
+      break;
+    case tilePicker:
+      tlPck.mouseReleased();
+      if (tlPck.finished) 
+      {
+        state = CreatorStates.creator;
+      }
       break;
     }
   }
@@ -280,6 +295,9 @@ class Creator
       break;
     case creator:
       state = CreatorStates.menu;
+      break;
+    case tilePicker:
+      state = CreatorStates.creator;
       break;
     }
   }
@@ -325,6 +343,7 @@ class Creator
       levelLoaded = false;
       state = CreatorStates.creator;
       dte.showAddItemDialog("");
+      selectTileFromDir(Storage.dataDirBacks);
     }
 
     if (btnOpen.pressed)
@@ -346,8 +365,31 @@ class Creator
     if (btnBack.pressed)
     {
       btnBack.reset();
-      level.save2File();
+      try
+      {
+        level.save2File();
+      }
+      catch(Exception ex) 
+      {
+      }
+
       finished = true;
+    }
+  }
+
+  void selectTileFromDir(String dir) 
+  {
+    String backsDir = dataPath(dir);
+    println(backsDir);
+    scrlbSelect = 
+      createFilesScrollBar(backsDir, ".png");
+    if (scrlbSelect != null) 
+    {
+      prevState = CreatorStates.creator; 
+      state = CreatorStates.select;
+    } else
+    {
+      println("No valid tile to load.");
     }
   }
 
@@ -358,30 +400,22 @@ class Creator
     {
       btnBck.reset();
       btnBck.setChecked(true);
-      btnWall.setChecked(false);
+      btnObj.setChecked(false);
       btnUnit.setChecked(false); 
+
+      selectTileFromDir(Storage.dataDirBacks);
 
       ret = true;
-      String backsDir = dataPath(Storage.dataDirBacks);
-      println(backsDir);
-      scrlbSelect = 
-        createFilesScrollBar(backsDir, ".png");
-      if (scrlbSelect != null) 
-      {
-        prevState = CreatorStates.creator; 
-        state = CreatorStates.select;
-      } else
-      {
-        println("No valid tile to load.");
-      }
     }
 
-    if (btnWall.pressed)
+    if (btnObj.pressed)
     {
-      btnWall.reset();
+      btnObj.reset();
       btnBck.setChecked(false);
-      btnWall.setChecked(true);
+      btnObj.setChecked(true);
       btnUnit.setChecked(false); 
+
+      selectTileFromDir(Storage.dataDirTiles);
 
       ret = true;
     }
@@ -390,7 +424,7 @@ class Creator
     {
       btnUnit.reset();
       btnBck.setChecked(false);
-      btnWall.setChecked(false);
+      btnObj.setChecked(false);
       btnUnit.setChecked(true); 
 
       scrlbSelect = createStringsScrollBar(Defs.units);
@@ -420,6 +454,14 @@ class Creator
         state = CreatorStates.creator;
       }
       break;
+    case newMap:
+      btn = scrlbSelect.getLastClickedBtn();
+      if (btn != null) 
+      {
+        level.loadGround(btn.text+".png");
+        state = CreatorStates.creator;
+      }
+      break;
     case select:
 
       break;
@@ -435,8 +477,11 @@ class Creator
         {
           level.loadGround(btn.text+".png");
         }
-        if (btnWall.checked)
+        if (btnObj.checked)
         {
+          tlPck = new TilePicker(btn.text+".png");
+          state = CreatorStates.tilePicker;
+          return;
         }
         if (btnUnit.checked)
         {

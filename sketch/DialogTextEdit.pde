@@ -29,7 +29,7 @@ class DialogTextEdit
   private void showAddItemDialog(String s) {
     txt = s;
     finished = false; 
-    th.getActivity().runOnUiThread(new Runnable() {
+    /*th.getActivity().*/runOnUiThread(new Runnable() {
       //@ Override
       public void run() {
         final EditText taskEditText = new EditText(ctx);

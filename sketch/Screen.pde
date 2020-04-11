@@ -15,12 +15,20 @@ class Screen
   boolean mTrStart = false;
   PVector mF1Old, mF2Old;
 
+  // Selection
+  boolean selEnabled = false;
+  boolean selFinished = false;
+  PVector touchStart;
+  PVector touchEnd;
+
   // Game base size
   int mWidth = 400;
   int mHeight = 800;
 
   int mOffX = width/2;
   int mOffY = height/2;
+
+  boolean bordersCheck = true;
 
   Screen(int w, int h) 
   {
@@ -114,8 +122,33 @@ class Screen
     }
   }
 
+  void mousePressed() 
+  {
+    selFinished = false;
+    if (selEnabled) 
+    {
+      touchStart = new PVector(mouseX, mouseY);
+    }
+  }
+
+
   void mouseDragged() 
   {
+    // Check one finger
+    if(touches.length == 1) 
+    {
+     if(selEnabled) 
+     {
+       pushStyle();
+        noFill();
+        stroke(30, 250, 30);
+        PVector end= new PVector(mouseX-touchStart.x, 
+          mouseY-touchStart.y);
+
+        rect(touchStart.x, touchStart.y, end.x, end.y);
+        popStyle();
+     }
+    }
     // Check two fingers
     if (touches.length == 2) 
     {
@@ -174,8 +207,24 @@ class Screen
         float scl = (PVector.dist(f1, f2)-mDistOld) / (mOffY);
         mScale = constrain(mScaleOld + scl*2, mScaleMin, mScaleMax);
       }
-      
-      checkBorders();
+
+      if (bordersCheck) 
+      {
+        checkBorders();
+      }
+    }
+  }
+  
+  void mouseReleased() 
+  {
+    if(selEnabled) 
+    {
+      if (touchStart.dist(new PVector(mouseX, mouseY)) > 50) 
+      {
+        touchEnd = new PVector(mouseX, mouseY);
+        selFinished = true;
+      }
+      else touchEnd = null;
     }
   }
 
