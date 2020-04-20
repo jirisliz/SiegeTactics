@@ -1,6 +1,6 @@
 enum LevelLoaderTypes
 {
-  map, back, wall, unit;
+  map, back, obj, unit;
 }
 
 class LevelLoader extends Level 
@@ -11,9 +11,10 @@ class LevelLoader extends Level
   ArrayList<SoldierBasic> defenders;
 
   LoadTile ground;
-  ArrayList<BackParams> grList;
+  BackParams[][] bckgs; 
   StringDict saveTypes;
   ArrayList<Wall> walls;
+  ArrayList<TileObject> objs;
 
   // Selections
   PGraphics backgr;
@@ -47,10 +48,11 @@ class LevelLoader extends Level
   {
     r = new Renderer();
 
-    grList = new ArrayList<BackParams>();
+    bckgs = new BackParams[mGridCols+1][mGridRows+1];
     walls = new ArrayList<Wall>();
     attackers = new ArrayList<SoldierBasic>();
     defenders = new ArrayList<SoldierBasic>();
+    objs = new ArrayList<TileObject>();
 
     // Draw grid 
     drawGrid();
@@ -60,9 +62,9 @@ class LevelLoader extends Level
   {
     return loadTile(name, Storage.dataDirBacks);
   }
-  
-  
-boolean loadTile(String name, String dir) 
+
+
+  boolean loadTile(String name, String dir) 
   {
     boolean ret = false;
     try
@@ -110,18 +112,6 @@ boolean loadTile(String name, String dir)
     backgr = createGraphics((int) sz.x, (int) sz.y);
     backgr.beginDraw();
     backgr.background(0);
-    /*
-    backgr.stroke(180);
-    for (int i = 0; i < mGridCols; i++) 
-    {
-      backgr.line(i*mBlockSz, 0, i*mBlockSz, sz.y);
-    }
-
-    for (int j = 0; j < mGridRows; j++) 
-    {
-      backgr.line(0, j*mBlockSz, sz.x, j*mBlockSz);
-    }
-    */
     backgr.endDraw();
   }
 
@@ -139,6 +129,10 @@ boolean loadTile(String name, String dir)
       s.update(null, null, null, null);
       r.add(s);
     }
+    for (TileObject t : objs) 
+    {
+      r.add(t);
+    }
   }
 
   void draw() 
@@ -154,18 +148,26 @@ boolean loadTile(String name, String dir)
     int y = (int) target.y;
     x = x/mBlockSz*mBlockSz;
     y = y/mBlockSz*mBlockSz;
-    backgr.beginDraw();
+    if (x < backgr.width && y < backgr.height &&
+      x >= 0 && y >= 0)
+    {
+      backgr.beginDraw();
 
-    backgr.image(ground.getRandTile(), x, y);
+      backgr.image(ground.getRandTile(), x, y);
 
-    backgr.endDraw(); 
+      backgr.endDraw(); 
 
-    // add to list for saving purposes 
-    BackParams bck = new BackParams(
-      new PVector(x, y), 
-      ground.path, 
-      new PVector(ground.xLast, ground.yLast));
-    add2GrList(bck);
+      x /= mBlockSz;
+      y /= mBlockSz;
+
+      // add to list for saving purposes 
+      BackParams bck = new BackParams(
+        new PVector(x, y), 
+        ground.path, 
+        new PVector(ground.xLast, ground.yLast));
+      bckgs[x][y] = bck;
+      //add2GrList(bck);
+    }
   }
 
   void fillAreaBack(PVector start, PVector end) 
@@ -209,19 +211,17 @@ boolean loadTile(String name, String dir)
 
   void clickObjs(Screen screen, TilePicker tlPck) 
   {
-    if (screen.mTrStart)return;
+    if (screen.mTrStart || tlPck == null)return;
     PVector target = screen.screen2World(new PVector(mouseX, mouseY));
     int x = (int) target.x;
     int y = (int) target.y;
     x = x/mBlockSz*mBlockSz;
     y = y/mBlockSz*mBlockSz;
-    
-    backgr.beginDraw();
-    PGraphics tile = tlPck.getSelectedTile();
-    if(tile != null) 
-      backgr.image(tile, x, y);
 
-    backgr.endDraw(); 
+    TileObject t = tlPck.getSelectedTileObject();
+    t.setLocation(new PVector(x, y));
+
+    objs.add(t);
   }
 
   void clickUnits(Screen screen) 
@@ -243,30 +243,6 @@ boolean loadTile(String name, String dir)
   {
   }
 
-  void add2GrList(BackParams bck) 
-  {
-    // check if same position occupied 
-    ArrayList<BackParams> toRemove = new ArrayList<BackParams>();
-    for (BackParams bp : grList)
-    {
-      PVector itemList = bp.pos;
-      PVector itemNew = bck.pos;
-      if (itemList.x == itemNew.x && itemList.y == itemNew.y)
-      {
-        // remove old one from the list
-        toRemove.add(bp);
-      }
-    }
-
-    for (BackParams re : toRemove) 
-    {
-      grList.remove(re);
-    }
-
-    // add to list
-    grList.add(bck);
-  }
-
   boolean save2File() 
   {
     boolean ret = false;
@@ -283,6 +259,8 @@ boolean loadTile(String name, String dir)
     table.addColumn("file"); 
     table.addColumn("param1");
     table.addColumn("param2");
+    table.addColumn("param3");
+    table.addColumn("param4");
 
     // Standard map size
     TableRow newRow = table.addRow(); 
@@ -292,15 +270,53 @@ boolean loadTile(String name, String dir)
     newRow.setInt("param1", (int)  mBlockSz);
 
     // Backs save
-    for (BackParams bp : grList) 
+    //for (BackParams bp : grList) 
+    for (int i = 0; i < mGridCols; i++) 
+    {
+      for (int j = 0; j < mGridRows; j++) 
+      {
+        BackParams bp = bckgs[i][j];
+        newRow = table.addRow(); 
+        newRow.setInt("type", LevelLoaderTypes.back.ordinal()); 
+        newRow.setInt("x", (int)  bp.pos.x); 
+        newRow.setInt("y", (int)  bp.pos.y); 
+        newRow.setString("file", bp.tileName);
+        newRow.setInt("param1", (int)  bp.tilePos.x); 
+        newRow.setInt("param2", (int)  bp.tilePos.y);
+      }
+    }
+
+    for (TileObject to : objs) 
     {
       newRow = table.addRow(); 
-      newRow.setInt("type", LevelLoaderTypes.back.ordinal()); 
-      newRow.setInt("x", (int)  bp.pos.x); 
-      newRow.setInt("y", (int)  bp.pos.y); 
-      newRow.setString("file", bp.tileName);
-      newRow.setInt("param1", (int)  bp.tilePos.x); 
-      newRow.setInt("param2", (int)  bp.tilePos.y);
+      newRow.setInt("type", LevelLoaderTypes.obj.ordinal()); 
+      newRow.setInt("x", (int)  to.position.x); 
+      newRow.setInt("y", (int)  to.position.y);
+      newRow.setString("file", to.fileName);
+      newRow.setInt("param1", (int)  to.tilePos.x); 
+      newRow.setInt("param2", (int)  to.tilePos.y);
+      newRow.setInt("param3", (int)  to.tileSz.x); 
+      newRow.setInt("param4", (int)  to.tileSz.y);
+    }
+    
+    for(SoldierBasic s : attackers) 
+    {
+      newRow = table.addRow(); 
+      newRow.setInt("type", LevelLoaderTypes.unit.ordinal()); 
+      newRow.setInt("x", (int)  s.position.x); 
+      newRow.setInt("y", (int)  s.position.y);
+      newRow.setString("file", s.unitType);
+      newRow.setInt("param1", 0); 
+    }
+    
+    for(SoldierBasic s : defenders) 
+    {
+      newRow = table.addRow(); 
+      newRow.setInt("type", LevelLoaderTypes.unit.ordinal()); 
+      newRow.setInt("x", (int)  s.position.x); 
+      newRow.setInt("y", (int)  s.position.y);
+      newRow.setString("file", s.unitType);
+      newRow.setInt("param1", 1); 
     }
 
     if (path != null) 
@@ -313,6 +329,17 @@ boolean loadTile(String name, String dir)
     return ret;
   }
 
+  void bckgsClear() 
+  {
+    for (int i = 0; i < mGridCols; i++) 
+    {
+      for (int j = 0; j < mGridRows; j++) 
+      {
+        BackParams bp = bckgs[i][j];
+      }
+    }
+  }
+
   boolean loadFromFile() 
   {
     boolean ret = false;
@@ -320,7 +347,7 @@ boolean loadTile(String name, String dir)
     if (path != null) 
     {
       // Crear previous data
-      grList.clear();
+      //grList.clear();
       drawGrid();
 
       Table table;
@@ -335,7 +362,6 @@ boolean loadTile(String name, String dir)
         return false;
       }
 
-
       // Load level
       for (int i = 0; i<table.getRowCount(); i++) 
       {
@@ -346,6 +372,8 @@ boolean loadTile(String name, String dir)
         String file = row.getString("file");
         int param1 = row.getInt("param1");
         int param2 = row.getInt("param2");
+        int param3 = row.getInt("param3");
+        int param4 = row.getInt("param4");
 
         // Load data according to type
         switch(type)
@@ -354,6 +382,7 @@ boolean loadTile(String name, String dir)
           mGridCols = x;
           mGridRows = y;
           mBlockSz = param1;
+          bckgs = new BackParams[mGridCols][mGridRows];
           break;
         case back:
           PVector p = new PVector(x, y);
@@ -362,15 +391,39 @@ boolean loadTile(String name, String dir)
           String backsDir = dataPath(Storage.dataDirBacks); 
           ground = new LoadTile(backsDir+"/" + tn, 16); 
           backgr.beginDraw();
-          backgr.image(ground.getTile((int) tp.x, (int) tp.y), x, y);
+          backgr.image(ground.getTile((int) tp.x, (int) tp.y), 
+            x*mBlockSz, y*mBlockSz);
           backgr.endDraw(); 
 
           BackParams b = new BackParams(p, tn, tp);
-          grList.add(b);
+          if (x < mGridCols && y < mGridRows)
+          {
+            bckgs[x][y] = b;
+          }
+
           break;
-        case wall:
+        case obj:
+          PVector op = new PVector(x, y);
+          String otn = file;
+          PVector otp = new PVector(param1, param2);
+          PVector ots = new PVector(param3, param4);
+          TileObject oto = new TileObject(otn, otp, ots);
+
+          String dir = dataPath(Storage.dataDirTiles); 
+          PImage img = loadImage(dir + "/" + otn);
+          oto.loadTileImg(img);
+          oto.setLocation(op);
+          objs.add(oto);
           break;
         case unit:
+
+          SoldierBasic s1 = new SoldierBasic(
+            x, y, 
+            file);
+          s1.setState(States.stand);
+          s1.dir = Dirs.RD;
+          if (param1 == 0)attackers.add(s1);
+          if (param1 == 1)defenders.add(s1);
           break;
         }
       }
@@ -390,5 +443,21 @@ class BackParams
     pos = p;
     tileName = tName;
     tilePos = tPos;
+  }
+}
+
+class TileParams
+{
+  PVector pos;
+  String tileName;
+  PVector tilePos;
+  PVector tileSize;
+
+  TileParams(PVector p, String tName, PVector tPos, PVector tSz) 
+  {
+    pos = p;
+    tileName = tName;
+    tilePos = tPos;
+    tileSize = tSz;
   }
 }

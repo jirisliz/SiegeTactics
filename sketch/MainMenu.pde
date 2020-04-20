@@ -174,12 +174,21 @@ class MainMenu
       break;
     }
   }
-
+  void clearOldImgs(String dir)
+  {
+    File[] files = Storage.getFilesList(dir);
+    for (int i = 0; i <= files.length - 1; i++)   
+    {
+      files[i].delete();
+    }
+  }
   void checkMainBtns() 
   {
     if (btnStart.pressed)
     {
       btnStart.reset();
+      clearOldImgs(Storage.dataDirBacks);
+      clearOldImgs(Storage.dataDirTiles);
     }
 
     if (btnDesigner.pressed)

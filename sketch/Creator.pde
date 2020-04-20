@@ -13,7 +13,7 @@ class Creator
   ArrayList<Button> btnsMenu;
 
   // Creator gui
-  Button btnBck, btnObj, btnUnit;
+  Button btnBck, btnObj, btnBarr, btnUnit;
   ArrayList<Button> btnsCreator;
   PVector touchStart;
 
@@ -57,35 +57,44 @@ class Creator
     btnsMenu = new ArrayList<Button>();
     btnsMenu.add(btnNew);
     btnsMenu.add(btnOpen);
+    
     btnsMenu.add(btnBack);
   }
 
   void initCreator() 
   {
+    int btnHDiv = 30;
     btnBck = 
-      new Button(new PVector(width/8, height*15/18), 
-      new PVector(width/4, height/19), 
+      new Button(new PVector(width/8, height*(btnHDiv-4)/btnHDiv), 
+      new PVector(width*3/8, height/(btnHDiv+1)), 
       "Background");
     btnBck.setChecked(true);
 
     btnObj = 
-      new Button(new PVector(width/8, height*16/18), 
-      new PVector(width/4, height/19), 
+      new Button(new PVector(width/8, height*(btnHDiv-3)/btnHDiv), 
+      new PVector(width*3/8, height/(btnHDiv+1)), 
       "Objects");
+      
+    btnBarr = 
+      new Button(new PVector(width/8, height*(btnHDiv-2)/btnHDiv), 
+      new PVector(width*3/8, height/(btnHDiv+1)), 
+      "Barriers");  
 
     btnUnit = 
-      new Button(new PVector(width/8, height*17/18), 
-      new PVector(width/4, height/19), 
+      new Button(new PVector(width/8, height*(btnHDiv-1)/btnHDiv), 
+      new PVector(width*3/8, height/(btnHDiv+1)), 
       "Units");
 
     PFont font = createFont("Monospaced-Bold", 30);
     btnBck.font = font;
     btnObj.font = font;
+    btnBarr.font = font;
     btnUnit.font = font;
 
     btnsCreator = new ArrayList<Button>();
     btnsCreator.add(btnBck);
     btnsCreator.add(btnObj);
+    btnsCreator.add(btnBarr);
     btnsCreator.add(btnUnit);
 
     dte = new DialogTextEdit(sketch);
@@ -301,6 +310,8 @@ class Creator
       break;
     }
   }
+
+
 
   ScrollBar createFilesScrollBar(String dir, String ext) 
   {

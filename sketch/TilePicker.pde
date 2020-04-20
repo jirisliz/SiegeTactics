@@ -10,10 +10,16 @@ class TilePicker
   ArrayList<PVector> selTiles;
 
   PGraphics selArea;
+  
+  // tile definitions
+  String tileName;
+  PVector tilePos;
+  PVector tileSz;
 
   TilePicker(String tile) 
   {
     finished = false;
+    tileName = tile;
     level = new LevelLoader(tile);
     mScr = new Screen(level.getWidth(), level.getHeight());
     mScr.bordersCheck = false;
@@ -41,6 +47,13 @@ class TilePicker
   {
     //if (selTiles == null)return null;
     return selArea;
+  }
+  
+  TileObject getSelectedTileObject() 
+  {
+    TileObject ret = new TileObject(tileName, tilePos, tileSz);
+    ret.setTileImg(selArea);
+    return ret;
   }
 
   void draw() 
@@ -128,15 +141,18 @@ class TilePicker
 
         int blockSz = level.getBlockSz();
         selArea = createGraphics((Mx-mx+1)*blockSz, (My-my+1)*blockSz);
-
+        
+        tileSz = new PVector(selArea.width, selArea.height);
+        tilePos = new PVector(mx*blockSz, my*blockSz);
+        
         selArea.beginDraw();
         for (PVector selTile : selTiles) 
         {
           selArea.image(
             level.ground.getTile((int)selTile.x, (int)selTile.y), 
             ((int)selTile.x-mx)*blockSz, ((int)selTile.y-my)*blockSz);
-          selArea.endDraw();
         }
+        selArea.endDraw();
       }
     }
   }

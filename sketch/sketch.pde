@@ -12,6 +12,8 @@ MainMenu main;
 
 int state = 0;
 
+
+
 void setup() 
 {
   orientation(PORTRAIT);
@@ -30,7 +32,9 @@ void setup()
   requestPermission(
     "android.permission.READ_EXTERNAL_STORAGE", 
     "handlePermissionRead");
-    
+
+
+
   main = new MainMenu();
 }
 
@@ -69,4 +73,6 @@ void handlePermissionRead(boolean granted)
 {
   println("READ_EXTERNAL_STORAGE: "+granted); 
   permissionRead = granted;
+  
+  
 }
