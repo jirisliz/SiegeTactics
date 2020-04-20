@@ -21,7 +21,12 @@ class LevelLoader extends Level
   String unitName = Defs.units[0];
 
   String levelName;
-  String levelFolder = "levels";
+  String levelFolder = Storage. levelsFolder;
+  
+  boolean viewBck = true;
+  boolean viewObj = true;
+  boolean viewBarr = true;
+  boolean viewUnit = true;
 
   LevelLoader() 
   {
@@ -118,7 +123,9 @@ class LevelLoader extends Level
   void update() 
   {
     r.clear(); 
-    for (SoldierBasic s : attackers) 
+    if(viewUnit) 
+    {
+      for (SoldierBasic s : attackers) 
     {
       s.update(null, null, null, null);
       r.add(s);
@@ -129,15 +136,20 @@ class LevelLoader extends Level
       s.update(null, null, null, null);
       r.add(s);
     }
+    }
+    
+    if(viewObj) 
+    {
     for (TileObject t : objs) 
     {
       r.add(t);
     }
+   } 
   }
 
   void draw() 
   {
-    image(backgr, 0, 0);
+    if(viewBck)image(backgr, 0, 0);
     update();
     r.draw();
   }

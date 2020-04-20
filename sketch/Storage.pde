@@ -8,6 +8,7 @@ static class Storage
   
   // Game folders
   static String gameFolder = "SiegeTactics";
+  static String levelsFolder = "levels";
 
   static String getPath() 
   {

@@ -69,7 +69,7 @@ class Button
       if(fill < fillIddle) fill++;
       if(checked) fill(fillChecked, 250);
       else fill(fill, 150);
-      rect(pos.x,pos.y,size.x,size.y,(size.x+size.y)/20);
+      rect(pos.x,pos.y,size.x,size.y,30);
       fill(25);
       text(text, pos.x+size.x/2,pos.y+size.y/2);
     }

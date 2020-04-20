@@ -13,7 +13,8 @@ class Creator
   ArrayList<Button> btnsMenu;
 
   // Creator gui
-  Button btnBck, btnObj, btnBarr, btnUnit;
+  Button btnBck, btnObj, btnBarr, btnUnit, 
+         btnBckChck, btnObjChck, btnBarrChck, btnUnitChck; 
   ArrayList<Button> btnsCreator;
   PVector touchStart;
 
@@ -84,18 +85,48 @@ class Creator
       new Button(new PVector(width/8, height*(btnHDiv-1)/btnHDiv), 
       new PVector(width*3/8, height/(btnHDiv+1)), 
       "Units");
+      
+    btnBckChck = 
+      new Button(new PVector(2, height*(btnHDiv-4)/btnHDiv), 
+      new PVector(width/8-2, height/(btnHDiv+1)), 
+      "Hide");
+    btnBck.setChecked(true);
 
-    PFont font = createFont("Monospaced-Bold", 30);
-    btnBck.font = font;
-    btnObj.font = font;
-    btnBarr.font = font;
-    btnUnit.font = font;
+    btnObjChck = 
+      new Button(new PVector(2, height*(btnHDiv-3)/btnHDiv), 
+      new PVector(width/8-2, height/(btnHDiv+1)), 
+      "Hide");
+      
+    btnBarrChck = 
+      new Button(new PVector(2, height*(btnHDiv-2)/btnHDiv), 
+      new PVector(width/8-2, height/(btnHDiv+1)), 
+      "Hide");  
 
+    btnUnitChck = 
+      new Button(new PVector(2, height*(btnHDiv-1)/btnHDiv), 
+      new PVector(width/8-2, height/(btnHDiv+1)), 
+      "Hide");
+    
+    btnBckChck.setChecked(true);
+    btnObjChck.setChecked(true);
+    btnBarrChck.setChecked(true);
+    btnUnitChck.setChecked(true);
+      
     btnsCreator = new ArrayList<Button>();
     btnsCreator.add(btnBck);
     btnsCreator.add(btnObj);
     btnsCreator.add(btnBarr);
     btnsCreator.add(btnUnit);
+    btnsCreator.add(btnBckChck);
+    btnsCreator.add(btnObjChck);
+    btnsCreator.add(btnBarrChck);
+    btnsCreator.add(btnUnitChck);
+    
+    PFont font = createFont("Monospaced-Bold", 30);
+    for(Button btn : btnsCreator) 
+    {
+     btn.font = font;
+    }
 
     dte = new DialogTextEdit(sketch);
     dte.title = "Level name";
@@ -416,7 +447,7 @@ class Creator
 
       selectTileFromDir(Storage.dataDirBacks);
 
-      ret = true;
+      ret |= true;
     }
 
     if (btnObj.pressed)
@@ -428,7 +459,7 @@ class Creator
 
       selectTileFromDir(Storage.dataDirTiles);
 
-      ret = true;
+      ret |= true;
     }
 
     if (btnUnit.pressed)
@@ -446,9 +477,37 @@ class Creator
         state = CreatorStates.select;
       } 
 
-      ret = true;
+      ret |= true;
+    }
+    
+    ret |= checkedLayerTest(btnBckChck);
+    ret |= checkedLayerTest(btnObjChck);
+    ret |= checkedLayerTest(btnBarrChck);
+    ret |= checkedLayerTest(btnUnitChck);
+    
+    if(ret) 
+    {
+      level.viewBck = btnBckChck.checked;
+      level.viewObj = btnObjChck.checked;
+      level.viewBarr = btnBarrChck.checked;
+      level.viewUnit = btnUnitChck.checked;
     }
     return ret;
+  }
+  
+  boolean checkedLayerTest(Button btn) 
+  {
+    if (btn.pressed)
+    {
+      btn.reset();
+      btn.setChecked(!btn.checked);
+      
+      if(btn.checked) btn.text = "Hide";
+      else btn.text = "Show";
+      
+      return true;
+    } 
+    return false;
   }
 
   void checkSelectBtns() 
