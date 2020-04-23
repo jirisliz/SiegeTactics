@@ -14,7 +14,8 @@ class Creator
 
   // Creator gui
   Button btnBck, btnObj, btnBarr, btnUnit, 
-         btnBckChck, btnObjChck, btnBarrChck, btnUnitChck; 
+    btnBckChck, btnObjChck, btnBarrChck, btnUnitChck; 
+  Button btnLoad, btnDel, btnMove, btnAdd;
   ArrayList<Button> btnsCreator;
   PVector touchStart;
 
@@ -58,7 +59,7 @@ class Creator
     btnsMenu = new ArrayList<Button>();
     btnsMenu.add(btnNew);
     btnsMenu.add(btnOpen);
-    
+
     btnsMenu.add(btnBack);
   }
 
@@ -75,7 +76,7 @@ class Creator
       new Button(new PVector(width/8, height*(btnHDiv-3)/btnHDiv), 
       new PVector(width*3/8, height/(btnHDiv+1)), 
       "Objects");
-      
+
     btnBarr = 
       new Button(new PVector(width/8, height*(btnHDiv-2)/btnHDiv), 
       new PVector(width*3/8, height/(btnHDiv+1)), 
@@ -85,7 +86,7 @@ class Creator
       new Button(new PVector(width/8, height*(btnHDiv-1)/btnHDiv), 
       new PVector(width*3/8, height/(btnHDiv+1)), 
       "Units");
-      
+
     btnBckChck = 
       new Button(new PVector(2, height*(btnHDiv-4)/btnHDiv), 
       new PVector(width/8-2, height/(btnHDiv+1)), 
@@ -96,7 +97,7 @@ class Creator
       new Button(new PVector(2, height*(btnHDiv-3)/btnHDiv), 
       new PVector(width/8-2, height/(btnHDiv+1)), 
       "Hide");
-      
+
     btnBarrChck = 
       new Button(new PVector(2, height*(btnHDiv-2)/btnHDiv), 
       new PVector(width/8-2, height/(btnHDiv+1)), 
@@ -106,12 +107,31 @@ class Creator
       new Button(new PVector(2, height*(btnHDiv-1)/btnHDiv), 
       new PVector(width/8-2, height/(btnHDiv+1)), 
       "Hide");
-    
+
+    btnLoad = 
+      new Button(new PVector(width*7/8-width/16, height*(btnHDiv-2)/btnHDiv), 
+      new PVector(width/8-2, height/(btnHDiv+1)), 
+      "Load");
+    btnAdd = 
+      new Button(new PVector(width*7/8-width/16, height*(btnHDiv-1)/btnHDiv), 
+      new PVector(width/8-2, height/(btnHDiv+1)), 
+      "Add"); 
+    btnDel = 
+      new Button(new PVector(width*5/8 -width/16, height*(btnHDiv-2)/btnHDiv), 
+      new PVector(width/8-2, height/(btnHDiv+1)), 
+      "Delete");
+    btnMove = 
+      new Button(new PVector(width*5/8 -width/16, height*(btnHDiv-1)/btnHDiv), 
+      new PVector(width/8-2, height/(btnHDiv+1)), 
+      "Move");
+
     btnBckChck.setChecked(true);
     btnObjChck.setChecked(true);
     btnBarrChck.setChecked(true);
     btnUnitChck.setChecked(true);
-      
+
+    btnMove.setChecked(true);
+
     btnsCreator = new ArrayList<Button>();
     btnsCreator.add(btnBck);
     btnsCreator.add(btnObj);
@@ -121,11 +141,15 @@ class Creator
     btnsCreator.add(btnObjChck);
     btnsCreator.add(btnBarrChck);
     btnsCreator.add(btnUnitChck);
-    
+    btnsCreator.add(btnLoad);
+    btnsCreator.add(btnAdd);
+    btnsCreator.add(btnDel);
+    btnsCreator.add(btnMove);
+
     PFont font = createFont("Monospaced-Bold", 30);
-    for(Button btn : btnsCreator) 
+    for (Button btn : btnsCreator) 
     {
-     btn.font = font;
+      btn.font = font;
     }
 
     dte = new DialogTextEdit(sketch);
@@ -185,6 +209,7 @@ class Creator
       background(0);
       mScr.transformPush();
       level.draw();
+      level.drawSelObj();
       mScr.transformPop();
 
       pushStyle();
@@ -291,17 +316,15 @@ class Creator
         mScr.mouseReleased();
         if (btnBck.checked)
         {
-          if (mScr.selFinished) 
-          {
-            level.clickBackrDrag(mScr);
-          } else
-          {
-            level.clickBackgr(mScr);
-          }
+          level.clickBackgr(mScr);
         }
         if (btnObj.checked)
         {
           level.clickObjs(mScr, tlPck);
+        }
+        if (btnBarr.checked)
+        {
+          level.clickBarr(mScr);
         }
         if (btnUnit.checked)
         {
@@ -383,6 +406,7 @@ class Creator
     {
       btnNew.reset();
       levelLoaded = false;
+      level = new LevelLoader();
       state = CreatorStates.creator;
       dte.showAddItemDialog("");
       selectTileFromDir(Storage.dataDirBacks);
@@ -443,10 +467,8 @@ class Creator
       btnBck.reset();
       btnBck.setChecked(true);
       btnObj.setChecked(false);
+      btnBarr.setChecked(false); 
       btnUnit.setChecked(false); 
-
-      selectTileFromDir(Storage.dataDirBacks);
-
       ret |= true;
     }
 
@@ -455,10 +477,18 @@ class Creator
       btnObj.reset();
       btnBck.setChecked(false);
       btnObj.setChecked(true);
+      btnBarr.setChecked(false); 
       btnUnit.setChecked(false); 
+      ret |= true;
+    }
 
-      selectTileFromDir(Storage.dataDirTiles);
-
+    if (btnBarr.pressed)
+    {
+      btnBarr.reset();
+      btnBck.setChecked(false);
+      btnObj.setChecked(false);
+      btnBarr.setChecked(true); 
+      btnUnit.setChecked(false);
       ret |= true;
     }
 
@@ -467,25 +497,66 @@ class Creator
       btnUnit.reset();
       btnBck.setChecked(false);
       btnObj.setChecked(false);
+      btnBarr.setChecked(false); 
       btnUnit.setChecked(true); 
+      ret |= true;
+    }
 
-      scrlbSelect = createStringsScrollBar(Defs.units);
+    if (btnLoad.pressed)
+    {
+      btnLoad.reset();
 
-      if (scrlbSelect != null) 
+      if (btnBck.checked)
       {
-        prevState = CreatorStates.creator; 
-        state = CreatorStates.select;
-      } 
+        selectTileFromDir(Storage.dataDirBacks);
+      } else if (btnObj.checked)
+      {
+        selectTileFromDir(Storage.dataDirTiles);
+      } else if (btnUnit.checked)
+      {
+        scrlbSelect = createStringsScrollBar(Defs.units);
+
+        if (scrlbSelect != null) 
+        {
+          prevState = CreatorStates.creator; 
+          state = CreatorStates.select;
+        }
+      }
 
       ret |= true;
     }
+    
+    if (btnDel.pressed)
+    {
+      btnDel.reset();
+      level.deleteSelected();
+      ret |= true;
+    } 
+    
+    if (btnMove.pressed)
+    {
+      btnMove.reset();
+      btnMove.setChecked(true);
+      btnAdd.setChecked(false);
+      level.setMoving();
+      ret |= true;
+    } 
+    
+    if (btnAdd.pressed)
+    {
+      btnAdd.reset();
+      btnMove.setChecked(false);
+      btnAdd.setChecked(true);
+      level.setAdding();
+      ret |= true;
+    } 
     
     ret |= checkedLayerTest(btnBckChck);
     ret |= checkedLayerTest(btnObjChck);
     ret |= checkedLayerTest(btnBarrChck);
     ret |= checkedLayerTest(btnUnitChck);
-    
-    if(ret) 
+
+    if (ret) 
     {
       level.viewBck = btnBckChck.checked;
       level.viewObj = btnObjChck.checked;
@@ -494,17 +565,17 @@ class Creator
     }
     return ret;
   }
-  
+
   boolean checkedLayerTest(Button btn) 
   {
     if (btn.pressed)
     {
       btn.reset();
       btn.setChecked(!btn.checked);
-      
-      if(btn.checked) btn.text = "Hide";
+
+      if (btn.checked) btn.text = "Hide";
       else btn.text = "Show";
-      
+
       return true;
     } 
     return false;

@@ -57,6 +57,7 @@ abstract class Unit extends Vehicle
     orig = new PVector(0, 0);
     unitType = aName;
     loadStdAnims(aName);
+    
   }
 
   void loadStdAnims(String unitName) 
@@ -84,6 +85,15 @@ abstract class Unit extends Vehicle
     anim_runLD = new LoadSprite(folder+"/" +"runLD.png", 4);
 
     anim_deadR = new LoadSprite(folder+"/" +"deadR.png", 4);
+    
+    if(anim_iddleRU != null) 
+    {
+      size = new PVector(anim_iddleRU.width, anim_iddleRU.height);
+    }
+    else
+    {
+      size = new PVector(16, 16);
+    }
 
     updateCurrAnim();
   }

@@ -219,7 +219,7 @@ class Screen
   {
     if(selEnabled) 
     {
-      if (touchStart.dist(new PVector(mouseX, mouseY)) > 50) 
+      if (touchStart.dist(new PVector(mouseX, mouseY)) > 16) 
       {
         touchEnd = new PVector(mouseX, mouseY);
         selFinished = true;

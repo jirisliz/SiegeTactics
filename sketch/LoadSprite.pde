@@ -4,6 +4,9 @@ class LoadSprite
   int frames = 0;
   int currFrame = 0;
   float scale = 1;
+  
+  int width;
+  int height;
 
   // Real framerate divided by
   int animSpdCount = 0;
@@ -31,6 +34,8 @@ class LoadSprite
       frames = sprImg.width/sprImg.height;
       currImg = createImage(sprImg.height, 
         sprImg.height, ARGB);
+      width = currImg.width;
+      height = currImg.height;
       update();
     }
     catch(Exception e) 

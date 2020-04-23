@@ -1,6 +1,6 @@
 enum LevelLoaderTypes
 {
-  map, back, obj, unit;
+  map, back, obj, barr, unit;
 }
 
 class LevelLoader extends Level 
@@ -13,7 +13,7 @@ class LevelLoader extends Level
   LoadTile ground;
   BackParams[][] bckgs; 
   StringDict saveTypes;
-  ArrayList<Wall> walls;
+  ArrayList<Barrier> barrs;
   ArrayList<TileObject> objs;
 
   // Selections
@@ -22,11 +22,17 @@ class LevelLoader extends Level
 
   String levelName;
   String levelFolder = Storage. levelsFolder;
-  
+
   boolean viewBck = true;
   boolean viewObj = true;
   boolean viewBarr = true;
   boolean viewUnit = true;
+  
+  boolean moving = true;
+  boolean adding = false;
+
+  //For moving objects and units
+  Object selectedObj;
 
   LevelLoader() 
   {
@@ -54,7 +60,7 @@ class LevelLoader extends Level
     r = new Renderer();
 
     bckgs = new BackParams[mGridCols+1][mGridRows+1];
-    walls = new ArrayList<Wall>();
+    barrs = new ArrayList<Barrier>();
     attackers = new ArrayList<SoldierBasic>();
     defenders = new ArrayList<SoldierBasic>();
     objs = new ArrayList<TileObject>();
@@ -98,6 +104,23 @@ class LevelLoader extends Level
     backgr.endDraw();
   }
 
+  void drawSelObj() 
+  {
+    if (selectedObj != null) 
+    {
+      pushStyle();
+      noFill();
+      stroke(30, 250, 30);
+      int x = (int) (selectedObj.position.x - selectedObj.size.x/2);
+      int y = (int) (selectedObj.position.y - selectedObj.size.y/2);
+      int w = (int) selectedObj.size.x;
+      int h = (int) selectedObj.size.y;
+
+      rect(x, y, w, h);
+      popStyle();
+    }
+  }
+
   void fillGround(Screen screen) 
   {
     PVector start = new PVector(0, 0);
@@ -120,44 +143,96 @@ class LevelLoader extends Level
     backgr.endDraw();
   }
 
+  PVector fitGrid(PVector v, int gridSz) 
+  {
+    PVector ret = new PVector(v.x, v.y);
+    ret.x = (int)ret.x/gridSz*gridSz;
+    ret.y = (int)ret.y/gridSz*gridSz;
+
+    return ret;
+  }
+  
+  void deleteSelected() 
+  {
+    if(selectedObj != null) 
+    {
+      selectedObj.delete();
+      checkDeleteRequests();
+      selectedObj = null;
+    }
+  }
+  
+  void checkDeleteRequests() 
+  { 
+    // objs
+    objs.remove(selectedObj);
+    
+    // barrs
+    barrs.remove(selectedObj);
+    
+    // units
+    attackers.remove(selectedObj);
+    defenders.remove(selectedObj);
+  }
+  
+  void setAdding() 
+  {
+    moving = false;
+    adding = true;
+  }
+  
+  void setMoving() 
+  {
+    moving = true;
+    adding = false;
+  }
+
   void update() 
   {
     r.clear(); 
-    if(viewUnit) 
+    if (viewUnit) 
     {
       for (SoldierBasic s : attackers) 
-    {
-      s.update(null, null, null, null);
-      r.add(s);
+      {
+        s.update(null, null, null, null);
+        r.add(s);
+      }
+
+      for (SoldierBasic s : defenders) 
+      {
+        s.update(null, null, null, null);
+        r.add(s);
+      }
     }
 
-    for (SoldierBasic s : defenders) 
+    if (viewObj) 
     {
-      s.update(null, null, null, null);
-      r.add(s);
+      for (TileObject t : objs) 
+      {
+        r.add(t);
+      }
     }
-    }
-    
-    if(viewObj) 
-    {
-    for (TileObject t : objs) 
-    {
-      r.add(t);
-    }
-   } 
   }
 
   void draw() 
   {
-    if(viewBck)image(backgr, 0, 0);
+    if (viewBck)image(backgr, 0, 0);
     update();
     r.draw();
+    if(viewBarr) 
+    {
+      for(Barrier b : barrs) 
+      {
+        b.draw();
+      }
+    } 
   }
 
   void addBackgr(PVector target) 
   {
     int x = (int) target.x;
     int y = (int) target.y;
+
     x = x/mBlockSz*mBlockSz;
     y = y/mBlockSz*mBlockSz;
     if (x < backgr.width && y < backgr.height &&
@@ -216,24 +291,130 @@ class LevelLoader extends Level
   void clickBackgr(Screen screen) 
   {
     if (screen.mTrStart || ground == null)return;
+
+    if (screen.selFinished) 
+    {
+      clickBackrDrag(screen);
+      return;
+    }
+
     PVector target = screen.screen2World(new PVector(mouseX, mouseY));
 
     addBackgr(target);
   }
 
+  boolean checkObjInPos(ArrayList list, PVector pos) 
+  {
+    for (int i = 0; i < list.size(); i++)
+    {
+      sketch.Object o = (sketch.Object) list.get(i);
+      if (o.posInside(pos)) 
+      {
+        selectedObj = o;
+        return true;
+      }
+    }
+    selectedObj = null;
+    return false;
+  }
+  
+  boolean moveSelectedObj(Screen screen, PVector target) 
+  {
+    if(!moving) return false;
+    // move if object selected and dragged 
+    if (screen.selFinished && selectedObj != null) 
+    {
+      PVector start = screen.screen2World(screen.touchStart);
+      PVector end = screen.screen2World(screen.touchEnd);
+      start = fitGrid(start, mBlockSz/2);
+      end = fitGrid(end, mBlockSz/2); 
+      if (selectedObj.posInside(start))
+      {
+        selectedObj.position.x += end.x - start.x;
+        selectedObj.position.y += end.y - start.y;
+      }
+      return true;
+    }
+
+    if (selectedObj != null) 
+    {
+      if (!selectedObj.posInside(target)) 
+      {
+        // deselect object
+        selectedObj = null;
+        return true;
+      }
+    }
+    return false;
+  }
+
   void clickObjs(Screen screen, TilePicker tlPck) 
   {
-    if (screen.mTrStart || tlPck == null)return;
+    
+    
     PVector target = screen.screen2World(new PVector(mouseX, mouseY));
     int x = (int) target.x;
     int y = (int) target.y;
-    x = x/mBlockSz*mBlockSz;
-    y = y/mBlockSz*mBlockSz;
 
+    // Use half of the block to move with objects
+    int blockDiv = mBlockSz/2;
+    x = x/blockDiv*blockDiv;
+    y = y/blockDiv*blockDiv;
+    
+    if(moveSelectedObj(screen, target)) return;
+
+    // select object if clicked
+    if(checkObjInPos(objs, new PVector(x, y))) 
+    {
+      return;
+    }
+    
+    if (screen.mTrStart || tlPck == null)return;
+    if(!adding) return;
+    // add new object
     TileObject t = tlPck.getSelectedTileObject();
     t.setLocation(new PVector(x, y));
 
     objs.add(t);
+  }
+
+  void clickBarr(Screen screen) 
+  {
+    
+    PVector target = screen.screen2World(new PVector(mouseX, mouseY));
+    int x = (int) target.x;
+    int y = (int) target.y;
+    
+    if(moveSelectedObj(screen, target)) return; 
+    
+    // select object if clicked
+    if(checkObjInPos(barrs, new PVector(x, y))) 
+    {
+      return;
+    }
+    
+    if(!adding) return;
+
+    if (screen.selFinished) 
+    {
+      PVector start = screen.screen2World(screen.touchStart);
+      PVector end = screen.screen2World(screen.touchEnd);
+
+      IntHolder sx = new IntHolder((int) (start.x));
+      IntHolder sy = new IntHolder((int) (start.y)) ;
+      IntHolder ex = new IntHolder((int) (end.x));
+      IntHolder ey = new IntHolder((int) (end.y));
+
+      if (sx.val> ex.val) Defs.swap(sx, ex);
+      if (sy.val> ey.val) Defs.swap(sy, ey);
+
+      PVector sz = new PVector(ex.val- sx.val, ey.val - sy.val);
+      PVector pos = new PVector(sx.val, sy.val);
+
+      Barrier newBarr = new Barrier(pos, sz);
+
+      barrs.add(newBarr);
+    }
   }
 
   void clickUnits(Screen screen) 
@@ -242,6 +423,21 @@ class LevelLoader extends Level
     PVector target = screen.screen2World(new PVector(mouseX, mouseY));
     int x = (int) target.x;
     int y = (int) target.y;
+    
+    if(moveSelectedObj(screen, target)) return; 
+    
+    // select object if clicked
+    if(checkObjInPos(attackers, new PVector(x, y))) 
+    {
+      return;
+    }
+    
+    if(checkObjInPos(defenders, new PVector(x, y))) 
+    {
+      return;
+    }
+    
+    if(!adding) return;
 
     SoldierBasic s1 = new SoldierBasic(
       x, y, 
@@ -307,28 +503,38 @@ class LevelLoader extends Level
       newRow.setString("file", to.fileName);
       newRow.setInt("param1", (int)  to.tilePos.x); 
       newRow.setInt("param2", (int)  to.tilePos.y);
-      newRow.setInt("param3", (int)  to.tileSz.x); 
-      newRow.setInt("param4", (int)  to.tileSz.y);
+      newRow.setInt("param3", (int)  to.size.x); 
+      newRow.setInt("param4", (int)  to.size.y);
     }
     
-    for(SoldierBasic s : attackers) 
+    for (Barrier b : barrs) 
+    {
+      newRow = table.addRow(); 
+      newRow.setInt("type", LevelLoaderTypes.barr.ordinal()); 
+      newRow.setInt("x", (int)  b.position.x); 
+      newRow.setInt("y", (int)  b.position.y);
+      newRow.setInt("param1", (int)  b.size.x); 
+      newRow.setInt("param2", (int)  b.size.y);
+    }
+
+    for (SoldierBasic s : attackers) 
     {
       newRow = table.addRow(); 
       newRow.setInt("type", LevelLoaderTypes.unit.ordinal()); 
       newRow.setInt("x", (int)  s.position.x); 
       newRow.setInt("y", (int)  s.position.y);
       newRow.setString("file", s.unitType);
-      newRow.setInt("param1", 0); 
+      newRow.setInt("param1", 0);
     }
-    
-    for(SoldierBasic s : defenders) 
+
+    for (SoldierBasic s : defenders) 
     {
       newRow = table.addRow(); 
       newRow.setInt("type", LevelLoaderTypes.unit.ordinal()); 
       newRow.setInt("x", (int)  s.position.x); 
       newRow.setInt("y", (int)  s.position.y);
       newRow.setString("file", s.unitType);
-      newRow.setInt("param1", 1); 
+      newRow.setInt("param1", 1);
     }
 
     if (path != null) 
@@ -351,11 +557,25 @@ class LevelLoader extends Level
       }
     }
   }
+  
+  void clearLevelData() 
+  {
+    bckgsClear();
+    objs.clear();
+    barrs.clear();
+    attackers.clear();
+    defenders.clear();
+    selectedObj = null;
+  }
 
   boolean loadFromFile() 
   {
     boolean ret = false;
     String path = Storage.createFolder(levelFolder);
+    
+    // Clear prevoius data
+    clearLevelData();
+    
     if (path != null) 
     {
       // Crear previous data
@@ -426,6 +646,15 @@ class LevelLoader extends Level
           oto.loadTileImg(img);
           oto.setLocation(op);
           objs.add(oto);
+          break;
+          
+        case barr:
+          PVector bp = new PVector(x-param1/2, y-param2/2);
+          PVector bs = new PVector(param1, param2);
+          Barrier barrNew = new Barrier(bp, bs);
+          
+          barrs.add(barrNew);
+          
           break;
         case unit:
 
