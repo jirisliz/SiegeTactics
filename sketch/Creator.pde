@@ -16,6 +16,7 @@ class Creator
   Button btnBck, btnObj, btnBarr, btnUnit, 
     btnBckChck, btnObjChck, btnBarrChck, btnUnitChck; 
   Button btnLoad, btnDel, btnMove, btnAdd;
+  Button btnAttacker, btnDefender;
   ArrayList<Button> btnsCreator;
   PVector touchStart;
 
@@ -109,28 +110,39 @@ class Creator
       "Hide");
 
     btnLoad = 
-      new Button(new PVector(width*7/8-width/16, height*(btnHDiv-2)/btnHDiv), 
+      new Button(new PVector(width*7/8-width/16, height*(btnHDiv-3)/btnHDiv), 
       new PVector(width/8-2, height/(btnHDiv+1)), 
       "Load");
     btnAdd = 
-      new Button(new PVector(width*7/8-width/16, height*(btnHDiv-1)/btnHDiv), 
+      new Button(new PVector(width*7/8-width/16, height*(btnHDiv-2)/btnHDiv), 
       new PVector(width/8-2, height/(btnHDiv+1)), 
       "Add"); 
     btnDel = 
-      new Button(new PVector(width*5/8 -width/16, height*(btnHDiv-2)/btnHDiv), 
+      new Button(new PVector(width*5/8 -width/16, height*(btnHDiv-3)/btnHDiv), 
       new PVector(width/8-2, height/(btnHDiv+1)), 
       "Delete");
     btnMove = 
-      new Button(new PVector(width*5/8 -width/16, height*(btnHDiv-1)/btnHDiv), 
+      new Button(new PVector(width*5/8 -width/16, height*(btnHDiv-2)/btnHDiv), 
       new PVector(width/8-2, height/(btnHDiv+1)), 
       "Move");
+
+    btnAttacker = 
+      new Button(new PVector(width*7/8-width/16, height*(btnHDiv-1)/btnHDiv), 
+      new PVector(width/6-2, height/(btnHDiv+1)), 
+      "Attacker");
+    btnDefender = 
+      new Button(new PVector(width*5/8-width/16, height*(btnHDiv-1)/btnHDiv), 
+      new PVector(width/6-2, height/(btnHDiv+1)), 
+      "Defender");
 
     btnBckChck.setChecked(true);
     btnObjChck.setChecked(true);
     btnBarrChck.setChecked(true);
     btnUnitChck.setChecked(true);
-
     btnMove.setChecked(true);
+
+    btnAttacker.setChecked(true);
+    showObjBtns(false); 
 
     btnsCreator = new ArrayList<Button>();
     btnsCreator.add(btnBck);
@@ -145,6 +157,9 @@ class Creator
     btnsCreator.add(btnAdd);
     btnsCreator.add(btnDel);
     btnsCreator.add(btnMove);
+
+    btnsCreator.add(btnAttacker);
+    btnsCreator.add(btnDefender);
 
     PFont font = createFont("Monospaced-Bold", 30);
     for (Button btn : btnsCreator) 
@@ -328,7 +343,26 @@ class Creator
         }
         if (btnUnit.checked)
         {
-          level.clickUnits(mScr);
+          level.clickUnits(mScr, btnAttacker.checked);
+          if (level.isSelected())
+          {
+            try
+            {
+              Unit u = (Unit) level.selectedObj;
+              if (u.teamNum == 0)
+              {
+                btnAttacker.setChecked(true);
+                btnDefender.setChecked(false);
+              } else
+              {
+                btnAttacker.setChecked(false);
+                btnDefender.setChecked(true);
+              }
+            }
+            catch(Exception e) 
+            {
+            }
+          }
         }
       }
 
@@ -365,41 +399,6 @@ class Creator
     }
   }
 
-
-
-  ScrollBar createFilesScrollBar(String dir, String ext) 
-  {
-    ScrollBar scrlb;
-    // list levels
-    File[] files = Storage.getFilesList(dir);
-    if (files.length > 0)scrlb = new ScrollBar();
-    else return null;
-    scrlb.layoutTopSpace = height/2; // for better one hand access
-    for (int i = 0; i <= files.length - 1; i++)   
-    {
-      String name = files[i].getName();
-      if (name.contains(ext))
-      {
-        name = name.replace(ext, "");
-        //println("scrollBar add: " + name);
-        scrlb.add(name);
-      }
-    }
-    return scrlb;
-  }
-
-  ScrollBar createStringsScrollBar(String[] strs) 
-  {
-    ScrollBar scrlb = new ScrollBar();
-    if (strs.length == 0) return null;
-    scrlb.layoutTopSpace = height/2; // for better one hand access
-    for (int i = 0; i <= strs.length - 1; i++)   
-    {
-      scrlb.add(strs[i]);
-    }
-    return scrlb;
-  }
-
   void checkMenuBtns() 
   {
     if (btnNew.pressed)
@@ -417,13 +416,14 @@ class Creator
       btnOpen.reset();
       String path = Storage.createFolder(level.levelFolder);
       scrlbSelect = 
-        createFilesScrollBar(path, ".csv");
-      if (scrlbSelect != null) 
+        new ScrollBar(path, ".csv");
+      if (scrlbSelect.loaded) 
       {
         prevState = CreatorStates.menu; 
         state = CreatorStates.select;
       } else
       {
+        scrlbSelect = null;
         println("No valid level to load.");
       }
     }
@@ -448,15 +448,22 @@ class Creator
     String backsDir = dataPath(dir);
     println(backsDir);
     scrlbSelect = 
-      createFilesScrollBar(backsDir, ".png");
-    if (scrlbSelect != null) 
+      new ScrollBar(backsDir, ".png");
+    if (scrlbSelect.loaded) 
     {
       prevState = CreatorStates.creator; 
       state = CreatorStates.select;
     } else
     {
+      scrlbSelect = null;
       println("No valid tile to load.");
     }
+  }
+
+  void showObjBtns(boolean show) 
+  {
+    btnAttacker.visible = show;
+    btnDefender.visible = show;
   }
 
   boolean checkCreatorBtns() 
@@ -469,7 +476,8 @@ class Creator
       btnObj.setChecked(false);
       btnBarr.setChecked(false); 
       btnUnit.setChecked(false); 
-      ret |= true;
+      showObjBtns(false); 
+      ret = true;
     }
 
     if (btnObj.pressed)
@@ -479,7 +487,8 @@ class Creator
       btnObj.setChecked(true);
       btnBarr.setChecked(false); 
       btnUnit.setChecked(false); 
-      ret |= true;
+      showObjBtns(false); 
+      ret = true;
     }
 
     if (btnBarr.pressed)
@@ -489,7 +498,8 @@ class Creator
       btnObj.setChecked(false);
       btnBarr.setChecked(true); 
       btnUnit.setChecked(false);
-      ret |= true;
+      showObjBtns(false); 
+      ret = true;
     }
 
     if (btnUnit.pressed)
@@ -499,7 +509,8 @@ class Creator
       btnObj.setChecked(false);
       btnBarr.setChecked(false); 
       btnUnit.setChecked(true); 
-      ret |= true;
+      showObjBtns(true); 
+      ret = true;
     }
 
     if (btnLoad.pressed)
@@ -514,43 +525,81 @@ class Creator
         selectTileFromDir(Storage.dataDirTiles);
       } else if (btnUnit.checked)
       {
-        scrlbSelect = createStringsScrollBar(Defs.units);
+        scrlbSelect = new ScrollBar(Defs.units);
 
-        if (scrlbSelect != null) 
+        if (scrlbSelect.loaded) 
         {
           prevState = CreatorStates.creator; 
           state = CreatorStates.select;
-        }
+        } else scrlbSelect = null;
       }
 
-      ret |= true;
+      ret = true;
     }
-    
+
     if (btnDel.pressed)
     {
       btnDel.reset();
       level.deleteSelected();
-      ret |= true;
+      ret = true;
     } 
-    
+
     if (btnMove.pressed)
     {
       btnMove.reset();
       btnMove.setChecked(true);
       btnAdd.setChecked(false);
       level.setMoving();
-      ret |= true;
+      ret = true;
     } 
-    
+
     if (btnAdd.pressed)
     {
       btnAdd.reset();
       btnMove.setChecked(false);
       btnAdd.setChecked(true);
       level.setAdding();
-      ret |= true;
+      ret = true;
     } 
-    
+
+    if (btnAttacker.pressed)
+    {
+      btnAttacker.reset();
+      btnAttacker.setChecked(true);
+      btnDefender.setChecked(false);
+      if (level.isSelected())
+      {
+        try
+        {
+          Unit u = (Unit) level.selectedObj;
+          u.teamNum = 0;
+        } 
+        catch(Exception e) 
+        {
+        }
+      }
+      ret = true;
+    }
+
+    if (btnDefender.pressed)
+    {
+      btnDefender.reset();
+      btnAttacker.setChecked(false);
+      btnDefender.setChecked(true);
+      if (level.isSelected())
+      {
+        try
+        {
+          Unit u = (Unit) level.selectedObj;
+          u.teamNum = 1;
+        } 
+        catch(Exception e) 
+        {
+        }
+      }
+      ret = true;
+    }
+
     ret |= checkedLayerTest(btnBckChck);
     ret |= checkedLayerTest(btnObjChck);
     ret |= checkedLayerTest(btnBarrChck);

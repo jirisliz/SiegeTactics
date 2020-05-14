@@ -6,6 +6,7 @@ class Button
   PFont font;
   boolean pressed = false;
   boolean checked = false;
+  boolean visible = true;
   
   int fillChecked = 210;
   int fill = 170;
@@ -29,6 +30,7 @@ class Button
 
   boolean isVisible(float trY) 
   {
+    if(!visible) return false;
     return pos.x+size.x >= 0 && pos.x <= width &&
       pos.y+size.y+trY >= 0 && pos.y+trY <= height;
   }
@@ -41,6 +43,7 @@ class Button
 
   void mouseReleased(float trY)
   {
+    if(!visible) return;
     if (isMouseIn(trY)) 
     {
       pressed = true;

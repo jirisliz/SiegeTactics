@@ -10,12 +10,22 @@ class ScrollBar {
   float initPos;
   boolean pressed = false;
   boolean moving = false;
+  boolean loaded = false;
   
   int layoutTopSpace = 100;
   
   ArrayList<Button> btns;
   
   Button lastClickedBtn = null;
+  
+  void init() 
+  {
+    btns = new ArrayList<Button>();
+    totalHeight = height;
+    barWidth = 0.05 * width;
+    translateY = 0;
+    opacity = 0;
+  }
   
   ScrollBar(float w, float h) {
     totalHeight = h;
@@ -33,12 +43,50 @@ class ScrollBar {
     recalcSz();
   }
   
-  ScrollBar() {
-    btns = new ArrayList<Button>();
-    totalHeight = height;
-    barWidth = 0.05 * width;
-    translateY = 0;
-    opacity = 0;
+  ScrollBar() 
+  {
+    init(); 
+  }
+  
+  ScrollBar(String dir, String ext) 
+  {
+    // list levels
+    File[] files = Storage.getFilesList(dir);
+    if (files.length <= 0)
+    {
+      loaded = false; 
+      return;
+    }
+    init(); 
+    
+    this.layoutTopSpace = height/2; // for better one hand access
+    for (int i = 0; i <= files.length - 1; i++)   
+    {
+      String name = files[i].getName();
+      if (name.contains(ext))
+      {
+        name = name.replace(ext, "");
+        //println("scrollBar add: " + name);
+        this.add(name);
+      }
+    }
+    loaded = true; 
+  }
+
+  ScrollBar(String[] strs) 
+  {
+    if (strs.length == 0) 
+    {
+      loaded = false; 
+      return;
+    }
+    init(); 
+    this.layoutTopSpace = height/2; // for better one hand access
+    for (int i = 0; i <= strs.length - 1; i++)   
+    {
+      this.add(strs[i]);
+    }
+    loaded = true; 
   }
   
   void recalcSz() 

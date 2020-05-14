@@ -17,5 +17,7 @@ class SoldierBasic extends Unit
   {
     super("BasicSpearman", new PVector(x, y), random(1,2), 0.4);
   }
+  
+  
  
 }

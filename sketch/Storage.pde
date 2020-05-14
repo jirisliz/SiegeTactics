@@ -5,6 +5,7 @@ static class Storage
   // Data folders
   static String dataDirBacks = "backs";
   static String dataDirTiles = "tiles";
+  static String dataDirProjectiles = "projectiles";
   
   // Game folders
   static String gameFolder = "SiegeTactics";

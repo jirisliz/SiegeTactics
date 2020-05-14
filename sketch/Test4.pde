@@ -5,6 +5,7 @@ class Test4 extends Level
 
   ArrayList<SoldierBasic> soldiers;
   ArrayList<SoldierBasic> soldiers2;
+  ArrayList<Projectile> projectiles;
 
   LoadTile grass;
   PImage backgr;
@@ -25,35 +26,39 @@ class Test4 extends Level
   {
     soldiers = new ArrayList<SoldierBasic>();
     soldiers2 = new ArrayList<SoldierBasic>();
+    projectiles = new ArrayList<Projectile>();
 
-    int numOfAttackers = 100;
-    int numOfDefenders = 100;
+    int numOfAttackers = 1;
+    int numOfDefenders = 1;
 
     for (int i = 0; i < numOfAttackers; i++) 
     {
       SoldierBasic s1 = new SoldierBasic(
         scr.mWidth*i/(2*numOfAttackers)+
         scr.mWidth/2-scr.mWidth*(numOfAttackers/2)/(2*numOfAttackers), 
-        scr.mHeight, 
+        scr.mHeight*3/5, 
         "BasicSpearman");
       s1.primaryTarget = new PVector(scr.mWidth/2, scr.mHeight/4);
       s1.target = s1.primaryTarget;
       s1.setDir(Dirs.LD);
-      s1.setState(States.attack);
+      s1.setState(States.stand);
       soldiers.add(s1);
     }
 
     for (int i = 0; i < numOfDefenders; i++) 
     {
       SoldierBasic s2 = new SoldierBasic(
-        scr.mWidth*i/(3*numOfDefenders)+
-        scr.mWidth/2-scr.mWidth*(numOfDefenders/2)/(3*numOfDefenders), 
-        0, 
+        scr.mWidth*i/(1*numOfDefenders)+
+        scr.mWidth/4-scr.mWidth*(numOfDefenders/2)/(3*numOfDefenders), 
+        scr.mHeight/6, 
         "BasicArcher");
       s2.primaryTarget = new PVector(scr.mWidth/2, scr.mHeight*3/4);
       s2.target = s2.primaryTarget;
+      s2.setRanged(true, projectiles);
       s2.setDir(Dirs.LD);
       s2.setState(States.attack);
+      s2.setAnimDiv(UnitAnims.attack, 4);
+      s2.setAnimDiv(UnitAnims.attack2, 3);
       soldiers2.add(s2);
     }
   }
@@ -72,6 +77,21 @@ class Test4 extends Level
     {
       s.update(soldiers2, soldiers, null, null);
       r.add(s);
+    }
+    
+    for (int i = projectiles.size()-1; i >= 0; i--) 
+    {
+      Projectile p = (Projectile) projectiles.get(i);
+      p.update(scr);
+      p.attack(soldiers);
+      if(p.finished)
+      {
+        projectiles.remove(p);
+      }
+      else 
+      {
+        r.add(p);
+      }
     }
 
     boolean anyLeft = false;

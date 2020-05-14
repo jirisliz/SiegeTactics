@@ -18,6 +18,8 @@ class MainMenu
 
   Screen mScr;
   Level level;
+  
+  LevelRunner levelRun;
 
   MainMenu()
   {
@@ -26,6 +28,8 @@ class MainMenu
     initSelect();
 
     initCreator();
+    
+    initNew();
 
     mScr = new Screen(16*16, 16*32);
     scr = mScr;
@@ -57,7 +61,12 @@ class MainMenu
   {
     dsg = new Creator();
   }
-
+  
+  void initNew() 
+  {
+    levelRun = new LevelRunner();
+  }
+  
   void draw() 
   {
     background(255);
@@ -78,7 +87,7 @@ class MainMenu
 
       break;
     case game:
-
+    levelRun.draw();
       break;
     case designer:
       if (dsg.state == CreatorStates.menu) 
@@ -104,7 +113,7 @@ class MainMenu
 
       break;
     case game:
-
+    levelRun.mousePressed();
       break;
     case designer:
       dsg.mousePressed();
@@ -123,7 +132,7 @@ class MainMenu
 
       break;
     case game:
-
+    levelRun.mouseDragged();
       break;
     case designer:
       mScr.mouseDragged(); 
@@ -146,7 +155,8 @@ class MainMenu
 
       break;
     case game:
-
+    levelRun.mouseReleased(); 
+    checkGame();
       break;
     case designer:
       dsg.mouseReleased();
@@ -166,7 +176,8 @@ class MainMenu
 
       break;
     case game:
-
+    levelRun.onBackPressed(); 
+    checkGame();
       break;
     case designer:
       dsg.onBackPressed();
@@ -187,8 +198,8 @@ class MainMenu
     if (btnStart.pressed)
     {
       btnStart.reset();
-      clearOldImgs(Storage.dataDirBacks);
-      clearOldImgs(Storage.dataDirTiles);
+      initNew();
+      state = MainStates.game;
     }
 
     if (btnDesigner.pressed)
@@ -203,10 +214,19 @@ class MainMenu
       getActivity().finish();
     }
   }
+  
+  void checkGame() 
+  {
+    if(levelRun.finished)
+    {
+      state=MainStates.main;
+      scr = mScr;
+    }
+  }
 
   void checkDesigner() 
   {
-    if (dsg.finished)
+    if(dsg.finished)
     {
       dsg.reset();
       state=MainStates.main;

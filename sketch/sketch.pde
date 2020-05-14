@@ -20,7 +20,7 @@ void setup()
   //size( displayWidth , displayHeight , P2D);
   fullScreen();
 
-  //frameRate(20);
+  frameRate(40);
 
   noSmooth();
   fill(0);

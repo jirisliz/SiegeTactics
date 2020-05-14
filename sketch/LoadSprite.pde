@@ -4,6 +4,7 @@ class LoadSprite
   int frames = 0;
   int currFrame = 0;
   float scale = 1;
+  boolean fullCycle = false;
   
   int width;
   int height;
@@ -40,7 +41,7 @@ class LoadSprite
     }
     catch(Exception e) 
     {
-      println("image not loaded");
+      println("image not loaded: " + e);
     }
   }
 
@@ -48,6 +49,13 @@ class LoadSprite
   {
     animSpdDiv = aDiv;
   }
+  
+  boolean fullCycleFinished() 
+  {
+    boolean ret = fullCycle;
+    fullCycle = false;
+    return ret;
+  } 
 
   void update() 
   {
@@ -60,6 +68,7 @@ class LoadSprite
       if (currFrame >= frames) 
       {
         currFrame = 0;
+        fullCycle = true;
       }
       currImg.copy(sprImg, currFrame*sprImg.height, 
         0, sprImg.height, sprImg.height, 

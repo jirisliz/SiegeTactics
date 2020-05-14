@@ -9,11 +9,16 @@ public enum Dirs
   //up, right, down, left;
 }
 
+public enum UnitAnims
+{
+  idle, attack, attack2, run, dead;
+}
+
 abstract class Unit extends Vehicle
 {
   // Standard unit animations:
-  LoadSprite anim_iddleRU, anim_iddleLU, 
-    anim_iddleRD, anim_iddleLD;
+  LoadSprite anim_idleRU, anim_idleLU, 
+    anim_idleRD, anim_idleLD;
 
   LoadSprite anim_attackRU, anim_attackLU, 
     anim_attackRD, anim_attackLD;
@@ -36,14 +41,21 @@ abstract class Unit extends Vehicle
   States state = States.walk;
   int currAttack = 0;
   Dirs dir = Dirs.RU;
-  int livesMax = 10;
+  int livesMax = 20;
   int lives = livesMax;
   boolean alive = true;
-
+  UnitAnims currAnim = UnitAnims.idle;
+  
+  // Ranged units params
+  boolean ranged = false;
+  String projectileName = "arrow.png";
+  ArrayList<Projectile> projectiles; // reference to projectiles list
+  
   int teamNum = 0;
 
   float viewRadius = 200;
   float attackRadius = 20;
+  float attackRadiusRanged = 200;
   Unit enemyAttacking;
 
   Unit() 
@@ -57,17 +69,16 @@ abstract class Unit extends Vehicle
     orig = new PVector(0, 0);
     unitType = aName;
     loadStdAnims(aName);
-    
   }
 
   void loadStdAnims(String unitName) 
   {
     String folder = dataPath(unitName);
 
-    anim_iddleRU = new LoadSprite(folder+"/" +"iddleRU.png", 8);
-    anim_iddleLU = new LoadSprite(folder+"/" +"iddleLU.png", 8);
-    anim_iddleRD = new LoadSprite(folder+"/" +"iddleRD.png", 8);
-    anim_iddleLD = new LoadSprite(folder+"/" +"iddleLD.png", 8);    
+    anim_idleRU = new LoadSprite(folder+"/" +"idleRU.png", 8);
+    anim_idleLU = new LoadSprite(folder+"/" +"idleLU.png", 8);
+    anim_idleRD = new LoadSprite(folder+"/" +"idleRD.png", 8);
+    anim_idleLD = new LoadSprite(folder+"/" +"idleLD.png", 8);    
 
     anim_attackRU = new LoadSprite(folder+"/" +"attackRU.png", 5);
     anim_attackLU = new LoadSprite(folder+"/" +"attackLU.png", 5);
@@ -85,12 +96,11 @@ abstract class Unit extends Vehicle
     anim_runLD = new LoadSprite(folder+"/" +"runLD.png", 4);
 
     anim_deadR = new LoadSprite(folder+"/" +"deadR.png", 4);
-    
-    if(anim_iddleRU != null) 
+
+    if (anim_idleRU != null) 
     {
-      size = new PVector(anim_iddleRU.width, anim_iddleRU.height);
-    }
-    else
+      size = new PVector(anim_idleRU.width, anim_idleRU.height);
+    } else
     {
       size = new PVector(16, 16);
     }
@@ -116,23 +126,71 @@ abstract class Unit extends Vehicle
     state = States.seek;
   }
 
+  void setRanged(boolean state, ArrayList<Projectile> p)
+  {
+    ranged = state;
+    if(ranged) 
+    {
+      projectiles = p;
+    }
+    else
+    {
+      projectiles = null;
+    }
+  } 
+
+  void setAnimDiv(UnitAnims anim, int div)
+  {
+    switch(anim) 
+    {
+    case idle: 
+      anim_idleRU.setSpeedDiv(div);
+      anim_idleLU.setSpeedDiv(div);
+      anim_idleRD.setSpeedDiv(div);
+      anim_idleLD.setSpeedDiv(div);
+      break;
+    case attack: 
+      anim_attackRU.setSpeedDiv(div);
+      anim_attackLU.setSpeedDiv(div);
+      anim_attackRD.setSpeedDiv(div);
+      anim_attackLD.setSpeedDiv(div);
+      break;
+    case attack2: 
+      anim_attack2RU.setSpeedDiv(div);
+      anim_attack2LU.setSpeedDiv(div);
+      anim_attack2RD.setSpeedDiv(div);
+      anim_attack2LD.setSpeedDiv(div);
+      break;
+    case run: 
+      anim_runRU.setSpeedDiv(div);
+      anim_runLU.setSpeedDiv(div);
+      anim_runRD.setSpeedDiv(div);
+      anim_runLD.setSpeedDiv(div);
+      break;
+    case dead: 
+      anim_deadR.setSpeedDiv(div);
+      break;
+    }
+  } 
+
   void setIddleAnim() 
   {
     switch(dir) 
     {
     case RU: 
-      animCurr = anim_iddleRU; 
+      animCurr = anim_idleRU; 
       break;
     case RD: 
-      animCurr = anim_iddleRD; 
+      animCurr = anim_idleRD; 
       break;
     case LD: 
-      animCurr = anim_iddleLD; 
+      animCurr = anim_idleLD; 
       break;
     case LU: 
-      animCurr = anim_iddleLU; 
+      animCurr = anim_idleLU; 
       break;
     }
+    currAnim = UnitAnims.idle;
   }
 
   void setWalkAnim() 
@@ -152,6 +210,7 @@ abstract class Unit extends Vehicle
       animCurr = anim_runLU; 
       break;
     }
+    currAnim = UnitAnims.run;
   }
 
   void setAttackAnim() 
@@ -173,6 +232,7 @@ abstract class Unit extends Vehicle
         animCurr = anim_attackLU; 
         break;
       }
+      currAnim = UnitAnims.attack;
     } else if (currAttack == 1)
     {
       switch(dir) 
@@ -190,12 +250,14 @@ abstract class Unit extends Vehicle
         animCurr = anim_attack2LU; 
         break;
       }
+      currAnim = UnitAnims.attack2;
     }
   }
 
   void setDeadAnim() 
   {
     animCurr = anim_deadR;
+    currAnim = UnitAnims.dead;
   }
 
   boolean randomBool() {
@@ -278,17 +340,43 @@ abstract class Unit extends Vehicle
 
       if (animFullCycle) 
       {
-        if(st == States.attack) 
+        if (ranged) 
         {
-          currAttack = (int) random(1.4);
+          currAttack = 1; // melee attack for ranged
+        } else
+        {
+          if (st == States.attack) 
+          {
+            currAttack = (int) random(1.4);
+          }
+          animFullCycle = false;
         }
-        animFullCycle = false;
         if (enemyAttacking != null) 
         {
           enemyAttacking.attack(1);
         }
       }
       return true;
+    }
+    else if(dist < attackRadiusRanged) 
+    {
+      selectDirQuad();
+      setState(States.defend);
+      currAttack = 0;
+      setAttackAnim();
+
+      if (animFullCycle && projectiles != null &&
+          currAnim == UnitAnims.attack ) 
+      {
+        animFullCycle = false;
+        String path = dataPath(Storage.dataDirProjectiles) +
+                        "/" + projectileName;
+
+        Projectile pr = new Projectile(position, path);
+        pr.fire(enemyAttacking);
+        
+        projectiles.add(pr);
+      }
     }
     return false;
   }
@@ -311,7 +399,7 @@ abstract class Unit extends Vehicle
     if (animCurr != null)
     {
       animCurr.update();
-      if (animCurr.currFrame == 0)animFullCycle = true;
+      if (animCurr.fullCycleFinished())animFullCycle = true;
     }
 
 
@@ -367,7 +455,7 @@ abstract class Unit extends Vehicle
       if (target != null) 
       {
         float dist = position.dist(target);
-        if (dist < viewRadius) 
+        if (dist < viewRadius && !ranged) 
         {
           super.update();
           applySeek();
@@ -392,7 +480,7 @@ abstract class Unit extends Vehicle
         stroke(30, 200, 30);
         strokeWeight(2);
         float w = 0.8*(float)r;
-        int l = (int) map(lives, 0, livesMax, 1, w);
+        float l = map(lives, 0, livesMax, 0.1, w);
         line(position.x-l, position.y-r, 
           position.x+l, position.y-r);
       }

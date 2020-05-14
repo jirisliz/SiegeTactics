@@ -68,6 +68,11 @@ class LevelLoader extends Level
     // Draw grid 
     drawGrid();
   }
+  
+  boolean isSelected() 
+  {
+    return selectedObj != null; 
+  }
 
   boolean loadGround(String name) 
   {
@@ -320,14 +325,24 @@ class LevelLoader extends Level
   
   boolean moveSelectedObj(Screen screen, PVector target) 
   {
+    return moveSelectedObj(screen, target, true);
+  }
+  
+  boolean moveSelectedObj(Screen screen, PVector target, boolean fitGrid) 
+  {
     if(!moving) return false;
     // move if object selected and dragged 
     if (screen.selFinished && selectedObj != null) 
     {
       PVector start = screen.screen2World(screen.touchStart);
       PVector end = screen.screen2World(screen.touchEnd);
-      start = fitGrid(start, mBlockSz/2);
-      end = fitGrid(end, mBlockSz/2); 
+      
+      if(fitGrid) 
+      {
+        start = fitGrid(start, mBlockSz/2);
+        end = fitGrid(end, mBlockSz/2); 
+      }
+      
       if (selectedObj.posInside(start))
       {
         selectedObj.position.x += end.x - start.x;
@@ -350,8 +365,6 @@ class LevelLoader extends Level
 
   void clickObjs(Screen screen, TilePicker tlPck) 
   {
-    
-    
     PVector target = screen.screen2World(new PVector(mouseX, mouseY));
     int x = (int) target.x;
     int y = (int) target.y;
@@ -380,7 +393,6 @@ class LevelLoader extends Level
 
   void clickBarr(Screen screen) 
   {
-    
     PVector target = screen.screen2World(new PVector(mouseX, mouseY));
     int x = (int) target.x;
     int y = (int) target.y;
@@ -417,14 +429,14 @@ class LevelLoader extends Level
     }
   }
 
-  void clickUnits(Screen screen) 
+  void clickUnits(Screen screen, boolean isAttacker) 
   {
     if (screen.mTrStart)return;
     PVector target = screen.screen2World(new PVector(mouseX, mouseY));
     int x = (int) target.x;
     int y = (int) target.y;
     
-    if(moveSelectedObj(screen, target)) return; 
+    if(moveSelectedObj(screen, target, false)) return; 
     
     // select object if clicked
     if(checkObjInPos(attackers, new PVector(x, y))) 
@@ -444,7 +456,9 @@ class LevelLoader extends Level
       unitName);
     s1.setState(States.stand);
     s1.dir = Dirs.RD;
-    attackers.add(s1);
+    if(!isAttacker)s1.teamNum = 1;
+    if(isAttacker) attackers.add(s1);
+    else defenders.add(s1);
   }
 
   void drawBack(BackParams bck) 
@@ -663,6 +677,7 @@ class LevelLoader extends Level
             file);
           s1.setState(States.stand);
           s1.dir = Dirs.RD;
+          s1.teamNum = param1;
           if (param1 == 0)attackers.add(s1);
           if (param1 == 1)defenders.add(s1);
           break;

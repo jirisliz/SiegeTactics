@@ -26,7 +26,7 @@ abstract class Object
     return false;
   }
   
-  boolean intersect(Object obj) 
+  boolean intersects(Object obj) 
   {
     PVector p1 = position;
     PVector s1 = size;
