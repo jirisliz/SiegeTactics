@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <title>Siege Tactics JS</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      overflow: hidden;
+      background: #111;
+    }
+    #gameCanvas {
+      display: block;
+      /* No CSS width/height — canvas pixel size is set by JS to match
+         devicePixelRatio so it is always crisp on HiDPI / Retina screens.
+         position:absolute keeps it from influencing layout. */
+      position: absolute;
+      top: 0; left: 0;
+      touch-action: none;
+      cursor: default;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- ── Core utilities ── -->
+  <script src="js/Defs.js"></script>
+  <script src="js/Storage.js"></script>
+
+  <!-- ── Engine ── -->
+  <script src="js/Camera.js"></script>
+  <script src="js/Renderer.js"></script>
+  <script src="js/LoadSprite.js"></script>
+  <script src="js/LoadTile.js"></script>
+
+  <!-- ── Game objects ── -->
+  <script src="js/GameObject.js"></script>
+  <script src="js/Vehicle.js"></script>
+  <script src="js/Unit.js"></script>
+  <script src="js/SoldierBasic.js"></script>
+  <script src="js/Projectile.js"></script>
+  <script src="js/Path.js"></script>
+  <script src="js/Wall.js"></script>
+  <script src="js/Barrier.js"></script>
+  <script src="js/TileObject.js"></script>
+
+  <!-- ── UI ── -->
+  <script src="js/Button.js"></script>
+  <script src="js/ScrollBar.js"></script>
+
+  <!-- ── Level system ── -->
+  <script src="js/Level.js"></script>
+  <script src="js/LevelLoader.js"></script>
+  <script src="js/TilePicker.js"></script>
+  <script src="js/Pathfinder.js"></script>
+  <script src="js/LevelRunner.js"></script>
+  <script src="js/Editor.js"></script>
+
+  <!-- ── App entry point ── -->
+  <script src="js/MainMenu.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
