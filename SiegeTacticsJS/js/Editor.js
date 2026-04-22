@@ -68,21 +68,26 @@ class Editor {
     this.btnCreatorBack = new Button(pad,               pad, topW, bH, '← Back');
     this.btnEditorSel   = new Button(pad + topW + pad,  pad, topW, bH, 'Select');
 
+    // Top-right: sidebar toggle
+    this.btnSidebarToggle = new Button(cW - topW - pad, pad, topW, bH, 'Units');
+
     // Select-back button (shown in scrollable list sub-state)
     const selBkW = Math.max(100, Math.round(cW * 0.25));
     this.btnSelectBack = new Button(Math.round((cW - selBkW) / 2), y0, selBkW, bH, '← Back');
 
     // Store for draw-time use
-    this._topW  = topW;
-    this._bH    = bH;
-    this._pad   = pad;
+    this._topW        = topW;
+    this._bH          = bH;
+    this._pad         = pad;
+    this._showSidebar = false;
 
     this._creatorBtns = [this.btnBck, this.btnObj, this.btnBarr, this.btnUnit,
                          this.btnBckV,this.btnObjV,this.btnBarrV,this.btnUnitV,
                          this.btnLoad,this.btnAdd, this.btnDel,  this.btnMove,
                          this.btnCopy,
                          this.btnAttacker, this.btnDefender,
-                         this.btnSave, this.btnGrid, this.btnCreatorBack, this.btnEditorSel];
+                         this.btnSave, this.btnGrid, this.btnCreatorBack, this.btnEditorSel,
+                         this.btnSidebarToggle];
 
     // ── Level & camera ──
     this.level       = new LevelLoader();
@@ -95,7 +100,7 @@ class Editor {
     this.levelLoaded  = false;
     this.scrollSelect = null;
     this.tlPck        = null;
-    this._showGrid    = false;
+    this._showGrid    = true;
 
     // ── Multi-selection state ──
     this._editorSelMode  = false;
@@ -367,6 +372,13 @@ class Editor {
       for (const b of others) b.setChecked(false);
     };
 
+    if (this.btnSidebarToggle.pressed) {
+      this.btnSidebarToggle.reset();
+      this._showSidebar = !this._showSidebar;
+      this.btnSidebarToggle.setChecked(this._showSidebar);
+      hit = true;
+    }
+
     if (this.btnEditorSel.pressed) {
       this.btnEditorSel.reset();
       this._editorSelMode = !this._editorSelMode;
@@ -529,6 +541,7 @@ class Editor {
         if (this._showGrid) this._drawGrid(ctx);
         this.cam.pop(ctx);
         this._drawEditorSelRect(ctx);
+        this._drawSidebar(ctx);
         for (const b of this._creatorBtns) b.draw(ctx);
         if (this.level.levelName) {
           ctx.fillStyle    = 'rgba(255,255,255,0.7)';
@@ -545,6 +558,97 @@ class Editor {
         if (this.tlPck) this.tlPck.draw(ctx);
         break;
     }
+  }
+
+  _unitCounts(list) {
+    const map = {};
+    for (const u of list) map[u.unitType] = (map[u.unitType] || 0) + 1;
+    return map;
+  }
+
+  _drawSidebar(ctx) {
+    if (!this._showSidebar) return;
+
+    const cW  = window.innerWidth;
+    const bH  = this._bH, pad = this._pad;
+    const sW  = Math.max(155, Math.min(230, Math.round(cW * 0.20)));
+    const sX  = cW - sW - pad;
+    const sY  = bH + pad * 3;
+    const sH  = UI.toolbarY(3) - sY - pad;
+    const r   = 10;
+
+    const lineH      = Math.max(18, Math.round(bH * 0.52));
+    const fontSize   = Math.max(11, Math.round(bH * 0.33));
+    const headerSize = Math.max(12, Math.round(bH * 0.38));
+    const innerX     = sX + pad * 2;
+
+    const atkCounts = this._unitCounts(this.level.attackers);
+    const defCounts = this._unitCounts(this.level.defenders);
+
+    ctx.save();
+
+    // Panel background
+    ctx.beginPath();
+    ctx.roundRect(sX, sY, sW, sH, r);
+    ctx.fillStyle = 'rgba(10,14,26,0.92)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Clip text to panel
+    ctx.beginPath();
+    ctx.roundRect(sX, sY, sW, sH, r);
+    ctx.clip();
+
+    ctx.textAlign    = 'left';
+    ctx.textBaseline = 'top';
+
+    let y = sY + pad * 1.5;
+
+    const drawSection = (title, color, counts) => {
+      // Section header
+      ctx.font      = `bold ${headerSize}px monospace`;
+      ctx.fillStyle = color;
+      ctx.fillText(title, innerX, y);
+      y += lineH;
+
+      const entries = Object.entries(counts);
+      ctx.font      = `${fontSize}px monospace`;
+      if (entries.length === 0) {
+        ctx.fillStyle = '#4b5563';
+        ctx.fillText('  (none)', innerX, y);
+        y += lineH;
+      } else {
+        for (const [type, n] of entries) {
+          ctx.fillStyle = '#cdd3e0';
+          ctx.fillText(`  ${n}×`, innerX, y);
+          ctx.fillStyle = '#9ca3af';
+          const nW = ctx.measureText(`  ${n}× `).width;
+          ctx.fillText(type, innerX + nW, y);
+          y += lineH;
+        }
+      }
+      y += Math.round(pad * 0.8);
+    };
+
+    drawSection('Attackers:', '#f87171', atkCounts);
+    drawSection('Defenders:', '#60a5fa', defCounts);
+
+    // Total lines
+    ctx.font      = `bold ${fontSize}px monospace`;
+    const atkTotal = this.level.attackers.length;
+    const defTotal = this.level.defenders.length;
+    const divY = y + pad * 0.5;
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+    ctx.lineWidth   = 1;
+    ctx.beginPath();
+    ctx.moveTo(sX + pad, divY); ctx.lineTo(sX + sW - pad, divY); ctx.stroke();
+    y = divY + pad;
+    ctx.fillStyle = '#6b7280';
+    ctx.fillText(`Total: ${atkTotal + defTotal}  (${atkTotal}a / ${defTotal}d)`, innerX, y);
+
+    ctx.restore();
   }
 
   // Green outlines around each editor-selected object (world space, inside cam.push/pop)
