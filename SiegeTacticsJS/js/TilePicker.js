@@ -22,8 +22,11 @@ class TilePicker {
     this.cam.selEnabled = true;
     this.cam.bordersCheck = false;
 
-    this.btnBack   = new Button(cW * 6/8, cH * 19/20, cW * 2/8 - 4, cH / 21, 'Back');
-    this.btnSelect = new Button(cW * 1/8, cH * 19/20, cW * 4/8,     cH / 21, 'Select');
+    UI.init();
+    const bH = UI.btnH, pad = UI.pad;
+    const selectW = Math.round(cW * 0.45);
+    this.btnBack   = new Button(cW - Math.round(cW * 0.22) - pad, UI.toolbarY(0), Math.round(cW * 0.22), bH, 'Back');
+    this.btnSelect = new Button(pad, UI.toolbarY(0), selectW, bH, 'Select', 'primary');
 
     // Load the tileset as a plain image for display + extraction
     this._tileImg = new LoadTile(`${Storage.dataDirTiles}/${tileFile}`, 16);

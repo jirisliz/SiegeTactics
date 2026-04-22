@@ -28,11 +28,13 @@ class ScrollBar {
   }
 
   _addName(name) {
-    const i  = this.btns.length;
-    const cW = window.innerWidth;
-    const cH = window.innerHeight;
-    const btn = new Button(20, i * 0.09 * cH + 20 + this.layoutTopSpace,
-                           cW - 40, 0.08 * cH - 20, name);
+    const i   = this.btns.length;
+    const cW  = window.innerWidth;
+    const bH  = UI.btnH;
+    const pad = UI.pad;
+    const rowH = bH + pad;
+    const btn = new Button(pad * 2, i * rowH + pad + this.layoutTopSpace,
+                           cW - pad * 4, bH, name);
     this.btns.push(btn);
   }
 

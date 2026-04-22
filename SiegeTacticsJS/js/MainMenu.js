@@ -8,11 +8,13 @@ class MainMenu {
     this.state    = MainStates.main;
 
     const cW = window.innerWidth, cH = window.innerHeight;
-    const bw = Math.floor(cW / 2), bh = Math.floor(cH / 12), bx = Math.floor(cW / 4);
+    UI.init();
+    const bh  = UI.btnH, bw = UI.menuW, bx = UI.menuX, gap = UI.menuGap;
+    const menuTop = Math.floor(cH * 0.58);
 
-    this.btnStart    = new Button(bx, Math.floor(cH * 7/10), bw, bh, 'Start');
-    this.btnDesigner = new Button(bx, Math.floor(cH * 8/10), bw, bh, 'Editor');
-    this.btnExit     = new Button(bx, Math.floor(cH * 9/10), bw, bh, 'Exit');
+    this.btnStart    = new Button(bx, menuTop,               bw, bh, 'Start',  'primary');
+    this.btnDesigner = new Button(bx, menuTop + bh + gap,    bw, bh, 'Editor');
+    this.btnExit     = new Button(bx, menuTop + 2*(bh+gap),  bw, bh, 'Exit',   'danger');
 
     this.levelRunner = null;
     this.editor      = null;
@@ -55,7 +57,7 @@ class MainMenu {
     const { x, y } = this._pos(e);
     this._mx = x; this._my = y; this._pmx = x; this._pmy = y;
     this._drag = true;
-    this.onMouseDown(x, y);
+    this.onMouseDown(x, y, e.button);
   }
 
   _onMove(e) {
@@ -68,7 +70,7 @@ class MainMenu {
   _onUp(e) {
     const { x, y } = this._pos(e);
     this._drag = false;
-    this.onMouseUp(x, y);
+    this.onMouseUp(x, y, e.button);
   }
 
   _onWheel(e) {
@@ -80,10 +82,10 @@ class MainMenu {
   }
 
   // ── Input ─────────────────────────────────────────────────────────────────
-  onMouseDown(mx, my) {
+  onMouseDown(mx, my, button = 0) {
     switch (this.state) {
-      case MainStates.game:     this.levelRunner.onMouseDown(mx, my); break;
-      case MainStates.designer: this.editor.onMouseDown(mx, my);      break;
+      case MainStates.game:     this.levelRunner.onMouseDown(mx, my, button); break;
+      case MainStates.designer: this.editor.onMouseDown(mx, my, button);      break;
     }
   }
 
@@ -98,7 +100,7 @@ class MainMenu {
     }
   }
 
-  onMouseUp(mx, my) {
+  onMouseUp(mx, my, button = 0) {
     switch (this.state) {
       case MainStates.main:
         this.btnStart.onMouseUp(mx, my);
@@ -106,10 +108,10 @@ class MainMenu {
         this.btnExit.onMouseUp(mx, my);
         this._checkMainBtns(); break;
       case MainStates.game:
-        this.levelRunner.onMouseUp(mx, my);
+        this.levelRunner.onMouseUp(mx, my, button);
         this._checkGame(); break;
       case MainStates.designer:
-        this.editor.onMouseUp(mx, my);
+        this.editor.onMouseUp(mx, my, button);
         this._checkEditor(); break;
     }
   }

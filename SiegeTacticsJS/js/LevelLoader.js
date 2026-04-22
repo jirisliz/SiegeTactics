@@ -110,11 +110,50 @@ class LevelLoader extends Level {
   deleteSelected() {
     if (!this.selectedObj) return;
     this.selectedObj.delete();
+    this._filterDeleted();
+    this.selectedObj = null;
+  }
+
+  deleteObjects(list) {
+    for (const o of list) o.delete();
+    this._filterDeleted();
+    if (list.includes(this.selectedObj)) this.selectedObj = null;
+  }
+
+  _filterDeleted() {
     this.objs      = this.objs.filter(o => !o.reqDelete);
     this.barrs     = this.barrs.filter(o => !o.reqDelete);
     this.attackers = this.attackers.filter(o => !o.reqDelete);
     this.defenders = this.defenders.filter(o => !o.reqDelete);
-    this.selectedObj = null;
+  }
+
+  copyObjects(list) {
+    const off   = this.blockSz;
+    const copies = [];
+    for (const o of list) {
+      if (o instanceof TileObject) {
+        const t = new TileObject(o.fileName, o.tilePos.x, o.tilePos.y, o.size.x, o.size.y);
+        t.setTileImg(o._img);
+        t.setLocation(o.position.x + off, o.position.y + off);
+        this.objs.push(t);
+        copies.push(t);
+      } else if (o instanceof Barrier) {
+        const b = new Barrier(
+          o.position.x - o.size.x / 2 + off,
+          o.position.y - o.size.y / 2 + off,
+          o.size.x, o.size.y
+        );
+        this.barrs.push(b);
+        copies.push(b);
+      } else if (o instanceof Unit) {
+        const s = new SoldierBasic(o.position.x + off, o.position.y + off, o.unitType);
+        s.setState(States.stand); s.dir = Dirs.RD;
+        s.teamNum = o.teamNum;
+        if (o.teamNum === 0) this.attackers.push(s); else this.defenders.push(s);
+        copies.push(s);
+      }
+    }
+    return copies;
   }
 
   _checkObjInPos(list, px, py) {

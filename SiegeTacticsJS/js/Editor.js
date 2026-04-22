@@ -8,56 +8,81 @@ class Editor {
     this._prevState = CreatorStates.menu;
 
     const cW = window.innerWidth, cH = window.innerHeight;
-    const bh = Math.floor(cH / 13);
-    const bw = Math.floor(cW / 2);
-    const bx = Math.floor(cW / 4);
+    UI.init();
+    const bH  = UI.btnH, pad = UI.pad;
+    const acW = UI.colAct, visW = UI.colVis;
 
     // ── Menu buttons ──
-    this.btnNew    = new Button(bx, Math.floor(cH * 7/10), bw, bh, 'New map');
-    this.btnOpen   = new Button(bx, Math.floor(cH * 8/10), bw, bh, 'Open map');
-    this.btnBack   = new Button(bx, Math.floor(cH * 9/10), bw, bh, 'Back');
+    const menuTop = Math.floor(cH * 0.58);
+    this.btnNew  = new Button(UI.menuX, menuTop,                    UI.menuW, bH, 'New map');
+    this.btnOpen = new Button(UI.menuX, menuTop + bH + UI.menuGap,  UI.menuW, bH, 'Open map');
+    this.btnBack = new Button(UI.menuX, menuTop + 2*(bH+UI.menuGap),UI.menuW, bH, 'Back');
 
-    // ── Creator toolbar ──
-    const D  = 31;
-    const bsH = Math.floor(cH / D);
-    const bsW = Math.floor(cW * 3 / 8);
-    const bsX = Math.floor(cW / 8);
-    const smW = Math.floor(cW / 8) - 2;
-    const smX = 2;
-    const rX  = Math.floor(cW * 7/8) - smW;
-    const r2X = Math.floor(cW * 5/8) - smW;
+    // ── Creator toolbar (4 rows from bottom) ──
+    // Visibility toggles at left edge; layer-select buttons beside them;
+    // action buttons anchored to right edge.
+    const visX = pad;
+    const layX = visX + visW + pad;
+    const layW = Math.max(90, Math.min(260, Math.round(cW * 0.28)));
 
-    this.btnBck    = new Button(bsX, cH*(D-4)/D, bsW, bsH, 'Background'); this.btnBck.setChecked(true);
-    this.btnObj    = new Button(bsX, cH*(D-3)/D, bsW, bsH, 'Objects');
-    this.btnBarr   = new Button(bsX, cH*(D-2)/D, bsW, bsH, 'Barriers');
-    this.btnUnit   = new Button(bsX, cH*(D-1)/D, bsW, bsH, 'Units');
+    const y3 = UI.toolbarY(3);  // background row (top of toolbar)
+    const y2 = UI.toolbarY(2);  // objects row
+    const y1 = UI.toolbarY(1);  // barriers row
+    const y0 = UI.toolbarY(0);  // units row (bottom)
 
-    this.btnBckV   = new Button(smX, cH*(D-4)/D, smW, bsH, 'Hide'); this.btnBckV.setChecked(true);
-    this.btnObjV   = new Button(smX, cH*(D-3)/D, smW, bsH, 'Hide'); this.btnObjV.setChecked(true);
-    this.btnBarrV  = new Button(smX, cH*(D-2)/D, smW, bsH, 'Hide'); this.btnBarrV.setChecked(true);
-    this.btnUnitV  = new Button(smX, cH*(D-1)/D, smW, bsH, 'Hide'); this.btnUnitV.setChecked(true);
+    // Layer-select buttons
+    this.btnBck  = new Button(layX, y3, layW, bH, 'Background'); this.btnBck.setChecked(true);
+    this.btnObj  = new Button(layX, y2, layW, bH, 'Objects');
+    this.btnBarr = new Button(layX, y1, layW, bH, 'Barriers');
+    this.btnUnit = new Button(layX, y0, layW, bH, 'Units');
 
-    this.btnLoad   = new Button(rX,  cH*(D-3)/D, smW, bsH, 'Load');
-    this.btnAdd    = new Button(rX,  cH*(D-2)/D, smW, bsH, 'Add');
-    this.btnDel    = new Button(r2X, cH*(D-3)/D, smW, bsH, 'Del');
-    this.btnMove   = new Button(r2X, cH*(D-2)/D, smW, bsH, 'Move'); this.btnMove.setChecked(true);
+    // Visibility toggles
+    this.btnBckV  = new Button(visX, y3, visW, bH, 'Hide'); this.btnBckV.setChecked(true);
+    this.btnObjV  = new Button(visX, y2, visW, bH, 'Hide'); this.btnObjV.setChecked(true);
+    this.btnBarrV = new Button(visX, y1, visW, bH, 'Hide'); this.btnBarrV.setChecked(true);
+    this.btnUnitV = new Button(visX, y0, visW, bH, 'Hide'); this.btnUnitV.setChecked(true);
 
-    this.btnAttacker = new Button(rX,  cH*(D-1)/D, Math.floor(cW/6), bsH, 'Attacker');
-    this.btnDefender = new Button(r2X, cH*(D-1)/D, Math.floor(cW/6), bsH, 'Defender');
+    // Action buttons — right-anchored
+    // Row 3: Save (col 0), Grid (col 1)
+    this.btnSave = new Button(UI.rightCol(0), y3, acW, bH, 'Save', 'primary');
+    this.btnGrid = new Button(UI.rightCol(1), y3, acW, bH, 'Grid');
+
+    // Row 2: Del (col 0), Copy (col 1), Load (col 2)
+    this.btnDel  = new Button(UI.rightCol(0), y2, acW, bH, 'Del',  'danger');
+    this.btnCopy = new Button(UI.rightCol(1), y2, acW, bH, 'Copy');
+    this.btnLoad = new Button(UI.rightCol(2), y2, acW, bH, 'Load');
+
+    // Row 1: Add (col 0), Move (col 1)
+    this.btnAdd  = new Button(UI.rightCol(0), y1, acW, bH, 'Add');
+    this.btnMove = new Button(UI.rightCol(1), y1, acW, bH, 'Move'); this.btnMove.setChecked(true);
+
+    // Row 0: Attacker/Defender (hidden until Units layer active)
+    this.btnAttacker = new Button(UI.rightCol(1), y0, acW, bH, 'Atk');
+    this.btnDefender = new Button(UI.rightCol(0), y0, acW, bH, 'Def');
     this.btnAttacker.setChecked(true);
     this.btnAttacker.visible = false;
     this.btnDefender.visible = false;
 
-    this.btnSave        = new Button(rX,  cH*(D-4)/D, smW, bsH, 'Save');
-    this.btnGrid        = new Button(r2X, cH*(D-4)/D, smW, bsH, 'Grid');
-    this.btnCreatorBack = new Button(4,   4,           smW, bsH, '← Back');
-    this.btnSelectBack  = new Button(bsX, cH*(D-1)/D, bsW, bsH, '← Back');
+    // Top-left buttons
+    const topW = Math.max(80, Math.round(cW * 0.13));
+    this.btnCreatorBack = new Button(pad,               pad, topW, bH, '← Back');
+    this.btnEditorSel   = new Button(pad + topW + pad,  pad, topW, bH, 'Select');
+
+    // Select-back button (shown in scrollable list sub-state)
+    const selBkW = Math.max(100, Math.round(cW * 0.25));
+    this.btnSelectBack = new Button(Math.round((cW - selBkW) / 2), y0, selBkW, bH, '← Back');
+
+    // Store for draw-time use
+    this._topW  = topW;
+    this._bH    = bH;
+    this._pad   = pad;
 
     this._creatorBtns = [this.btnBck, this.btnObj, this.btnBarr, this.btnUnit,
                          this.btnBckV,this.btnObjV,this.btnBarrV,this.btnUnitV,
                          this.btnLoad,this.btnAdd, this.btnDel,  this.btnMove,
+                         this.btnCopy,
                          this.btnAttacker, this.btnDefender,
-                         this.btnSave, this.btnGrid, this.btnCreatorBack];
+                         this.btnSave, this.btnGrid, this.btnCreatorBack, this.btnEditorSel];
 
     // ── Level & camera ──
     this.level       = new LevelLoader();
@@ -71,8 +96,13 @@ class Editor {
     this.scrollSelect = null;
     this.tlPck        = null;
     this._showGrid    = false;
-    this._smW         = smW;
-    this._bsH         = bsH;
+
+    // ── Multi-selection state ──
+    this._editorSelMode  = false;
+    this._editorSelected = [];
+    this._selRectStart   = null;
+    this._selRectCurr    = null;
+    this._midDrag        = false;   // middle-button pan active
 
     // ── Name dialog (HTML overlay) ──
     this._nameDialog   = null;
@@ -161,12 +191,20 @@ class Editor {
   }
 
   // ── Input ─────────────────────────────────────────────────────────────────
-  onMouseDown(mx, my) {
+  onMouseDown(mx, my, button = 0) {
     switch (this.state) {
       case CreatorStates.select:
         this.scrollSelect.open(my); break;
       case CreatorStates.creator:
-        this.cam.onMouseDown(mx, my); break;
+        if (button === 1) {
+          this._midDrag = true;
+        } else if (this._editorSelMode) {
+          this._selRectStart = { x: mx, y: my };
+          this._selRectCurr  = { x: mx, y: my };
+        } else {
+          this.cam.onMouseDown(mx, my);
+        }
+        break;
       case CreatorStates.tilePicker:
         this.tlPck.onMouseDown(mx, my); break;
     }
@@ -177,13 +215,20 @@ class Editor {
       case CreatorStates.select:
         if (drag) this.scrollSelect.update(my - py); break;
       case CreatorStates.creator:
-        this.cam.onMouseMove(mx, my, px, py, drag); break;
+        if (this._midDrag) {
+          this.cam.onMouseMove(mx, my, px, py, drag);
+        } else if (this._editorSelMode) {
+          this._selRectCurr = { x: mx, y: my };
+        } else {
+          this.cam.onMouseMove(mx, my, px, py, drag);
+        }
+        break;
       case CreatorStates.tilePicker:
         this.tlPck.onMouseMove(mx, my, px, py, drag); break;
     }
   }
 
-  onMouseUp(mx, my) {
+  onMouseUp(mx, my, button = 0) {
     switch (this.state) {
       case CreatorStates.menu:
         this.btnNew.onMouseUp(mx, my);
@@ -197,23 +242,50 @@ class Editor {
         this._checkSelectBtns(); break;
 
       case CreatorStates.creator: {
+        if (button === 1) { this._midDrag = false; break; }
         for (const b of this._creatorBtns) b.onMouseUp(mx, my);
         const consumed = this._checkCreatorBtns();
         if (!consumed) {
-          this.cam.onMouseUp(mx, my);
-          const sf = this.cam.selFinished;
-          const ts = this.cam.touchStart;
-          const te = this.cam.touchEnd;
-          if (this.btnBck.checked)  this.level.clickBackgr(this.cam, sf, ts, te, mx, my);
-          if (this.btnObj.checked)  this.level.clickObjs  (this.cam, this.tlPck, sf, ts, te, mx, my);
-          if (this.btnBarr.checked) this.level.clickBarr  (this.cam, sf, ts, te, mx, my);
-          if (this.btnUnit.checked) {
-            this.level.clickUnits(this.cam, sf, ts, te, mx, my, this.btnAttacker.checked);
-            if (this.level.isSelected()) {
-              const sel = this.level.selectedObj;
-              if (sel instanceof Unit) {
-                this.btnAttacker.setChecked(sel.teamNum === 0);
-                this.btnDefender.setChecked(sel.teamNum !== 0);
+          if (this._editorSelMode && this._selRectStart) {
+            // Rubber-band: add all visible objects inside the rect to the selection
+            const x1 = Math.min(this._selRectStart.x, mx);
+            const y1 = Math.min(this._selRectStart.y, my);
+            const x2 = Math.max(this._selRectStart.x, mx);
+            const y2 = Math.max(this._selRectStart.y, my);
+            const wMin = this.cam.screen2World(x1, y1);
+            const wMax = this.cam.screen2World(x2, y2);
+            const candidates = [];
+            if (this.level.viewObj)  candidates.push(...this.level.objs);
+            if (this.level.viewBarr) candidates.push(...this.level.barrs);
+            if (this.level.viewUnit) {
+              candidates.push(...this.level.attackers);
+              candidates.push(...this.level.defenders);
+            }
+            for (const o of candidates) {
+              if (o.position.x >= wMin.x && o.position.x <= wMax.x &&
+                  o.position.y >= wMin.y && o.position.y <= wMax.y &&
+                  !this._editorSelected.includes(o)) {
+                this._editorSelected.push(o);
+              }
+            }
+            this._selRectStart = null;
+            this._selRectCurr  = null;
+          } else if (!this._editorSelMode) {
+            this.cam.onMouseUp(mx, my);
+            const sf = this.cam.selFinished;
+            const ts = this.cam.touchStart;
+            const te = this.cam.touchEnd;
+            if (this.btnBck.checked)  this.level.clickBackgr(this.cam, sf, ts, te, mx, my);
+            if (this.btnObj.checked)  this.level.clickObjs  (this.cam, this.tlPck, sf, ts, te, mx, my);
+            if (this.btnBarr.checked) this.level.clickBarr  (this.cam, sf, ts, te, mx, my);
+            if (this.btnUnit.checked) {
+              this.level.clickUnits(this.cam, sf, ts, te, mx, my, this.btnAttacker.checked);
+              if (this.level.isSelected()) {
+                const sel = this.level.selectedObj;
+                if (sel instanceof Unit) {
+                  this.btnAttacker.setChecked(sel.teamNum === 0);
+                  this.btnDefender.setChecked(sel.teamNum !== 0);
+                }
               }
             }
           }
@@ -291,8 +363,21 @@ class Editor {
     let hit = false;
 
     const radioLayer = (active, others) => {
-      active.setChecked(true); for (const b of others) b.setChecked(false);
+      active.setChecked(true);
+      for (const b of others) b.setChecked(false);
     };
+
+    if (this.btnEditorSel.pressed) {
+      this.btnEditorSel.reset();
+      this._editorSelMode = !this._editorSelMode;
+      this.btnEditorSel.setChecked(this._editorSelMode);
+      if (!this._editorSelMode) {
+        this._editorSelected = [];
+        this._selRectStart   = null;
+        this._selRectCurr    = null;
+      }
+      hit = true;
+    }
 
     if (this.btnBck.pressed)  { this.btnBck.reset();  radioLayer(this.btnBck,  [this.btnObj,this.btnBarr,this.btnUnit]); this._showObjBtns(false); hit=true; }
     if (this.btnObj.pressed)  { this.btnObj.reset();  radioLayer(this.btnObj,  [this.btnBck,this.btnBarr,this.btnUnit]); this._showObjBtns(false); hit=true; }
@@ -333,7 +418,22 @@ class Editor {
       hit = true;
     }
 
-    if (this.btnDel.pressed)  { this.btnDel.reset();  this.level.deleteSelected(); hit=true; }
+    if (this.btnDel.pressed) {
+      this.btnDel.reset();
+      if (this._editorSelected.length > 0) {
+        this.level.deleteObjects(this._editorSelected);
+        this._editorSelected = [];
+      } else {
+        this.level.deleteSelected();
+      }
+      hit = true;
+    }
+    if (this.btnCopy.pressed) {
+      this.btnCopy.reset();
+      if (this._editorSelected.length > 0)
+        this._editorSelected = this.level.copyObjects(this._editorSelected);
+      hit = true;
+    }
     if (this.btnMove.pressed) { this.btnMove.reset(); this.btnMove.setChecked(true); this.btnAdd.setChecked(false); this.level.setMoving(); hit=true; }
     if (this.btnAdd.pressed)  { this.btnAdd.reset();  this.btnAdd.setChecked(true); this.btnMove.setChecked(false); this.level.setAdding(); hit=true; }
 
@@ -425,15 +525,19 @@ class Editor {
         this.cam.push(ctx);
         this.level.draw(ctx);
         this.level.drawSelObj(ctx);
+        this._drawEditorSelection(ctx);
         if (this._showGrid) this._drawGrid(ctx);
         this.cam.pop(ctx);
+        this._drawEditorSelRect(ctx);
         for (const b of this._creatorBtns) b.draw(ctx);
         if (this.level.levelName) {
           ctx.fillStyle    = 'rgba(255,255,255,0.7)';
-          ctx.font         = '14px monospace';
+          ctx.font         = `${Math.max(12, Math.round(this._bH * 0.32))}px monospace`;
           ctx.textAlign    = 'left';
           ctx.textBaseline = 'middle';
-          ctx.fillText(`Level: ${this.level.levelName}`, this._smW + 12, this._bsH / 2 + 4);
+          ctx.fillText(`Level: ${this.level.levelName}`,
+            this._pad + this._topW + this._pad + this._topW + this._pad * 2,
+            this._pad + this._bH / 2);
         }
         break;
 
@@ -441,6 +545,40 @@ class Editor {
         if (this.tlPck) this.tlPck.draw(ctx);
         break;
     }
+  }
+
+  // Green outlines around each editor-selected object (world space, inside cam.push/pop)
+  _drawEditorSelection(ctx) {
+    if (this._editorSelected.length === 0) return;
+    ctx.save();
+    ctx.strokeStyle = '#22c55e';
+    ctx.lineWidth   = 2;
+    ctx.globalAlpha = 0.9;
+    ctx.setLineDash([4, 4]);
+    for (const o of this._editorSelected) {
+      const hw = o.size.x / 2, hh = o.size.y / 2;
+      ctx.strokeRect(o.position.x - hw, o.position.y - hh, o.size.x, o.size.y);
+    }
+    ctx.restore();
+  }
+
+  // Yellow rubber-band rectangle (screen space, drawn after cam.pop)
+  _drawEditorSelRect(ctx) {
+    if (!this._editorSelMode || !this._selRectStart || !this._selRectCurr) return;
+    const sx = Math.min(this._selRectStart.x, this._selRectCurr.x);
+    const sy = Math.min(this._selRectStart.y, this._selRectCurr.y);
+    const sw = Math.abs(this._selRectCurr.x - this._selRectStart.x);
+    const sh = Math.abs(this._selRectCurr.y - this._selRectStart.y);
+    ctx.save();
+    ctx.strokeStyle = '#facc15';
+    ctx.lineWidth   = 1.5;
+    ctx.globalAlpha = 0.9;
+    ctx.setLineDash([]);
+    ctx.strokeRect(sx, sy, sw, sh);
+    ctx.fillStyle   = '#facc15';
+    ctx.globalAlpha = 0.08;
+    ctx.fillRect(sx, sy, sw, sh);
+    ctx.restore();
   }
 
   _drawGrid(ctx) {

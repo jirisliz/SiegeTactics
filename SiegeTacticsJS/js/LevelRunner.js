@@ -11,6 +11,7 @@ class LevelRunner {
     this.projectiles = [];
 
     const cW = window.innerWidth, cH = window.innerHeight;
+    UI.init();
 
     // ── Select screen ──
     this.scrollSelect = new ScrollBar();
@@ -18,15 +19,12 @@ class LevelRunner {
     this.scrollSelect.fromNames(names, Math.floor(cH * 0.1));
     this._noLevels = names.length === 0;
 
-    // ── Planning screen buttons ──
-    const bh   = Math.floor(cH / 18);
-    const bw   = Math.floor(cW * 0.3);
-    this.btnFight = new Button(cW - bw - 10, cH - bh - 10, bw, bh, 'Fight!');
+    const bh     = UI.btnH;
+    const pad    = UI.pad;
+    const topBtW = Math.max(80, Math.round(cW * 0.13));
 
     // ── Back button ──
-    const bh2 = Math.floor(cH / 20);
-    const bw2 = Math.floor(cW * 0.15);
-    this.btnBack = new Button(10, 10, bw2, bh2, '← Back');
+    this.btnBack = new Button(pad, pad, topBtW, bh, '← Back');
 
     // ── Results ──
     this._resultMsg  = '';
@@ -40,12 +38,19 @@ class LevelRunner {
     this._selRectStart  = null;      // screen-space drag start for rubber-band selection
     this._selRectCurr   = null;      // screen-space current pointer position
 
+    // ── Planning screen Fight button ──
+    const fightW = Math.max(120, Math.round(cW * 0.22));
+    this.btnFight = new Button(cW - fightW - pad, UI.toolbarY(0), fightW, bh, 'Fight!', 'primary');
+
     // ── Planning tool buttons ──
-    const bh3 = Math.floor(cH / 18);
-    const bw3 = Math.floor(cW * 0.15);
-    this.btnPlanSelect = new Button(10,            cH - bh3 - 10, bw3, bh3, 'Select');
-    this.btnPlanTrack  = new Button(10 + bw3 + 8,  cH - bh3 - 10, bw3, bh3, 'Track');
+    this.btnPlanSelect = new Button(pad,                     UI.toolbarY(0), UI.colAct, bh, 'Select');
+    this.btnPlanTrack  = new Button(pad + UI.colAct + pad,   UI.toolbarY(0), UI.colAct, bh, 'Track');
     this.btnPlanSelect.setChecked(true);
+
+    // ── Speed slider (fight state) ──
+    this._speed      = 1;    // 0.5 | 1 | 2
+    this._speedAccum = 0;
+    this._slX = 0; this._slY = 0; this._slW = 0; this._slH = 0;
   }
 
   // ── Input ─────────────────────────────────────────────────────────────────
@@ -149,7 +154,8 @@ class LevelRunner {
       }
 
       case LevelRunnerTypes.fight:
-        this.cam.onMouseUp(mx, my); break;
+        if (!this._sliderHit(mx, my)) this.cam.onMouseUp(mx, my);
+        break;
       case LevelRunnerTypes.results:
         this.finished = true; break;
     }
@@ -227,6 +233,7 @@ class LevelRunner {
     for (const u of this.level.attackers)  this._initNavPath(u);
     for (const u of this.level.defenders)  this._initNavPath(u);
 
+    this._speedAccum = 0;
     this.state = LevelRunnerTypes.fight;
     return true;
   }
@@ -341,8 +348,14 @@ class LevelRunner {
         break;
 
       case LevelRunnerTypes.fight:
-        this._updateFight();
+        this._speedAccum += this._speed;
+        while (this._speedAccum >= 1) {
+          this._updateFight();
+          this._speedAccum -= 1;
+          if (this.state !== LevelRunnerTypes.fight) break;
+        }
         this._drawLevel(ctx);
+        this._drawSpeedSlider(ctx);
         break;
 
       case LevelRunnerTypes.results:
@@ -419,6 +432,74 @@ class LevelRunner {
       ctx.fillRect(sx, sy, sw, sh);
       ctx.restore();
     }
+  }
+
+  _drawSpeedSlider(ctx) {
+    const cW  = window.innerWidth;
+    const bH  = UI.btnH, pad = UI.pad;
+    const slW = Math.max(140, Math.round(cW * 0.22));
+    const slH = bH;
+    const slX = cW - slW - pad;
+    const slY = pad;
+
+    this._slX = slX; this._slY = slY; this._slW = slW; this._slH = slH;
+
+    const labels = ['½×', '1×', '2×'];
+    const speeds = [0.5, 1, 2];
+    const idx    = speeds.indexOf(this._speed);
+    const segW   = slW / 3;
+    const r      = Math.min(10, slH * 0.28);
+
+    ctx.save();
+
+    // Track background
+    ctx.beginPath();
+    ctx.roundRect(slX, slY, slW, slH, r);
+    ctx.fillStyle = 'rgba(15,20,36,0.82)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.13)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Active segment highlight with matching corner radius
+    const ax = slX + idx * segW;
+    ctx.beginPath();
+    if      (idx === 0) ctx.roundRect(ax, slY, segW, slH, [r, 0, 0, r]);
+    else if (idx === 2) ctx.roundRect(ax, slY, segW, slH, [0, r, r, 0]);
+    else                ctx.roundRect(ax, slY, segW, slH, 0);
+    ctx.fillStyle = 'rgba(29,78,216,0.92)';
+    ctx.fill();
+
+    // Segment dividers
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+    ctx.lineWidth   = 1;
+    for (let i = 1; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(slX + i * segW, slY + 4);
+      ctx.lineTo(slX + i * segW, slY + slH - 4);
+      ctx.stroke();
+    }
+
+    // Labels
+    const fontSize = Math.max(11, Math.floor(slH * 0.40));
+    ctx.font         = `bold ${fontSize}px monospace`;
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    for (let i = 0; i < 3; i++) {
+      ctx.fillStyle = i === idx ? '#ffffff' : '#9ca3af';
+      ctx.fillText(labels[i], slX + (i + 0.5) * segW, slY + slH / 2);
+    }
+
+    ctx.restore();
+  }
+
+  _sliderHit(mx, my) {
+    const { _slX: sx, _slY: sy, _slW: sw, _slH: sh } = this;
+    if (!sw || mx < sx || mx > sx + sw || my < sy || my > sy + sh) return false;
+    const speeds = [0.5, 1, 2];
+    const idx    = Math.max(0, Math.min(2, Math.floor((mx - sx) / (sw / 3))));
+    this._speed  = speeds[idx];
+    return true;
   }
 
   _drawResults(ctx) {
