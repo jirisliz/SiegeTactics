@@ -52,9 +52,10 @@ class Editor {
     this.btnCopy = new Button(UI.rightCol(1), y2, acW, bH, 'Copy');
     this.btnLoad = new Button(UI.rightCol(2), y2, acW, bH, 'Load');
 
-    // Row 1: Add (col 0), Move (col 1)
-    this.btnAdd  = new Button(UI.rightCol(0), y1, acW, bH, 'Add');
-    this.btnMove = new Button(UI.rightCol(1), y1, acW, bH, 'Move'); this.btnMove.setChecked(true);
+    // Row 1: Add (col 0), Move (col 1), Move grid (col 2)
+    this.btnAdd      = new Button(UI.rightCol(0), y1, acW, bH, 'Add');
+    this.btnMove     = new Button(UI.rightCol(1), y1, acW, bH, 'Move'); this.btnMove.setChecked(true);
+    this.btnMoveGrid = new Button(UI.rightCol(2), y1, acW, bH, 'Move grid');
 
     // Row 0: Attacker/Defender (hidden until Units layer active)
     this.btnAttacker = new Button(UI.rightCol(1), y0, acW, bH, 'Atk');
@@ -64,9 +65,12 @@ class Editor {
     this.btnDefender.visible = false;
 
     // Top-left buttons
-    const topW = Math.max(80, Math.round(cW * 0.13));
-    this.btnCreatorBack = new Button(pad,               pad, topW, bH, '← Back');
-    this.btnEditorSel   = new Button(pad + topW + pad,  pad, topW, bH, 'Select');
+    const backW   = Math.max(60, Math.round(cW * 0.08));
+    const topW    = Math.max(80, Math.round(cW * 0.13));
+    const clrSelW = Math.max(80, Math.round(cW * 0.10));
+    this.btnCreatorBack = new Button(pad,                                    pad, backW,   bH, '← Back');
+    this.btnEditorSel   = new Button(pad + backW + pad,                      pad, topW,    bH, 'Select');
+    this.btnClearSel    = new Button(pad + backW + pad + topW + pad,         pad, clrSelW, bH, 'Clear sel.');
 
     // Top-right: sidebar toggle
     this.btnSidebarToggle = new Button(cW - topW - pad, pad, topW, bH, 'Units');
@@ -76,7 +80,9 @@ class Editor {
     this.btnSelectBack = new Button(Math.round((cW - selBkW) / 2), y0, selBkW, bH, '← Back');
 
     // Store for draw-time use
+    this._backW       = backW;
     this._topW        = topW;
+    this._clrSelW     = clrSelW;
     this._bH          = bH;
     this._pad         = pad;
     this._showSidebar = false;
@@ -87,7 +93,7 @@ class Editor {
                          this.btnCopy,
                          this.btnAttacker, this.btnDefender,
                          this.btnSave, this.btnGrid, this.btnCreatorBack, this.btnEditorSel,
-                         this.btnSidebarToggle];
+                         this.btnClearSel, this.btnMoveGrid, this.btnSidebarToggle];
 
     // ── Level & camera ──
     this.level       = new LevelLoader();
@@ -109,11 +115,16 @@ class Editor {
     this._selRectCurr    = null;
     this._midDrag        = false;   // middle-button pan active
 
+    // ── Move grid snap ──
+    this._moveGridX = Math.round(this.level.blockSz / 2);
+    this._moveGridY = Math.round(this.level.blockSz / 2);
+
     // ── Name dialog (HTML overlay) ──
     this._nameDialog   = null;
     this._nameResolve  = null;
     this._dlgIsNewMap  = false;
     this._buildDialog();
+    this._buildMoveGridDialog();
   }
 
   // ── HTML name-input dialog ────────────────────────────────────────────────
@@ -195,6 +206,49 @@ class Editor {
     this._dlgIsNewMap = false;
   }
 
+  // ── Move-grid dialog ─────────────────────────────────────────────────────
+  _buildMoveGridDialog() {
+    const dlg = document.createElement('div');
+    dlg.id = 'moveGridDialog';
+    dlg.style.cssText = `display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+      z-index:100;align-items:center;justify-content:center;`;
+    dlg.innerHTML = `
+      <div style="background:#222;padding:28px 32px;border-radius:14px;min-width:260px;text-align:center">
+        <p style="color:#ddd;font:bold 18px monospace;margin:0 0 16px">Move grid (px)</p>
+        <div style="display:flex;gap:14px;align-items:center;justify-content:center;margin-bottom:18px">
+          <label style="color:#aaa;font:14px monospace">X:</label>
+          <input id="mgX" type="number" min="1" max="512"
+            style="width:70px;padding:6px 8px;font:14px monospace;border-radius:6px;border:none;background:#111;color:#eee;text-align:center"/>
+          <label style="color:#aaa;font:14px monospace">Y:</label>
+          <input id="mgY" type="number" min="1" max="512"
+            style="width:70px;padding:6px 8px;font:14px monospace;border-radius:6px;border:none;background:#111;color:#eee;text-align:center"/>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:center">
+          <button id="mgOk"     style="padding:8px 22px;border-radius:8px;border:none;background:#4a7;color:#fff;font:bold 15px monospace;cursor:pointer">OK</button>
+          <button id="mgCancel" style="padding:8px 22px;border-radius:8px;border:none;background:#555;color:#fff;font:bold 15px monospace;cursor:pointer">Cancel</button>
+        </div>
+      </div>`;
+    document.body.appendChild(dlg);
+    this._moveGridDialog = dlg;
+    document.getElementById('mgOk').onclick = () => {
+      const x = Math.max(1, parseInt(document.getElementById('mgX').value, 10) || 1);
+      const y = Math.max(1, parseInt(document.getElementById('mgY').value, 10) || 1);
+      this._moveGridX = x;
+      this._moveGridY = y;
+      dlg.style.display = 'none';
+    };
+    document.getElementById('mgCancel').onclick = () => { dlg.style.display = 'none'; };
+    document.getElementById('mgX').onkeydown = e => { if (e.key === 'Enter') document.getElementById('mgOk').click(); };
+    document.getElementById('mgY').onkeydown = e => { if (e.key === 'Enter') document.getElementById('mgOk').click(); };
+  }
+
+  _showMoveGridDialog() {
+    document.getElementById('mgX').value = this._moveGridX;
+    document.getElementById('mgY').value = this._moveGridY;
+    this._moveGridDialog.style.display = 'flex';
+    document.getElementById('mgX').focus();
+  }
+
   // ── Input ─────────────────────────────────────────────────────────────────
   onMouseDown(mx, my, button = 0) {
     switch (this.state) {
@@ -203,11 +257,12 @@ class Editor {
       case CreatorStates.creator:
         if (button === 1) {
           this._midDrag = true;
-        } else if (this._editorSelMode) {
-          this._selRectStart = { x: mx, y: my };
-          this._selRectCurr  = { x: mx, y: my };
         } else {
           this.cam.onMouseDown(mx, my);
+          if (this._editorSelMode) {
+            this._selRectStart = { x: mx, y: my };
+            this._selRectCurr  = { x: mx, y: my };
+          }
         }
         break;
       case CreatorStates.tilePicker:
@@ -224,8 +279,11 @@ class Editor {
           this.cam.onMouseMove(mx, my, px, py, drag);
         } else if (this._editorSelMode) {
           this._selRectCurr = { x: mx, y: my };
-        } else {
-          this.cam.onMouseMove(mx, my, px, py, drag);
+        } else if (drag && this._editorSelected.length > 0 && this.btnMove.checked) {
+          const curr = this.cam.screen2World(mx, my);
+          const prev = this.cam.screen2World(px, py);
+          const dx = curr.x - prev.x, dy = curr.y - prev.y;
+          for (const o of this._editorSelected) { o.position.x += dx; o.position.y += dy; }
         }
         break;
       case CreatorStates.tilePicker:
@@ -251,35 +309,44 @@ class Editor {
         for (const b of this._creatorBtns) b.onMouseUp(mx, my);
         const consumed = this._checkCreatorBtns();
         if (!consumed) {
+          this.cam.onMouseUp(mx, my);
+          const sf = this.cam.selFinished;
+          const ts = this.cam.touchStart;
+          const te = this.cam.touchEnd;
+
           if (this._editorSelMode && this._selRectStart) {
-            // Rubber-band: add all visible objects inside the rect to the selection
-            const x1 = Math.min(this._selRectStart.x, mx);
-            const y1 = Math.min(this._selRectStart.y, my);
-            const x2 = Math.max(this._selRectStart.x, mx);
-            const y2 = Math.max(this._selRectStart.y, my);
-            const wMin = this.cam.screen2World(x1, y1);
-            const wMax = this.cam.screen2World(x2, y2);
-            const candidates = [];
-            if (this.level.viewObj)  candidates.push(...this.level.objs);
-            if (this.level.viewBarr) candidates.push(...this.level.barrs);
-            if (this.level.viewUnit) {
-              candidates.push(...this.level.attackers);
-              candidates.push(...this.level.defenders);
-            }
-            for (const o of candidates) {
-              if (o.position.x >= wMin.x && o.position.x <= wMax.x &&
-                  o.position.y >= wMin.y && o.position.y <= wMax.y &&
-                  !this._editorSelected.includes(o)) {
-                this._editorSelected.push(o);
+            const dx = Math.abs(mx - this._selRectStart.x);
+            const dy = Math.abs(my - this._selRectStart.y);
+            if (dx > 8 || dy > 8) {
+              // Rubber-band: add all visible objects inside the rect
+              const x1 = Math.min(this._selRectStart.x, mx);
+              const y1 = Math.min(this._selRectStart.y, my);
+              const x2 = Math.max(this._selRectStart.x, mx);
+              const y2 = Math.max(this._selRectStart.y, my);
+              const wMin = this.cam.screen2World(x1, y1);
+              const wMax = this.cam.screen2World(x2, y2);
+              const candidates = this._activeLayerCandidates();
+              for (const o of candidates) {
+                if (o.position.x >= wMin.x && o.position.x <= wMax.x &&
+                    o.position.y >= wMin.y && o.position.y <= wMax.y &&
+                    !this._editorSelected.includes(o)) {
+                  this._editorSelected.push(o);
+                }
               }
+            } else {
+              // Short click in sel-mode → individual tap toggle
+              this._toggleTapSelect(mx, my);
             }
             this._selRectStart = null;
             this._selRectCurr  = null;
-          } else if (!this._editorSelMode) {
-            this.cam.onMouseUp(mx, my);
-            const sf = this.cam.selFinished;
-            const ts = this.cam.touchStart;
-            const te = this.cam.touchEnd;
+          } else if (sf && this._editorSelected.length > 0 && this.btnMove.checked) {
+            // Drag already moved objects incrementally; snap final positions to move grid.
+            for (const o of this._editorSelected) {
+              o.position.x = Math.round(o.position.x / this._moveGridX) * this._moveGridX;
+              o.position.y = Math.round(o.position.y / this._moveGridY) * this._moveGridY;
+            }
+          } else {
+            // Normal mode: level actions (paint / place / move)
             if (this.btnBck.checked)  this.level.clickBackgr(this.cam, sf, ts, te, mx, my);
             if (this.btnObj.checked)  this.level.clickObjs  (this.cam, this.tlPck, sf, ts, te, mx, my);
             if (this.btnBarr.checked) this.level.clickBarr  (this.cam, sf, ts, te, mx, my);
@@ -293,6 +360,8 @@ class Editor {
                 }
               }
             }
+            // Tap (not a drag) always toggles individual selection
+            if (!sf) this._toggleTapSelect(mx, my);
           }
         }
         break;
@@ -329,6 +398,8 @@ class Editor {
         this.cam.scaleMin = Math.min(cW2 / this.level.getWidth(), cH2 / this.level.getHeight());
         this.cam.scale    = this.cam.scaleMin;
         this.cam.selEnabled = true;
+        this._moveGridX = Math.round(this.level.blockSz / 2);
+        this._moveGridY = Math.round(this.level.blockSz / 2);
         this.state = CreatorStates.creator;
         this._selectTileDir(Storage.dataDirBacks);
       });
@@ -383,11 +454,17 @@ class Editor {
       this.btnEditorSel.reset();
       this._editorSelMode = !this._editorSelMode;
       this.btnEditorSel.setChecked(this._editorSelMode);
-      if (!this._editorSelMode) {
-        this._editorSelected = [];
-        this._selRectStart   = null;
-        this._selRectCurr    = null;
-      }
+      // Keep _editorSelected when toggling off so copy/del/move still work.
+      this._selRectStart = null;
+      this._selRectCurr  = null;
+      hit = true;
+    }
+
+    if (this.btnClearSel.pressed) {
+      this.btnClearSel.reset();
+      this._editorSelected = [];
+      this._selRectStart   = null;
+      this._selRectCurr    = null;
       hit = true;
     }
 
@@ -448,6 +525,7 @@ class Editor {
     }
     if (this.btnMove.pressed) { this.btnMove.reset(); this.btnMove.setChecked(true); this.btnAdd.setChecked(false); this.level.setMoving(); hit=true; }
     if (this.btnAdd.pressed)  { this.btnAdd.reset();  this.btnAdd.setChecked(true); this.btnMove.setChecked(false); this.level.setAdding(); hit=true; }
+    if (this.btnMoveGrid.pressed) { this.btnMoveGrid.reset(); this._showMoveGridDialog(); hit=true; }
 
     if (this.btnAttacker.pressed) {
       this.btnAttacker.reset(); this.btnAttacker.setChecked(true); this.btnDefender.setChecked(false);
@@ -492,12 +570,14 @@ class Editor {
         this.cam.scaleMin = Math.min(window.innerWidth / this.level.getWidth(), window.innerHeight / this.level.getHeight());
         this.cam.scale    = this.cam.scaleMin;
         this.cam.selEnabled = true;
+        this._moveGridX = Math.round(this.level.blockSz / 2);
+        this._moveGridY = Math.round(this.level.blockSz / 2);
         this.state = CreatorStates.creator;
         break;
 
       case CreatorStates.creator:
         if (this.btnBck.checked) {
-          this.level.loadGround(`${btn.text}.png`);
+          this.level.loadGround(`${btn.text}.png`, () => this.level.fillGroundFull());
         } else if (this.btnObj.checked) {
           this.tlPck = new TilePicker(`${btn.text}.png`);
           this.state = CreatorStates.tilePicker;
@@ -507,6 +587,30 @@ class Editor {
         }
         this.state = CreatorStates.creator;
         break;
+    }
+  }
+
+  _activeLayerCandidates() {
+    const out = [];
+    if (this.btnObj.checked  && this.level.viewObj)  out.push(...this.level.objs);
+    if (this.btnBarr.checked && this.level.viewBarr) out.push(...this.level.barrs);
+    if (this.btnUnit.checked && this.level.viewUnit) {
+      out.push(...this.level.attackers);
+      out.push(...this.level.defenders);
+    }
+    return out;
+  }
+
+  _toggleTapSelect(mx, my) {
+    const wp   = this.cam.screen2World(mx, my);
+    const list = this._activeLayerCandidates();
+    const hit  = list.find(o => o.posInside(wp.x, wp.y)) ?? null;
+    if (hit) {
+      const idx = this._editorSelected.indexOf(hit);
+      if (idx >= 0) this._editorSelected.splice(idx, 1);
+      else           this._editorSelected.push(hit);
+    } else {
+      this._editorSelected = [];
     }
   }
 
@@ -536,7 +640,6 @@ class Editor {
         ctx.fillRect(0, 0, cW, cH);
         this.cam.push(ctx);
         this.level.draw(ctx);
-        this.level.drawSelObj(ctx);
         this._drawEditorSelection(ctx);
         if (this._showGrid) this._drawGrid(ctx);
         this.cam.pop(ctx);
@@ -549,7 +652,7 @@ class Editor {
           ctx.textAlign    = 'left';
           ctx.textBaseline = 'middle';
           ctx.fillText(`Level: ${this.level.levelName}`,
-            this._pad + this._topW + this._pad + this._topW + this._pad * 2,
+            this._pad + this._backW + this._pad + this._topW + this._pad + this._clrSelW + this._pad * 2,
             this._pad + this._bH / 2);
         }
         break;

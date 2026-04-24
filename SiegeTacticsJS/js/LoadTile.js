@@ -32,6 +32,7 @@ class LoadTile {
         this.yNum  = Math.floor(img.height / this._side);
       }
       this.loaded = true;
+      if (this._onload) this._onload();
     };
     img.onerror = () => console.warn(`LoadTile: could not load "${this.path}"`);
   }

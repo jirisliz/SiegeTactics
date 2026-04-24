@@ -44,9 +44,14 @@ class LevelLoader extends Level {
   _bckIdx(x, y) { return x + y * this.gridCols; }
 
   // ── Ground tile loading ───────────────────────────────────────────────────
-  loadGround(name) {
+  loadGround(name, onLoaded) {
     this.ground = new LoadTile(`${Storage.dataDirBacks}/${name}`, 16);
+    if (onLoaded) this.ground._onload = onLoaded;
     return true;
+  }
+
+  fillGroundFull() {
+    this._fillAreaBack(0, 0, this.getWidth() - 1, this.getHeight() - 1);
   }
 
   // Pre-render all tiles onto the background OffscreenCanvas
@@ -161,6 +166,17 @@ class LevelLoader extends Level {
       if (o.posInside(px, py)) { this.selectedObj = o; return true; }
     }
     return false;
+  }
+
+  // Returns the first visible object at world pos (px,py), or null.
+  findObjAt(px, py) {
+    if (this.viewObj)  { for (const o of this.objs)      { if (o.posInside(px, py)) return o; } }
+    if (this.viewBarr) { for (const o of this.barrs)     { if (o.posInside(px, py)) return o; } }
+    if (this.viewUnit) {
+      for (const o of this.attackers) { if (o.posInside(px, py)) return o; }
+      for (const o of this.defenders) { if (o.posInside(px, py)) return o; }
+    }
+    return null;
   }
 
   // ── Click handlers (called by Editor) ────────────────────────────────────

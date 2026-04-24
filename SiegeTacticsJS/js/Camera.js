@@ -151,24 +151,12 @@ class Camera {
   }
 
   checkBorders() {
-    const cW = this.offX * 2;
-    const cH = this.offY * 2;
-    if (this.worldW * this.scale < cW) {
-      this.transX = -this.worldW / 2;
-    } else {
-      const tlx = this.transX * this.scale + this.offX;
-      const brx = (this.worldW + this.transX) * this.scale + this.offX;
-      if (tlx > 0)  this.transX = -this.offX / this.scale;
-      if (brx < cW) this.transX = this.offX / this.scale - this.worldW;
-    }
-    if (this.worldH * this.scale < cH) {
-      this.transY = -this.worldH / 2;
-    } else {
-      const tly = this.transY * this.scale + this.offY;
-      const bry = (this.worldH + this.transY) * this.scale + this.offY;
-      if (tly > 0)  this.transY = -this.offY / this.scale;
-      if (bry < cH) this.transY = this.offY / this.scale - this.worldH;
-    }
+    // Clamp so at least half the map is always visible in each axis.
+    // Pan limit: map edge may reach canvas centre but not beyond.
+    if (this.transX > 0)           this.transX = 0;
+    if (this.transX < -this.worldW) this.transX = -this.worldW;
+    if (this.transY > 0)           this.transY = 0;
+    if (this.transY < -this.worldH) this.transY = -this.worldH;
   }
 
   // Draw selection rectangle in screen space (call outside push/pop)
