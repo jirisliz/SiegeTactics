@@ -42,10 +42,16 @@ class LevelRunner {
     const fightW = Math.max(120, Math.round(cW * 0.22));
     this.btnFight = new Button(cW - fightW - pad, UI.toolbarY(0), fightW, bh, 'Fight!', 'primary');
 
-    // ── Planning tool buttons ──
+    // ── Planning tool buttons (row 0) ──
     this.btnPlanSelect = new Button(pad,                     UI.toolbarY(0), UI.colAct, bh, 'Select');
     this.btnPlanTrack  = new Button(pad + UI.colAct + pad,   UI.toolbarY(0), UI.colAct, bh, 'Track');
     this.btnPlanSelect.setChecked(true);
+
+    // ── Order buttons (row 1) — set order for selected units ──
+    this.btnOrderAttack = new Button(pad,                              UI.toolbarY(1), UI.colAct, bh, 'Attack');
+    this.btnOrderPath   = new Button(pad + (UI.colAct + pad),          UI.toolbarY(1), UI.colAct, bh, 'Path');
+    this.btnOrderStand  = new Button(pad + (UI.colAct + pad) * 2,      UI.toolbarY(1), UI.colAct, bh, 'Stand');
+    this.btnOrderAttack.setChecked(true);
 
     // ── Speed slider (fight state) ──
     this._speed      = 1;    // 0.5 | 1 | 2
@@ -104,6 +110,9 @@ class LevelRunner {
         // Check all buttons first
         this.btnPlanSelect.onMouseUp(mx, my);
         this.btnPlanTrack.onMouseUp(mx, my);
+        this.btnOrderAttack.onMouseUp(mx, my);
+        this.btnOrderPath.onMouseUp(mx, my);
+        this.btnOrderStand.onMouseUp(mx, my);
         this.btnFight.onMouseUp(mx, my);
         this.btnBack.onMouseUp(mx, my);
 
@@ -116,6 +125,21 @@ class LevelRunner {
         if (this.btnPlanTrack.pressed) {
           this.btnPlanTrack.reset();
           this._setPlanMode('track');
+          break;
+        }
+        if (this.btnOrderAttack.pressed) {
+          this.btnOrderAttack.reset();
+          this._setOrder('attack');
+          break;
+        }
+        if (this.btnOrderPath.pressed) {
+          this.btnOrderPath.reset();
+          this._setOrder('path');
+          break;
+        }
+        if (this.btnOrderStand.pressed) {
+          this.btnOrderStand.reset();
+          this._setOrder('stand');
           break;
         }
         if (this.btnBack.pressed) { this.btnBack.reset(); this.finished = true; break; }
@@ -149,6 +173,7 @@ class LevelRunner {
           }
           this._selRectStart = null;
           this._selRectCurr  = null;
+          this._syncOrderButtons();
         }
         break;
       }
@@ -175,6 +200,22 @@ class LevelRunner {
     this._pathPoints  = [];
     this.btnPlanSelect.setChecked(mode === 'select');
     this.btnPlanTrack.setChecked(mode === 'track');
+  }
+
+  _setOrder(order) {
+    for (const u of this._selectedUnits) u._order = order;
+    this.btnOrderAttack.setChecked(order === 'attack');
+    this.btnOrderPath.setChecked(order === 'path');
+    this.btnOrderStand.setChecked(order === 'stand');
+  }
+
+  _syncOrderButtons() {
+    if (this._selectedUnits.length === 0) return;
+    const order = this._selectedUnits[0]._order;
+    const same  = this._selectedUnits.every(u => u._order === order);
+    this.btnOrderAttack.setChecked(same && order === 'attack');
+    this.btnOrderPath.setChecked(same && order === 'path');
+    this.btnOrderStand.setChecked(same && order === 'stand');
   }
 
   onBackPressed() { this.finished = true; }
@@ -207,16 +248,34 @@ class LevelRunner {
     this.btnFight.reset();
     const cW = window.innerWidth, cH = window.innerHeight;
 
-    // Start all units marching
+    // Start all units — behaviour depends on their order
+    const atkDefaultTarget = { x: this.level.getWidth()/2, y: this.level.getHeight()*0.25 };
+    const defDefaultTarget = { x: this.level.getWidth()/2, y: this.level.getHeight()*0.75 };
     for (const u of this.level.attackers) {
-      u.setState(States.attack);
-      u.primaryTarget = { x: this.level.getWidth()/2, y: this.level.getHeight()*0.25 };
-      u.target        = { ...u.primaryTarget };
+      if (u._order === 'stand') {
+        u.setState(States.defend);
+        u.primaryTarget = { ...u.position };
+        u.target        = { ...u.position };
+      } else {
+        u.setState(States.attack);
+        u.primaryTarget = u._order === 'path' && u._playerPath
+          ? { ...u._playerPath.points[u._playerPath.points.length - 1] }
+          : { ...atkDefaultTarget };
+        u.target = { ...u.primaryTarget };
+      }
     }
     for (const u of this.level.defenders) {
-      u.setState(States.attack);
-      u.primaryTarget = { x: this.level.getWidth()/2, y: this.level.getHeight()*0.75 };
-      u.target        = { ...u.primaryTarget };
+      if (u._order === 'stand') {
+        u.setState(States.defend);
+        u.primaryTarget = { ...u.position };
+        u.target        = { ...u.position };
+      } else {
+        u.setState(States.attack);
+        u.primaryTarget = u._order === 'path' && u._playerPath
+          ? { ...u._playerPath.points[u._playerPath.points.length - 1] }
+          : { ...defDefaultTarget };
+        u.target = { ...u.primaryTarget };
+      }
     }
     // Arm ranged units
     for (const u of this.level.attackers)
@@ -239,27 +298,40 @@ class LevelRunner {
   }
 
   _initNavPath(u) {
-    if (u._playerPath) {
-      // Use last waypoint of player path as primary target
-      const pts = u._playerPath.points;
-      const last = pts[pts.length - 1];
-      u.primaryTarget = { x: last.x, y: last.y };
-      u.target        = { ...u.primaryTarget };
-      u._navPath      = u._playerPath;
-      u._navTarget    = { ...u.primaryTarget };
+    if (u._order === 'stand') {
+      u._navPath = null; u._navTarget = null; return;
+    }
+    if (u._order === 'path' && u._playerPath) {
+      u._navPath   = u._playerPath;
+      u._navTarget = { ...u.primaryTarget };
     } else {
       u._navPath   = this._pathfinder.findPath(u.position, u.primaryTarget);
       u._navTarget = { ...u.primaryTarget };
     }
   }
 
+  _checkPathArrival(units) {
+    for (const u of units) {
+      if (!u.alive || u._order !== 'path' || !u._playerPath) continue;
+      const pts  = u._playerPath.points;
+      const last = pts[pts.length - 1];
+      if (Math.hypot(u.position.x - last.x, u.position.y - last.y) > this.level.blockSz * 1.5) continue;
+      // Reached end — forget path, switch to free attack (order becomes 'attack')
+      u._playerPath = null;
+      u._order      = 'attack';
+      const navTarget = (u.enemyAttacking && u.enemyAttacking.alive)
+        ? u.enemyAttacking.position : u.primaryTarget;
+      u._navPath   = this._pathfinder.findPath(u.position, navTarget);
+      u._navTarget = { ...navTarget };
+    }
+  }
+
   _refreshPaths(units) {
     for (const u of units) {
       if (!u.alive) continue;
-      if (u._playerPath) {
-        // Keep following player-drawn path; enemy engagement handled by applySeek
-        u._navPath = u._playerPath;
-        continue;
+      if (u._order === 'stand') { u._navPath = null; continue; }
+      if (u._order === 'path' && u._playerPath) {
+        u._navPath = u._playerPath; continue;
       }
       const navTarget = (u.enemyAttacking && u.enemyAttacking.alive)
         ? u.enemyAttacking.position : u.primaryTarget;
@@ -275,6 +347,10 @@ class LevelRunner {
     // Target finding
     for (const u of this.level.attackers) u.findNearestEnemy(this.level.defenders);
     for (const u of this.level.defenders) u.findNearestEnemy(this.level.attackers);
+
+    // Every frame: check if any unit has reached the end of its player path
+    this._checkPathArrival(this.level.attackers);
+    this._checkPathArrival(this.level.defenders);
 
     // Refresh A* nav paths every 30 frames
     this._pathTick++;
@@ -345,6 +421,9 @@ class LevelRunner {
         this.btnBack.draw(ctx);
         this.btnPlanSelect.draw(ctx);
         this.btnPlanTrack.draw(ctx);
+        this.btnOrderAttack.draw(ctx);
+        this.btnOrderPath.draw(ctx);
+        this.btnOrderStand.draw(ctx);
         break;
 
       case LevelRunnerTypes.fight:
@@ -391,6 +470,32 @@ class LevelRunner {
       for (let i = 1; i < this._pathPoints.length; i++)
         ctx.lineTo(this._pathPoints[i].x, this._pathPoints[i].y);
       ctx.stroke();
+      ctx.restore();
+    }
+
+    // Order badges on units (planning phase)
+    if (this.state === LevelRunnerTypes.planning) {
+      const ORDER_COLOR = { attack: '#ef4444', path: '#f97316', stand: '#3b82f6' };
+      const ORDER_LABEL = { attack: 'A', path: 'P', stand: 'S' };
+      ctx.save();
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      for (const u of [...this.level.attackers, ...this.level.defenders]) {
+        const order = u._order || 'attack';
+        const color = ORDER_COLOR[order];
+        const label = ORDER_LABEL[order];
+        const bx = u.position.x, by = u.position.y - u.r * 3;
+        const br = u.r * 0.85;
+        ctx.beginPath();
+        ctx.arc(bx, by, br, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.85;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = '#fff';
+        ctx.font = `bold ${Math.round(br * 1.4)}px monospace`;
+        ctx.fillText(label, bx, by);
+      }
       ctx.restore();
     }
 

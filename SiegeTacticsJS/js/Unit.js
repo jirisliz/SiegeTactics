@@ -23,6 +23,7 @@ class Unit extends Vehicle {
     this.projectiles         = null;
     this.size = { x: 16, y: 16 };
     this.orig = { x: 0,  y: 0  };
+    this._order   = 'attack'; // 'attack' | 'path' | 'stand'
     this._anims   = {};
     this.animCurr = null;
     if (unitName) this.loadStdAnims(unitName);
@@ -167,7 +168,7 @@ class Unit extends Vehicle {
         } break;
       case States.defend:
         this.animCurr = this._idleByDir(); this.actionIfTargetNear(States.attack);
-        if (this.target) {
+        if (this.target && this._order !== 'stand') {
           const dist = this._dist(this.position, this.target);
           const shouldMove = this.ranged ? dist > this.attackRadiusRanged : dist < this.viewRadius;
           if (shouldMove) {
